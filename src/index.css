@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "./theme/tokens.css";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-ink: #111111;
+  --color-canvas: #FAF8F4;
+  --color-pine: #1F6B4A;
+  --color-sage: #DCE8E0;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: #FAF8F4;
+    color: #111111;
+  }
+  h1, h2, h3, .font-display {
+    font-family: var(--font-serif);
+  }
+}

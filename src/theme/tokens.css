@@ -1,0 +1,38 @@
+:root {
+  --color-ink: #111111;
+  --color-canvas: #FAF8F4;
+  --color-surface: #FFFFFF;
+  --color-green: #1F6B4A;
+  --color-green-hover: #18553A;
+  --color-sage: #DCE8E0;
+  --color-amber: #D97706;
+  --color-red: #DC2626;
+  --color-border: rgba(17, 17, 17, 0.10);
+  --color-muted: rgba(17, 17, 17, 0.65);
+  
+  --spacing-grid: 8px;
+  --padding-side: 16px;
+  --touch-target-min: 44px;
+  --radius-card: 16px;
+  --radius-button: 16px;
+  --height-button-primary: 52px;
+  --height-top-bar: 56px;
+  --height-tab-bar: 64px;
+
+  /* Typography Scale - No text under 14px */
+  --font-size-title: 28px;
+  --font-size-subtitle: 20px;
+  --font-size-body: 16px;
+  --font-size-secondary: 14px;
+}
+
+[data-theme="dark"], .dark {
+  --color-ink: #F5F5F0;
+  --color-canvas: #121412;
+  --color-surface: #1B1F1C;
+  --color-green: #2EA875;
+  --color-green-hover: #3CC28A;
+  --color-sage: #233328;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-muted: rgba(255, 255, 255, 0.65);
+}

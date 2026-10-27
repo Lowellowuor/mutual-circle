@@ -1,0 +1,6 @@
+{
+  "name": "The Mutual Circle (R.U.T.H)",
+  "description": "A dignified, anonymous resource-sharing network prototype for Nairobi, Kenya by LumiereCore CLG.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
