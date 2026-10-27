@@ -1,0 +1,33 @@
+﻿R.U.T.H prototype audit - 2026-10-27 20:58
+PASS: 119   FAIL: 11   REVIEW: 10   MISSING: 3   INFO: 5
+
+--- FAIL ---
+[1] donate / donation (1 hits)  => src\shells\DonorShell.tsx:361
+[1] SHA-256 / salt mention (2 hits)  => src\data\mock.ts:19; src\mockData.ts:19
+[1] WhatsApp channel (15 hits)  => src\components\Requester\ChannelChooser.tsx:48; src\components\Requester\HomeScreen.tsx:60; src\components\Requester\HomeScreen.tsx:65; src\components\Requester\WhatsAppSimulator.tsx:26
+[1] INV- / WST- prefixes (1 hits)  => src\data\mock.ts:66
+[1] ZK / zero-knowledge ledger (1 hits)  => src\components\Architecture\ArchitectureView.tsx:75
+[1] B2B / Paybill wording (2 hits)  => src\components\Requester\UssdSimulator.tsx:141; src\data\mock.ts:291
+[1] "100% disbursed" / "Fully committed" (1 hits)  => src\components\Donor\DonorView.tsx:364
+[1] digital voucher provider (5 hits)  => src\components\Phase2\Phase2Cards.tsx:71; src\components\Phase2\Phase2Hub.tsx:591; src\components\Phase2\Phase2Hub.tsx:608; src\data\mock.ts:307
+[1] "double-claiming" / "civil society" (3 hits)  => src\components\Console\ConsoleView.tsx:857; src\shells\DocsShell.tsx:31; src\mockData.ts:472
+[4] Non-hex object fragments (6)  => src\components\Architecture\ArchitectureView.tsx:113; src\components\DemoNavigator.tsx:302; src\context\AppContext.tsx:168; src\context\AppContext.tsx:173
+[4] Hard-coded numeric phone numbers (3); use +254 7XX XXX XXX  => src\components\Donor\DonorView.tsx:25; src\components\Requester\PhoneVerification.tsx:75; src\context\AppContext.tsx:102
+
+--- MISSING ---
+[2] Funds note: LumiereCore accounts  => not found in src (may be worded differently - check manually)
+[2] Error: bill already settled  => not found in src (may be worded differently - check manually)
+[3] file: Keypad.*  => check the name or folder
+
+--- REVIEW ---
+[1] zero fraud (only allowed in the disclaimer) (1 hits)  => src\components\Architecture\ArchitectureView.tsx:294
+[1] "Dispatch" action (2 hits)  => src\components\Phase2\Phase2Hub.tsx:385; src\components\Phase2\Phase2Hub.tsx:386
+[1] "Settled" as a stepper label (use Fulfilled) (1 hits)  => src\i18n\en.ts:89
+[4] Token rendered in JSX? (1)  => src\components\Console\ConsoleView.tsx:24
+[4] 'token' appears in staff/partner/donor files (17). Allowed only as aggregate counts (e.g. tokens created per day)  => src\components\Console\ConsoleView.tsx:24; src\components\Console\ConsoleView.tsx:125; src\components\Console\ConsoleView.tsx:190; src\components\Console\ConsoleView.tsx:197; src\components\Console\ConsoleView.tsx:200; src\components\Console\ConsoleView.tsx:223
+[5] 2 strings over 6 words (Privacy and Docs screens are exempt)  => [7w] Phone stored encrypted for automated PIN delivery. | [7w] No gift is linked to a recipient.
+[6] Default Tailwind colours used 165 times; switch to brand tokens  => src\components\Console\ConsoleView.tsx (36); src\components\Phase2\Phase2Hub.tsx (17); src\components\Requester\PoolFlow.tsx (17); src\shells\ConsoleShell.tsx (13); src\components\Partner\PartnerTillScreen.tsx (12)
+[7] role=switch/progressbar/tablist: none found
+[7] reduced-motion support: none found
+[7] Small text classes used 664 times (rule: nothing under 14px)  => src\components\Architecture\ArchitectureView.tsx:25; src\components\Architecture\ArchitectureView.tsx:32; src\components\Architecture\ArchitectureView.tsx:43
+

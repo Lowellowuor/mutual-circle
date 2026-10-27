@@ -1,5 +1,6 @@
 {
-  "name": "react-example",
+  "name": "mutual-circle-prototype",
+  "description": "R.U.T.H - The Mutual Circle: anonymized resource-sharing network prototype (LumiereCore CLG)",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -34,3 +35,4 @@
     "@types/express": "^4.17.21"
   }
 }
+

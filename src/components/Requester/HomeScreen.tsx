@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
   Package, 
@@ -57,12 +57,12 @@ export const HomeScreen: React.FC = () => {
         </span>
         <button
           onClick={() => {
-            setRequesterChannel('whatsapp');
+            setRequesterChannel('sms');
             setRequesterScreen('channel');
           }}
           className="px-2.5 py-1 bg-[#075E54] hover:bg-[#064e46] text-white rounded-lg font-medium cursor-pointer flex items-center gap-1.5 transition-colors shadow-2xs"
         >
-          <span>💬 WhatsApp Bot</span>
+          <span>ðŸ’¬ SMS Bot</span>
         </button>
         <button
           onClick={() => {
@@ -86,7 +86,7 @@ export const HomeScreen: React.FC = () => {
           onClick={() => setSurface('phase2')}
           className="ml-auto px-2.5 py-1 bg-[#DCE8E0] hover:bg-[#c9ddd0] text-[#1F6B4A] rounded-lg font-semibold cursor-pointer text-[11px] flex items-center gap-1"
         >
-          <span>✨ Phase 2 Hub</span>
+          <span>âœ¨ Phase 2 Hub</span>
         </button>
       </div>
 
@@ -271,7 +271,7 @@ export const HomeScreen: React.FC = () => {
                       </div>
                       <div className="text-[11px] text-[#111111]/60 font-mono mt-0.5 flex items-center gap-2">
                         <span>{req.objectIdMasked}</span>
-                        <span>·</span>
+                        <span>Â·</span>
                         <span>KES {req.amount.toLocaleString()}</span>
                       </div>
                     </div>
@@ -308,7 +308,7 @@ export const HomeScreen: React.FC = () => {
           onClick={() => setRequesterScreen('data_rights')}
           className="text-xs font-semibold text-[#1F6B4A] hover:underline cursor-pointer"
         >
-          {t('data_rights')} →
+          {t('data_rights')} â†’
         </button>
       </div>
 
@@ -318,3 +318,5 @@ export const HomeScreen: React.FC = () => {
     </div>
   );
 };
+
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ShieldCheck, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
 
@@ -42,7 +42,7 @@ export const PhoneVerification: React.FC = () => {
           onClick={() => setRequesterScreen('channel')}
           className="text-xs text-[#111111]/60 hover:text-[#111111] mb-2 inline-flex items-center gap-1 cursor-pointer"
         >
-          ← Back to Channels
+          â† Back to Channels
         </button>
         <h2 className="font-serif text-2xl font-bold text-[#111111]">
           {step === 'phone' ? 'Phone Verification' : 'Enter One-Time Code'}
@@ -72,7 +72,7 @@ export const PhoneVerification: React.FC = () => {
               />
             </div>
             <div className="flex gap-2 pt-1">
-              {['+254 712 345 678', '+254 722 987 654', '+254 733 112 233'].map(num => (
+              {['+254 7XX XXX XXX', '+254 7XX XXX XXX', '+254 7XX XXX XXX'].map(num => (
                 <button
                   key={num}
                   type="button"
@@ -92,7 +92,7 @@ export const PhoneVerification: React.FC = () => {
               <span>How your privacy is protected</span>
             </div>
             <p className="text-xs text-[#111111]/75 leading-relaxed">
-              A private token is created via one-way cryptographic hashing. This token is <strong>never shown to anyone</strong>—including staff, operators, and donors. It is used strictly by the automated rate-limiting engine to ensure fair community rotation.
+              A private token is created via one-way cryptographic hashing. This token is <strong>never shown to anyone</strong>â€”including staff, operators, and donors. It is used strictly by the automated rate-limiting engine to ensure fair community rotation.
             </p>
             <p className="text-[11px] text-[#111111]/60 leading-relaxed border-t border-[#111111]/10 pt-2">
               <strong>Telecom note:</strong> While our platform isolates your identity from people in the resource distribution chain, M-Pesa mobile wallets in Kenya are legally tied to verified SIM cards by telecoms under Kenya SIM registration regulations and the POCAMLA anti-money-laundering framework.
@@ -121,7 +121,7 @@ export const PhoneVerification: React.FC = () => {
                   key={idx}
                   className="w-12 h-14 rounded-xl bg-white border-2 border-[#1F6B4A] flex items-center justify-center font-mono text-xl font-bold text-[#111111] shadow-sm"
                 >
-                  {otpCode[idx] || '•'}
+                  {otpCode[idx] || 'â€¢'}
                 </div>
               ))}
             </div>
@@ -159,3 +159,4 @@ export const PhoneVerification: React.FC = () => {
     </div>
   );
 };
+

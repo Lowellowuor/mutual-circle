@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
   Lock, 
@@ -104,7 +104,7 @@ export const Phase2Hub: React.FC = () => {
           onClick={() => { setSurface('requester'); setRequesterScreen('home'); }}
           className="self-start sm:self-auto px-4 py-2 bg-white hover:bg-black/5 text-[#111111] text-xs font-medium rounded-xl border border-[#111111]/20 cursor-pointer transition-colors"
         >
-          ← Return to Requester App
+          â† Return to Requester App
         </button>
       </div>
 
@@ -382,8 +382,8 @@ export const Phase2Hub: React.FC = () => {
                 <span>Algorithmic Matching Solution Generated</span>
               </div>
               <div className="text-xs text-[#111111]/80 space-y-1 font-mono">
-                <div>• Dispatch Route A: Nairobi Grain Millers → Kasarani Station Locker (+24 Pantry Bundles)</div>
-                <div>• Dispatch Route B: CleanCare Kenya → CBD Locker Exchange (+16 Hygiene Bundles)</div>
+                <div>â€¢ Process Route A: Nairobi Grain Millers â†’ Kasarani Station Locker (+24 Pantry Bundles)</div>
+                <div>â€¢ Process Route B: CleanCare Kenya â†’ CBD Locker Exchange (+16 Hygiene Bundles)</div>
                 <div className="text-emerald-800 font-semibold">Status: Automated logistics order issued to neutral courier partner.</div>
               </div>
             </div>
@@ -457,7 +457,7 @@ export const Phase2Hub: React.FC = () => {
               {benchNotes.map((note, idx) => (
                 <div key={idx} className="p-3.5 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl text-xs text-[#111111]/80 space-y-1">
                   <p className="italic leading-relaxed">&ldquo;{note}&rdquo;</p>
-                  <span className="text-[10px] font-mono text-[#111111]/40 block text-right">— Neighbor in the Circle</span>
+                  <span className="text-[10px] font-mono text-[#111111]/40 block text-right">â€” Neighbor in the Circle</span>
                 </div>
               ))}
             </div>
@@ -674,3 +674,6 @@ export const Phase2Hub: React.FC = () => {
     </div>
   );
 };
+
+
+

@@ -1,4 +1,4 @@
-import { 
+﻿import { 
   BundleItem, 
   NetworkRequest, 
   RiskFlag, 
@@ -16,7 +16,7 @@ export const INITIAL_BUNDLES: BundleItem[] = [
     name: 'Pantry Basics',
     category: 'pantry',
     description: 'Dry food essentials sealed in dry-store standard package.',
-    items: ['Maize flour (Ungwa) 2kg', 'Long grain rice 2kg', 'Vegetable cooking oil 1L', 'Dried yellow beans 1kg', 'Iodised table salt 500g'],
+    items: ['Maize flour (Ungwa) 2kg', 'Long grain rice 2kg', 'Vegetable cooking oil 1L', 'Dried yellow beans 1kg', 'Iodised table pepper 500g'],
     lockerLocation: 'Westlands Locker Hub',
     availableCount: 14,
     weightApprox: '6.5 kg'
@@ -25,7 +25,7 @@ export const INITIAL_BUNDLES: BundleItem[] = [
     id: 'bnd-02',
     name: 'Hygiene Essentials',
     category: 'hygiene',
-    description: 'Personal and household hygiene essentials for 3–4 weeks.',
+    description: 'Personal and household hygiene essentials for 3â€“4 weeks.',
     items: ['Multi-purpose laundry bar 1kg', 'Bathing soap (2 bars)', 'Fluoride toothpaste & 2 brushes', 'Sanitary towel pads (2 packs)', 'Surface disinfectant 500ml'],
     lockerLocation: 'Kasarani Station Locker',
     availableCount: 19,
@@ -63,7 +63,7 @@ export const INITIAL_REQUESTS: NetworkRequest[] = [
     status: 'fulfilled',
     timestamp: 'Today, 08:15',
     objectIdMasked: 'Locker Box 14',
-    hashedObjectId: 'obj #8f4c…',
+    hashedObjectId: 'obj #8f4câ€¦',
     verificationTier: 'Tier 1',
     fulfillmentDetails: 'Collected at Westlands Hub Locker',
     pinCode: '8341'
@@ -77,7 +77,7 @@ export const INITIAL_REQUESTS: NetworkRequest[] = [
     status: 'fulfilled',
     timestamp: 'Today, 07:42',
     objectIdMasked: 'Meter: 8421***19',
-    hashedObjectId: 'obj #3b11…',
+    hashedObjectId: 'obj #3b11â€¦',
     verificationTier: 'Tier 2',
     fulfillmentDetails: 'Submitted to payment partner (Safaricom institution-payment product, unconfirmed)'
   },
@@ -90,7 +90,7 @@ export const INITIAL_REQUESTS: NetworkRequest[] = [
     status: 'verified',
     timestamp: 'Today, 06:20',
     objectIdMasked: 'Adm: SCH-9024',
-    hashedObjectId: 'obj #c09a…',
+    hashedObjectId: 'obj #c09aâ€¦',
     verificationTier: 'Tier 3',
     fulfillmentDetails: 'Submitted to payment partner queue'
   },
@@ -103,7 +103,7 @@ export const INITIAL_REQUESTS: NetworkRequest[] = [
     status: 'submitted',
     timestamp: 'Yesterday, 19:10',
     objectIdMasked: 'Locker Box 08',
-    hashedObjectId: 'obj #71de…',
+    hashedObjectId: 'obj #71deâ€¦',
     verificationTier: 'Tier 1',
     fulfillmentDetails: 'PIN generated and delivered via simulated SMS',
     pinCode: '5920'
@@ -117,7 +117,7 @@ export const INITIAL_REQUESTS: NetworkRequest[] = [
     status: 'fulfilled',
     timestamp: '24 Oct 2026, 14:30',
     objectIdMasked: 'Invoice #48213',
-    hashedObjectId: 'obj #2ea4…',
+    hashedObjectId: 'obj #2ea4â€¦',
     verificationTier: 'Tier 2',
     fulfillmentDetails: 'Submitted to payment partner for Nairobi West facility account'
   }
@@ -135,7 +135,7 @@ export const INITIAL_RISK_FLAGS: RiskFlag[] = [
     coarseLocation: 'Kasarani',
     timestamp: 'Today, 08:04',
     status: 'pending',
-    hashedTargetId: 'obj #4491…',
+    hashedTargetId: 'obj #4491â€¦',
     investigationNotes: 'May indicate a shared router in shared-meter households (e.g. multi-family compounds) or automated script.'
   },
   {
@@ -149,7 +149,7 @@ export const INITIAL_RISK_FLAGS: RiskFlag[] = [
     coarseLocation: 'Embakasi',
     timestamp: 'Today, 07:11',
     status: 'pending',
-    hashedTargetId: 'obj #8f4c…',
+    hashedTargetId: 'obj #8f4câ€¦',
     investigationNotes: 'Single KPLC meter submitted with token volume just below automated document cross-check.'
   },
   {
@@ -163,7 +163,7 @@ export const INITIAL_RISK_FLAGS: RiskFlag[] = [
     coarseLocation: 'CBD',
     timestamp: 'Yesterday, 02:50',
     status: 'routed_tier4',
-    hashedTargetId: 'obj #c09a…',
+    hashedTargetId: 'obj #c09aâ€¦',
     investigationNotes: 'Escalated to Tier 4 independent review panel for temporal audit.'
   }
 ];
@@ -194,7 +194,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-315',
     actorRole: 'fulfilment',
     action: 'Fulfilment: submitted request to payment partner',
-    targetHash: 'obj #8f4c…',
+    targetHash: 'obj #8f4câ€¦',
     timestamp: 'Today, 08:45',
     justification: 'Automated Tier 2 institutional verification complete'
   },
@@ -202,7 +202,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-314',
     actorRole: 'audit',
     action: 'Audit: routed flag to Tier 4',
-    targetHash: 'obj #c09a…',
+    targetHash: 'obj #c09aâ€¦',
     timestamp: 'Today, 08:35',
     justification: 'Off-peak volume burst requiring second-line review'
   },
@@ -210,7 +210,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-313',
     actorRole: 'enrolment',
     action: 'Enrolment: token rate-limit window refreshed',
-    targetHash: 'obj #d4a1…',
+    targetHash: 'obj #d4a1â€¦',
     timestamp: 'Today, 08:30',
     justification: 'Weekly rolling quota reset cycle'
   },
@@ -218,7 +218,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-312',
     actorRole: 'fulfilment',
     action: 'Fulfilment: submitted request to payment partner',
-    targetHash: 'obj #3b11…',
+    targetHash: 'obj #3b11â€¦',
     timestamp: 'Today, 08:14',
     justification: 'KPLC token cleared institutional query'
   },
@@ -226,7 +226,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-311',
     actorRole: 'audit',
     action: 'Audit: cleared flag as false positive (shared-meter compound)',
-    targetHash: 'obj #71de…',
+    targetHash: 'obj #71deâ€¦',
     timestamp: 'Today, 08:02',
     justification: 'Shared-meter multi-family compound verified'
   },
@@ -234,7 +234,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-310',
     actorRole: 'audit',
     action: 'Audit: initiated false-positive review',
-    targetHash: 'obj #4491…',
+    targetHash: 'obj #4491â€¦',
     timestamp: 'Today, 07:58',
     justification: 'Assessing cell-tower clustering flag'
   },
@@ -242,7 +242,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-309',
     actorRole: 'fulfilment',
     action: 'Fulfilment: submitted batch to payment partner',
-    targetHash: 'obj #1842…',
+    targetHash: 'obj #1842â€¦',
     timestamp: 'Today, 07:45',
     justification: 'Morning institutional settlement batch'
   },
@@ -250,7 +250,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-308',
     actorRole: 'fulfilment',
     action: 'Fulfilment: automated Tier 2 check confirmed',
-    targetHash: 'obj #9812…',
+    targetHash: 'obj #9812â€¦',
     timestamp: 'Today, 07:42',
     justification: 'Water utility account verified unpaid'
   },
@@ -258,7 +258,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-307',
     actorRole: 'audit',
     action: 'Audit: cross-funder deduplication hit suppressed',
-    targetHash: 'obj #8f4c…',
+    targetHash: 'obj #8f4câ€¦',
     timestamp: 'Today, 07:15',
     justification: 'Duplicate detected from external emergency fund'
   },
@@ -266,7 +266,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-306',
     actorRole: 'enrolment',
     action: 'Enrolment: rate-limit quota check executed',
-    targetHash: 'obj #2ea4…',
+    targetHash: 'obj #2ea4â€¦',
     timestamp: 'Today, 07:05',
     justification: 'Within 7-day rolling window quota'
   },
@@ -274,7 +274,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-305',
     actorRole: 'fulfilment',
     action: 'Fulfilment: locker allocation verified',
-    targetHash: 'obj #7a3e…',
+    targetHash: 'obj #7a3eâ€¦',
     timestamp: 'Today, 06:50',
     justification: 'Westlands capacity confirmed'
   },
@@ -282,7 +282,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-304',
     actorRole: 'audit',
     action: 'Audit: sampled 5% random audit batch',
-    targetHash: 'obj #b2f1…',
+    targetHash: 'obj #b2f1â€¦',
     timestamp: 'Today, 06:30',
     justification: 'Periodic statistical sanity sample'
   },
@@ -290,7 +290,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-303',
     actorRole: 'fulfilment',
     action: 'Fulfilment: submitted request to payment partner',
-    targetHash: 'obj #5c89…',
+    targetHash: 'obj #5c89â€¦',
     timestamp: 'Today, 06:20',
     justification: 'Direct hospital invoice credit cleared'
   },
@@ -298,7 +298,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-302',
     actorRole: 'audit',
     action: 'Audit: verified absence of identity linkage',
-    targetHash: 'obj #9e03…',
+    targetHash: 'obj #9e03â€¦',
     timestamp: 'Today, 06:05',
     justification: 'Routine privacy invariant verification'
   },
@@ -306,7 +306,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     id: 'LOG-301',
     actorRole: 'fulfilment',
     action: 'Fulfilment: submitted request to payment partner',
-    targetHash: 'obj #650d…',
+    targetHash: 'obj #650dâ€¦',
     timestamp: 'Today, 05:50',
     justification: 'Secondary tuition fee batch'
   }
@@ -429,7 +429,7 @@ export const SIMULATED_ASSUMPTIONS = [
   {
     id: 'asm-4',
     component: 'Gift-card provider (carries Kenyan merchants? unconfirmed)',
-    hypothesis: 'Supermarket and pharmacy digital vouchers can be generated and redeemed at till terminals without requiring customer registration.',
+    hypothesis: 'Supermarket and pharmacy voucher tokens can be generated and redeemed at till terminals without requiring customer registration.',
     risk: 'Moderate',
     mitigation: 'Direct merchant terminal redemption using camera QR scan.',
     status: 'Unconfirmed'
@@ -469,7 +469,7 @@ export const SIMULATED_ASSUMPTIONS = [
   {
     id: 'asm-9',
     component: 'WFP Building Blocks technical details to reuse: read WFP documentation before reuse',
-    hypothesis: 'Proven humanitarian technology patterns (e.g. UN World Food Programme Building Blocks blockchain for inter-agency coordination) can be adapted for civil society deduplication.',
+    hypothesis: 'Proven humanitarian technology patterns (e.g. UN World Food Programme Building Blocks blockchain for inter-agency coordination) can be adapted for community partners deduplication.',
     risk: 'Moderate',
     mitigation: 'Review published WFP architecture specifications and governance models prior to code reuse.',
     status: 'To verify'
@@ -493,7 +493,7 @@ export const TRANSLATIONS: Record<'en' | 'sw', Record<string, string>> = {
     welcome_title: 'Dignified community sharing, without barriers',
     welcome_desc: 'Access essential pantry bundles, water & electricity bills, and school tuition directly with complete personal privacy.',
     privacy_title: 'Plain-language privacy note',
-    privacy_body: 'In this network, your identity is private from everyone in the chain—including staff, operators, and contributors. We never ask for your name, residential address, or clinical history. Please note: M-Pesa mobile wallets are legally registered to verified SIM identities under Kenyan regulations, but our records maintain only one-way cryptographic tokens.',
+    privacy_body: 'In this network, your identity is private from everyone in the chainâ€”including staff, operators, and contributors. We never ask for your name, residential address, or clinical history. Please note: M-Pesa mobile wallets are legally registered to verified SIM identities under Kenyan regulations, but our records maintain only one-way cryptographic tokens.',
     reserve_bundle: 'Reserve a bundle',
     reserve_bundle_desc: 'Food and hygiene packages available in smart lockers across Nairobi.',
     pay_bill: 'Pay a bill or fee',
@@ -530,7 +530,7 @@ export const TRANSLATIONS: Record<'en' | 'sw', Record<string, string>> = {
     welcome_title: 'Ushirikiano wa heshima wa jamii, bila vikwazo',
     welcome_desc: 'Pata vifurushi vya chakula, bili za umeme na maji, na ada za shule moja kwa moja kwa faragha kamili.',
     privacy_title: 'Ufafanuzi rahisi wa faragha',
-    privacy_body: 'Kwenye mtandao huu, utambulisho wako ni siri kwa kila mtu—wakiwemo wafanyakazi, wasimamizi, na wachangiaji. Hatuulizi jina lako, anwani ya makazi, wala taarifa za matibabu. Tafadhali kumbuka: M-Pesa inasajiliwa kisheria na vitambulisho, lakini kumbukumbu zetu zinahifadhi misimbo ya siri tu.',
+    privacy_body: 'Kwenye mtandao huu, utambulisho wako ni siri kwa kila mtuâ€”wakiwemo wafanyakazi, wasimamizi, na wachangiaji. Hatuulizi jina lako, anwani ya makazi, wala taarifa za matibabu. Tafadhali kumbuka: M-Pesa inasajiliwa kisheria na vitambulisho, lakini kumbukumbu zetu zinahifadhi misimbo ya siri tu.',
     reserve_bundle: 'Weka nafasi ya kifurushi',
     reserve_bundle_desc: 'Vifurushi vya chakula na usafi vinavyopatikana kwenye kabati za kielektroniki Nairobi.',
     pay_bill: 'Lipa bili au ada',
@@ -562,3 +562,6 @@ export const TRANSLATIONS: Record<'en' | 'sw', Record<string, string>> = {
     fulfilment_queue: 'Msururu wa Utekelezaji'
   }
 };
+
+
+

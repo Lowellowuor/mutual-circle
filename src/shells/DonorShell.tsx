@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -358,7 +358,7 @@ export const DonorShell: React.FC = () => {
       >
         <div className="space-y-3 text-sm leading-relaxed text-[#111111]/80">
           <p>Contributions fund an undifferentiated pool for utilities, school tuition, and lockers.</p>
-          <p>No donation is linked to any individual recipient.</p>
+          <p>No give is linked to any individual recipient.</p>
           <Button fullWidth variant="outline" size="md" onClick={() => setInfoSheetOpen(false)}>
             {t('btn_close')}
           </Button>
@@ -368,3 +368,4 @@ export const DonorShell: React.FC = () => {
     </div>
   );
 };
+

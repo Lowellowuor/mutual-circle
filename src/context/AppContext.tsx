@@ -1,362 +1,297 @@
 import React, { createContext, useContext, useState } from 'react';
-import { 
-  Surface, 
-  RequesterScreen, 
-  RequesterChannel, 
-  ConsoleRole, 
-  NetworkRequest, 
-  BundleItem, 
-  RiskFlag, 
-  DeduplicationItem, 
-  AuditLogEntry, 
-  CampaignData,
-  PoolRequestInput,
-  PartnerMonthlyStatement,
-  DepotStageCount,
-  LockerLocationStock
+import { generateHMAC } from '../lib/hash';
+import { reserveLockerSlot, verifyObjectLevel } from '../services/mockIntegrations';
+import { verifyStaffCredentials, STAFF_CREDS, appendHistory } from '../services/auth';
+import {
+  PoolRequest, SwapRequest, RiskFlag, VerificationTier, Campaign, Pledge, AuditLogEntry,
+  DedupItem, LockerStock, DepotCounts, DonorContribution, StaffRole, Voucher, VoucherRedemption,
 } from '../types';
-import { 
-  INITIAL_BUNDLES, 
-  INITIAL_REQUESTS, 
-  INITIAL_RISK_FLAGS, 
-  INITIAL_DEDUPLICATION_ITEMS, 
-  INITIAL_AUDIT_LOG, 
-  INITIAL_CAMPAIGNS,
-  PARTNER_MONTHLY_STATEMENTS,
-  DEPOT_STAGE_COUNTS,
-  LOCKER_LOCATION_STOCKS,
-  TRANSLATIONS 
-} from '../mockData';
-import { en } from '../i18n/en';
-import { sw } from '../i18n/sw';
+
+interface MatchInterest { id: string; opportunityId: string; title: string; tokenHash: string; timestamp: string }
 
 interface AppContextType {
-  surface: Surface;
-  setSurface: (surface: Surface) => void;
-  requesterScreen: RequesterScreen;
-  setRequesterScreen: (screen: RequesterScreen) => void;
-  requesterChannel: RequesterChannel;
-  setRequesterChannel: (channel: RequesterChannel) => void;
-  language: 'en' | 'sw';
-  setLanguage: (lang: 'en' | 'sw') => void;
-  t: (key: string) => string;
-  exportComplianceCsv: () => void;
-  isPhoneFramed: boolean;
-  setIsPhoneFramed: (val: boolean) => void;
-  phoneNumber: string;
-  setPhoneNumber: (num: string) => void;
-  isPhoneVerified: boolean;
-  setIsPhoneVerified: (val: boolean) => void;
-  activeRequestId: string | null;
-  setActiveRequestId: (id: string | null) => void;
-  requests: NetworkRequest[];
-  bundles: BundleItem[];
-  campaigns: CampaignData[];
+  tokenHash: string | null;
+  initializeSession: (phone: string, channel: 'web' | 'sms' | 'ussd') => Promise<void>;
+  logout: () => void;
+
+  swapRequests: SwapRequest[];
+  poolRequests: PoolRequest[];
   riskFlags: RiskFlag[];
-  dedupItems: DeduplicationItem[];
+  campaigns: Campaign[];
+  pledges: Pledge[];
   auditLog: AuditLogEntry[];
-  consoleRole: ConsoleRole;
-  setConsoleRole: (role: ConsoleRole) => void;
-  demoDrawerOpen: boolean;
-  setDemoDrawerOpen: (val: boolean) => void;
-  partnerPin: string;
-  setPartnerPin: (pin: string) => void;
-  partnerResult: 'idle' | 'valid' | 'used' | 'invalid';
-  partnerMessage: string;
-  redeemPartnerPin: (pin: string) => void;
-  partnerStatements: PartnerMonthlyStatement[];
-  depotCounts: DepotStageCount;
-  lockerStocks: LockerLocationStock[];
-  opportunityOptIn: boolean;
-  setOpportunityOptIn: (optIn: boolean) => void;
-  opportunityDismissed: boolean;
-  setOpportunityDismissed: (dismissed: boolean) => void;
-  isLoadingRequests: boolean;
-  setIsLoadingRequests: (val: boolean) => void;
-  isLoadingBundles: boolean;
-  setIsLoadingBundles: (val: boolean) => void;
-  emptyRequestsMode: boolean;
-  setEmptyRequestsMode: (val: boolean) => void;
-  emptyBundlesMode: boolean;
-  setEmptyBundlesMode: (val: boolean) => void;
+  dedupItems: DedupItem[];
+  lockerStocks: LockerStock[];
+  depotCounts: DepotCounts;
+  donorContributions: DonorContribution[];
+  vouchers: Voucher[];
+  voucherRedemptions: VoucherRedemption[];
+  matchInterests: MatchInterest[];
   emptyQueueMode: boolean;
-  setEmptyQueueMode: (val: boolean) => void;
-  addSwapRequest: (bundle: BundleItem) => NetworkRequest;
-  addPoolRequest: (input: PoolRequestInput) => NetworkRequest;
+  setEmptyQueueMode: (v: boolean) => void;
+
+  staffRole: StaffRole | null;
+  staffId: string | null;
+  loginStaff: (role: StaffRole, id: string, pin: string) => boolean;
+  logoutStaff: () => void;
+
+  executeSwap: (category: string, location: string, tokenOverride?: string) => Promise<SwapRequest | null>;
+  executePool: (category: PoolRequest['category'], objectId: string, amount: number, tokenOverride?: string) => Promise<PoolRequest | null>;
+  withdrawRequest: (id: string, type: 'swap' | 'pool') => void;
+  dispatchRequest: (id: string, type: 'swap' | 'pool') => string;
   routeFlagToTier4: (flagId: string) => void;
-  clearFlagAsFalsePositive: (flagId: string, notes: string) => void;
-  dispatchRequestBatch: (requestId: string) => void;
+  clearFlagAsFalsePositive: (flagId: string, note: string) => void;
+  completeOcrCheck: (requestId: string) => void;
+  matchPledge: (pledgeId: string) => void;
+  redeemVoucher: (pin: string, amount: number, partnerName: string) => { ok: boolean; reason?: string };
+  logAction: (role: StaffRole | 'system', action: string, targetHash: string) => void;
+  issueVoucher: (requestId: string, partnerName: string, partnerType: 'retailer' | 'hospital') => Voucher | null;
+  expressInterest: (opportunityId: string, title: string) => void;
+  matchInterests: { id: string; opportunityId: string; title: string; tokenHash: string; timestamp: string }[];
   addDonorContribution: (amount: number, isAnonymous: boolean, optInLedger: boolean) => void;
-  logAuditEvent: (role: ConsoleRole | 'system', action: string, targetHash: string, justification?: string) => void;
-  resetToDefaults: () => void;
+  addPledge: (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [surface, setSurface] = useState<Surface>('requester');
-  const [requesterScreen, setRequesterScreen] = useState<RequesterScreen>('welcome');
-  const [requesterChannel, setRequesterChannel] = useState<RequesterChannel>('web');
-  const [language, setLanguage] = useState<'en' | 'sw'>('en');
-  const [isPhoneFramed, setIsPhoneFramed] = useState<boolean>(true);
-  const [phoneNumber, setPhoneNumber] = useState<string>('+254 712 345 678');
-  const [isPhoneVerified, setIsPhoneVerified] = useState<boolean>(true);
-  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
-  
-  const [requests, setRequests] = useState<NetworkRequest[]>(INITIAL_REQUESTS);
-  const [bundles, setBundles] = useState<BundleItem[]>(INITIAL_BUNDLES);
-  const [campaigns, setCampaigns] = useState<CampaignData[]>(INITIAL_CAMPAIGNS);
-  const [riskFlags, setRiskFlags] = useState<RiskFlag[]>(INITIAL_RISK_FLAGS);
-  const [dedupItems] = useState<DeduplicationItem[]>(INITIAL_DEDUPLICATION_ITEMS);
-  const [auditLog, setAuditLog] = useState<AuditLogEntry[]>(INITIAL_AUDIT_LOG);
-  const [consoleRole, setConsoleRoleState] = useState<ConsoleRole>('fulfilment');
-  const [demoDrawerOpen, setDemoDrawerOpen] = useState<boolean>(false);
+  const [tokenHash, setTokenHash] = useState<string | null>(null);
+  const [emptyQueueMode, setEmptyQueueMode] = useState(false);
 
-  // Loading and empty state controls for demo reviewers
-  const [isLoadingRequests, setIsLoadingRequests] = useState<boolean>(false);
-  const [isLoadingBundles, setIsLoadingBundles] = useState<boolean>(false);
-  const [emptyRequestsMode, setEmptyRequestsMode] = useState<boolean>(false);
-  const [emptyBundlesMode, setEmptyBundlesMode] = useState<boolean>(false);
-  const [emptyQueueMode, setEmptyQueueMode] = useState<boolean>(false);
+  const [staffRole, setStaffRole] = useState<StaffRole | null>(() => {
+    try { const r = sessionStorage.getItem('mtc-staff-role'); return r ? r as StaffRole : null; } catch { return null; }
+  });
+  const [staffId, setStaffId] = useState<string | null>(() => {
+    try { return sessionStorage.getItem('mtc-staff-id'); } catch { return null; }
+  });
 
-  // Partner statements & Depot inventory
-  const [partnerStatements] = useState<PartnerMonthlyStatement[]>(PARTNER_MONTHLY_STATEMENTS);
-  const [depotCounts] = useState<DepotStageCount>(DEPOT_STAGE_COUNTS);
-  const [lockerStocks] = useState<LockerLocationStock[]>(LOCKER_LOCATION_STOCKS);
+  const [swapRequests, setSwapRequests] = useState<SwapRequest[]>([
+    { id: 'SWP-1001', tokenHash: 'a4f8b29c...', bundleCategory: 'Standard Pantry', lockerLocation: 'Kibera Hub', status: 'reserved', pin: '4821', qrPayload: 'MTC-LK-KIB-171200', timestamp: '10 mins ago' },
+    { id: 'SWP-1002', tokenHash: 'f91c3d4e...', bundleCategory: 'Hygiene Kit', lockerLocation: 'Mathare Central', status: 'reserved', pin: '7355', qrPayload: 'MTC-LK-MAT-171205', timestamp: '25 mins ago' },
+  ]);
 
-  // Partner redemption state
-  const [partnerPin, setPartnerPin] = useState<string>('8341');
-  const [partnerResult, setPartnerResult] = useState<'idle' | 'valid' | 'used' | 'invalid'>('idle');
-  const [partnerMessage, setPartnerMessage] = useState<string>('');
+  const [poolRequests, setPoolRequests] = useState<PoolRequest[]>([
+    { id: 'POOL-2001', tokenHash: 'a4f8b29c...', category: 'utility', hashedObjectId: 'obj #8f4c…', amount: 3500, tier: 2, status: 'verified', timestamp: '5 mins ago' },
+    { id: 'POOL-2002', tokenHash: 'e11d8a2b...', category: 'hospital_invoice', hashedObjectId: 'obj #c9d2…', amount: 12000, tier: 3, status: 'pending_check', timestamp: '15 mins ago' },
+    { id: 'POOL-2003', tokenHash: 'b55a1f9c...', category: 'school_fee', hashedObjectId: 'obj #7a1e…', amount: 8500, tier: 2, status: 'verified', timestamp: '30 mins ago' },
+  ]);
 
-  // Opportunity surfaced opt-in state (default false, non-identifying)
-  const [opportunityOptIn, setOpportunityOptIn] = useState<boolean>(false);
-  const [opportunityDismissed, setOpportunityDismissed] = useState<boolean>(false);
+  const [riskFlags, setRiskFlags] = useState<RiskFlag[]>([
+    { id: 'FLG-101', targetHash: 'obj #c9d2…', severity: 'high', title: 'Amount just under threshold', description: 'Request amount is KES 12,000, just below the KES 15,000 Tier 4 threshold.', status: 'pending', timestamp: '2 mins ago' },
+    { id: 'FLG-102', targetHash: 'a4f8b29c...', severity: 'elevated', title: 'Device clustering detected', description: '3 tokens generated from same physical device in 24h.', status: 'pending', timestamp: '1 hr ago' },
+  ]);
 
-  const t = (key: string): string => {
-    if (language === 'sw') {
-      return (sw as any)[key] || (en as any)[key] || TRANSLATIONS['sw']?.[key] || TRANSLATIONS['en']?.[key] || key;
+  const [campaigns] = useState<Campaign[]>([
+    { id: 'CMP-1', title: 'Nairobi Term 2 Tuition', cohortGoalText: 'Cover tuition for 200 secondary students.', targetAmount: 3000000, pooledAmount: 1250000, targetCount: 200, coveredCount: 83, daysRemaining: 14 },
+    { id: 'CMP-2', title: 'Kibera Pantry Bundles', cohortGoalText: 'Provide 500 standard pantry bundles.', targetAmount: 1500000, pooledAmount: 1500000, targetCount: 500, coveredCount: 500, daysRemaining: 0, isClosed: true },
+    { id: 'CMP-3', title: 'Utility Relief Fund', cohortGoalText: 'Cover 300 KPLC bills across Nairobi.', targetAmount: 1200000, pooledAmount: 340000, targetCount: 300, coveredCount: 85, daysRemaining: 27 },
+  ]);
+
+  const [pledges, setPledges] = useState<Pledge[]>([
+    { id: 'PLG-9001', donorHash: 'donor_a1b2c3', type: 'service_credit', description: 'Electricity bill up to KES 5,000', locality: 'Nairobi County', maxValue: 5000, status: 'awaiting_match', timestamp: '1 hr ago' },
+    { id: 'PLG-9002', donorHash: 'donor_x9y8z7', type: 'goods', description: '20 blankets (new)', locality: 'Mombasa County', status: 'awaiting_match', timestamp: '3 hrs ago' },
+  ]);
+  const [donorContributions, setDonorContributions] = useState<DonorContribution[]>([]);
+
+  const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([
+    { id: 'LOG-001', timestamp: '10:42:11', actorRole: 'fulfilment', action: 'Dispatched POOL-2001 to payment partner', targetHash: 'obj #8f4c…' },
+    { id: 'LOG-002', timestamp: '10:38:04', actorRole: 'audit', action: 'Routed FLG-101 to Tier 4 review', targetHash: 'obj #c9d2…' },
+    { id: 'LOG-003', timestamp: '10:15:33', actorRole: 'enrolment', action: 'Weekly salt rotated (SHA256-WK43)', targetHash: 'system' },
+    { id: 'LOG-004', timestamp: '09:52:18', actorRole: 'audit', action: 'Cleared FLG-097 as false positive', targetHash: 'obj #3a8e…' },
+  ]);
+
+  const [dedupItems] = useState<DedupItem[]>([
+    { id: 'DEDUP-1', hashedObjectId: 'obj #8f4c…', objectType: 'KPLC meter', firstFundedBy: 'Partner A', firstFundedDate: '2024-04-12', duplicateAttemptDate: '2024-04-18', status: 'blocked' },
+    { id: 'DEDUP-2', hashedObjectId: 'obj #7a1e…', objectType: 'School admission', firstFundedBy: 'Cohort CMP-1', firstFundedDate: '2024-03-02', duplicateAttemptDate: '2024-04-20', status: 'blocked' },
+    { id: 'DEDUP-3', hashedObjectId: 'obj #d3b1…', objectType: 'Hospital invoice', firstFundedBy: 'Partner B', firstFundedDate: '2024-04-10', duplicateAttemptDate: '2024-04-15', status: 'under_review' },
+  ]);
+
+  const [lockerStocks] = useState<LockerStock[]>([
+    { location: 'Kibera Hub', bundleType: 'Standard Pantry', available: 12, capacity: 40, lowStockThreshold: 5 },
+    { location: 'Kibera Hub', bundleType: 'Hygiene Kit', available: 3, capacity: 30, lowStockThreshold: 5 },
+    { location: 'Mathare Central', bundleType: 'Standard Pantry', available: 18, capacity: 40, lowStockThreshold: 5 },
+    { location: 'Mathare Central', bundleType: 'Hygiene Kit', available: 9, capacity: 30, lowStockThreshold: 5 },
+    { location: 'Kawangware Station', bundleType: 'Standard Pantry', available: 4, capacity: 40, lowStockThreshold: 5 },
+    { location: 'Kawangware Station', bundleType: 'Hygiene Kit', available: 15, capacity: 30, lowStockThreshold: 5 },
+  ]);
+
+  const [depotCounts] = useState<DepotCounts>({ receivedUnits: 2400, qualityCheckedUnits: 2328, packedBundles: 582, loadedLockerUnits: 61 });
+
+  const [vouchers, setVouchers] = useState<Voucher[]>([
+    { id: 'VCH-1', partnerName: 'Naivas Kibera', partnerType: 'retailer', description: 'Food & hygiene staples', maxValue: 4000, status: 'active', issuedToken: 'a4f8b29c...', pin: '8842', expiresAt: '2026-12-31' },
+    { id: 'VCH-2', partnerName: 'Kenyatta Hospital', partnerType: 'hospital', description: 'Invoice settlement', maxValue: 8000, status: 'active', issuedToken: 'e11d8a2b...', pin: '2177', expiresAt: '2026-12-31' },
+    { id: 'VCH-3', partnerName: 'Naivas Kibera', partnerType: 'retailer', description: 'Food & hygiene staples', maxValue: 2500, status: 'redeemed', issuedToken: 'b55a1f9c...', pin: '4409', expiresAt: '2026-12-31' },
+  ]);
+  const [voucherRedemptions, setVoucherRedemptions] = useState<VoucherRedemption[]>([]);
+  const [matchInterests, setMatchInterests] = useState<MatchInterest[]>([]);
+
+  const initializeSession = async (phone: string, channel: 'web' | 'sms' | 'ussd') => {
+    const hash = await generateHMAC(phone);
+    setTokenHash(hash);
+  };
+  const logout = () => setTokenHash(null);
+
+  const logAction = (role: StaffRole | 'system', action: string, targetHash: string) => {
+    setAuditLog(log => [{ id: 'LOG-' + Date.now(), timestamp: new Date().toLocaleTimeString(), actorRole: role, action, targetHash }, ...log]);
+  };
+
+  const loginStaff = (role: StaffRole, id: string, pin: string): boolean => {
+    const ok = verifyStaffCredentials(role, id, pin);
+    if (ok) {
+      setStaffRole(role);
+      setStaffId(STAFF_CREDS[role].id);
+      try { sessionStorage.setItem('mtc-staff-role', role); sessionStorage.setItem('mtc-staff-id', STAFF_CREDS[role].id); } catch {}
+      logAction(role, `Logged in as ${STAFF_CREDS[role].label}`, 'system');
     }
-    return (en as any)[key] || TRANSLATIONS['en']?.[key] || key;
+    return ok;
   };
 
-  const exportComplianceCsv = () => {
-    const headers = "RequestID,Category,KeyedObjectHash,SettlementAmountKES,CoarseLocation,Status,Timestamp,ComplianceStandard\n";
-    const rows = requests.map(r => `${r.id},${r.categoryTitle},obj #8f4câ€¦,${r.amount},${r.coarseLocation},${r.status},${r.timestamp},POCAMLA-Shortcode-Duties\n`).join('');
-    const blob = new Blob([headers + rows], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `compliance_audit_pocamla_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
+  const logoutStaff = () => {
+    if (staffRole) logAction(staffRole, `Logged out`, 'system');
+    try { sessionStorage.removeItem('mtc-staff-role'); sessionStorage.removeItem('mtc-staff-id'); } catch {}
+    setStaffRole(null);
+    setStaffId(null);
   };
 
-  const logAuditEvent = (role: ConsoleRole | 'system', action: string, targetHash: string, justification?: string) => {
-    const newEntry: AuditLogEntry = {
-      id: `LOG-${Date.now().toString().slice(-4)}`,
-      actorRole: role,
-      action: action,
-      targetHash: targetHash,
-      timestamp: 'Just now',
-      justification: justification
-    };
-    setAuditLog(prev => [newEntry, ...prev]);
-  };
-
-  const setConsoleRole = (role: ConsoleRole) => {
-    setConsoleRoleState(role);
-    logAuditEvent(role, `Switched view to ${role.toUpperCase()}`, 'obj #auth-session', 'Separation of duties role view switched');
-  };
-
-  const addSwapRequest = (bundle: BundleItem): NetworkRequest => {
-    const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    const hashFrag = `obj #${Math.random().toString(16).slice(2, 6)}â€¦`;
-    const newReq: NetworkRequest = {
-      id: `REQ-SWAP-${Math.floor(1000 + Math.random() * 9000)}`,
-      type: 'swap',
-      categoryTitle: `${bundle.name} Bundle`,
-      amount: bundle.category === 'family' ? 2400 : 1350,
-      coarseLocation: bundle.lockerLocation.split(' ')[0], // "Westlands", "Kasarani", etc.
-      status: 'submitted',
-      timestamp: 'Just now',
-      objectIdMasked: `Locker: ${bundle.lockerLocation.slice(0, 3).toUpperCase()}-Box-${Math.floor(1 + Math.random() * 24).toString().padStart(2, '0')}`,
-      hashedObjectId: hashFrag,
-      verificationTier: 'Tier 1',
-      fulfillmentDetails: 'PIN generated and delivered via simulated SMS',
-      pinCode: pin
-    };
-
-    setRequests(prev => [newReq, ...prev]);
-    // update inventory
-    setBundles(prev => prev.map(b => b.id === bundle.id ? { ...b, availableCount: Math.max(0, b.availableCount - 1) } : b));
-    
-    // Add audit entry (target hash fragment only)
-    logAuditEvent('fulfilment', 'Fulfilment: locker allocation verified', hashFrag, 'Automated Tier 1 quota and coarse location check');
-
+  const executeSwap = async (category: string, location: string, tokenOverride?: string): Promise<SwapRequest | null> => {
+    const token = tokenOverride || tokenHash;
+    if (!token) return null;
+    const { pin, qr } = await reserveLockerSlot(location);
+    const newReq: SwapRequest = { id: `SWP-${Date.now()}`, tokenHash: token, bundleCategory: category, lockerLocation: location, status: 'reserved', pin, qrPayload: qr, timestamp: new Date().toLocaleString() };
+    setSwapRequests(prev => [newReq, ...prev]);
+    appendHistory(token, { ...newReq, type: 'swap' });
     return newReq;
   };
 
-  const addPoolRequest = (input: PoolRequestInput): NetworkRequest => {
-    const hashFrag = `obj #${Math.random().toString(16).slice(2, 6)}â€¦`;
-    const newReq: NetworkRequest = {
-      id: `REQ-POOL-${Math.floor(1000 + Math.random() * 9000)}`,
-      type: 'pool',
-      categoryTitle: input.subType,
-      amount: input.amount,
-      coarseLocation: 'Nairobi Region',
-      status: 'submitted',
-      timestamp: 'Just now',
-      objectIdMasked: `${input.category === 'utility' ? 'Meter' : input.category === 'school' ? 'Adm' : 'Inv'}: ${input.objectId.slice(0, 4)}***${input.objectId.slice(-2)}`,
-      hashedObjectId: hashFrag,
-      verificationTier: input.amount > 5000 ? 'Tier 3' : 'Tier 2',
-      fulfillmentDetails: 'Submitted to payment partner (Safaricom institution-payment product, unconfirmed)'
-    };
-
-    setRequests(prev => [newReq, ...prev]);
-
-    logAuditEvent('fulfilment', 'Fulfilment: automated Tier 2 check confirmed', hashFrag, 'Institutional object query pass; submitted to payment partner queue');
-
+  const executePool = async (category: PoolRequest['category'], objectId: string, amount: number, tokenOverride?: string): Promise<PoolRequest | null> => {
+    const token = tokenOverride || tokenHash;
+    if (!token) return null;
+    const hashedObj = await generateHMAC(objectId);
+    const tier: VerificationTier = amount > 5000 ? 3 : 2;
+    const check = await verifyObjectLevel(objectId, amount);
+    if (!check.isValid) return null;
+    const newReq: PoolRequest = { id: `POOL-${Date.now()}`, tokenHash: token, category, hashedObjectId: `obj #${hashedObj.slice(0, 4)}…`, amount, tier, status: check.requiresOcr ? 'pending_check' : 'verified', timestamp: new Date().toLocaleString() };
+    setPoolRequests(prev => [newReq, ...prev]);
+    appendHistory(token, { ...newReq, type: 'pool' });
     return newReq;
+  };
+
+  const withdrawRequest = (id: string, type: 'swap' | 'pool') => {
+    if (type === 'swap') {
+      setSwapRequests(prev => prev.map(r => r.id === id && r.status === 'reserved' ? { ...r, status: 'withdrawn' } : r));
+    } else {
+      setPoolRequests(prev => prev.map(r => r.id === id && (r.status === 'verified' || r.status === 'pending_check') ? { ...r, status: 'withdrawn' } : r));
+    }
+    logAction('system', `Requester withdrew ${id}`, id);
+  };
+
+  const dispatchRequest = (id: string, type: 'swap' | 'pool'): string => {
+    if (type === 'pool') {
+      const req = poolRequests.find(r => r.id === id);
+      if (!req || req.status !== 'verified') return '';
+      const receipt = 'MPESA-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      setPoolRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'submitted_to_partner' } : r));
+      logAction('fulfilment', `Dispatched ${id} (${receipt})`, req.hashedObjectId);
+      return receipt;
+    }
+    setSwapRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'collected' } : r));
+    return '';
   };
 
   const routeFlagToTier4 = (flagId: string) => {
     setRiskFlags(prev => prev.map(f => f.id === flagId ? { ...f, status: 'routed_tier4' } : f));
-    const targetFlag = riskFlags.find(f => f.id === flagId);
-    if (targetFlag) {
-      logAuditEvent('audit', 'Audit: routed flag to Tier 4', targetFlag.hashedTargetId, 'Escalated to Tier 4 independent review panel');
-    }
+    logAction('audit', `Routed ${flagId} to Tier 4`, 'obj #c9d2…');
   };
 
-  const clearFlagAsFalsePositive = (flagId: string, notes: string) => {
-    setRiskFlags(prev => prev.map(f => f.id === flagId ? { ...f, status: 'cleared_false_positive', investigationNotes: notes } : f));
-    const targetFlag = riskFlags.find(f => f.id === flagId);
-    if (targetFlag) {
-      logAuditEvent('audit', 'Audit: cleared flag as false positive (shared-meter compound)', targetFlag.hashedTargetId, notes || 'Verified legitimate multi-family usage pattern');
-    }
+  const clearFlagAsFalsePositive = (flagId: string, note: string) => {
+    setRiskFlags(prev => prev.map(f => f.id === flagId ? { ...f, status: 'cleared_false_positive', investigationNotes: note } : f));
+    logAction('audit', `Cleared ${flagId} as false positive`, 'obj #8f4c…');
   };
 
-  const dispatchRequestBatch = (requestId: string) => {
-    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'fulfilled', fulfillmentDetails: 'Submitted to payment partner (Safaricom institution-payment product, unconfirmed)' } : r));
-    const req = requests.find(r => r.id === requestId);
-    if (req) {
-      logAuditEvent('fulfilment', 'Fulfilment: submitted request to payment partner', req.hashedObjectId || 'obj #8f4câ€¦', 'Automated institutional verification and payment partner transmission');
-    }
+  const completeOcrCheck = (requestId: string) => {
+    const req = poolRequests.find(r => r.id === requestId);
+    if (!req || req.status !== 'pending_check') return;
+    setPoolRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'verified' } : r));
+    logAction('audit', `Completed OCR check for ${requestId}`, req.hashedObjectId);
   };
 
-  const redeemPartnerPin = (pin: string) => {
-    const cleanPin = pin.trim();
-    if (cleanPin === '8341') {
-      setPartnerResult('used');
-      setPartnerMessage('Already used: Voucher PIN 8341 was redeemed earlier today at Westlands Locker Hub.');
-    } else if (cleanPin === '5920' || cleanPin.length === 4) {
-      setPartnerResult('valid');
-      setPartnerMessage('Valid voucher: Voucher for Pantry Basics (1 Package). Box Door #07 unlocked. Zero requester identity required.');
-    } else {
-      setPartnerResult('invalid');
-      setPartnerMessage('Invalid code: Voucher PIN not found in current active cycle or already expired.');
+  const matchPledge = (pledgeId: string) => {
+    setPledges(prev => prev.map(p => p.id === pledgeId && p.status === 'awaiting_match' ? { ...p, status: 'matched' } : p));
+    logAction('fulfilment', `Matched pledge ${pledgeId} to cohort`, 'pledge');
+  };
+
+  const redeemVoucher = (pin: string, amount: number, partnerName: string): { ok: boolean; reason?: string } => {
+    const v = vouchers.find(x => x.pin === pin && x.partnerName === partnerName);
+    if (!v) {
+      setVoucherRedemptions(prev => [{ id: 'VR-' + Date.now(), voucherId: 'unknown', pin, amount, partnerName, timestamp: new Date().toLocaleTimeString(), status: 'invalid' }, ...prev]);
+      return { ok: false, reason: 'PIN does not match any active voucher at this partner.' };
     }
+    if (v.status === 'redeemed') {
+      setVoucherRedemptions(prev => [{ id: 'VR-' + Date.now(), voucherId: v.id, pin, amount, partnerName, timestamp: new Date().toLocaleTimeString(), status: 'already_redeemed' }, ...prev]);
+      return { ok: false, reason: 'This voucher has already been redeemed.' };
+    }
+    if (new Date(v.expiresAt) < new Date()) {
+      setVoucherRedemptions(prev => [{ id: 'VR-' + Date.now(), voucherId: v.id, pin, amount, partnerName, timestamp: new Date().toLocaleTimeString(), status: 'expired' }, ...prev]);
+      return { ok: false, reason: 'Voucher has expired.' };
+    }
+    if (amount > v.maxValue) {
+      setVoucherRedemptions(prev => [{ id: 'VR-' + Date.now(), voucherId: v.id, pin, amount, partnerName, timestamp: new Date().toLocaleTimeString(), status: 'invalid' }, ...prev]);
+      return { ok: false, reason: `Amount exceeds voucher limit of KES ${v.maxValue.toLocaleString()}.` };
+    }
+    setVoucherRedemptions(prev => [{ id: 'VR-' + Date.now(), voucherId: v.id, pin, amount, partnerName, timestamp: new Date().toLocaleTimeString(), status: 'success' }, ...prev]);
+    logAction('system', `Voucher ${v.id} redeemed at ${partnerName} (KES ${amount})`, v.issuedToken);
+    return { ok: true };
   };
 
   const addDonorContribution = (amount: number, isAnonymous: boolean, optInLedger: boolean) => {
-    // Undifferentiated fund contribution
-    setCampaigns(prev => prev.map(c => {
-      if (c.id === 'cmp-01') {
-        return {
-          ...c,
-          pooledAmount: c.pooledAmount + amount,
-          recentGiftsCountToday: c.recentGiftsCountToday + 1,
-          recentPooledAmountToday: c.recentPooledAmountToday + amount,
-          coveredCount: Math.min(c.targetCount, Math.floor((c.pooledAmount + amount) / 9000))
-        };
-      }
-      return c;
-    }));
-
-    logAuditEvent('enrolment', `Intake: pooled contribution received KES ${amount.toLocaleString()}`, 'obj #pool-intake', `${isAnonymous ? 'Anonymous contribution.' : 'Non-identifying contribution.'} Undifferentiated pool.`);
+    setDonorContributions(prev => [{ id: 'CONT-' + Date.now(), amount, isAnonymous, optInLedger, timestamp: new Date().toLocaleString() }, ...prev]);
   };
 
-  const resetToDefaults = () => {
-    setRequests(INITIAL_REQUESTS);
-    setBundles(INITIAL_BUNDLES);
-    setCampaigns(INITIAL_CAMPAIGNS);
-    setRiskFlags(INITIAL_RISK_FLAGS);
-    setAuditLog(INITIAL_AUDIT_LOG);
-    setPartnerResult('idle');
-    setPartnerMessage('');
-    setOpportunityOptIn(false);
-    setOpportunityDismissed(false);
-    setIsPhoneVerified(true);
-    setEmptyRequestsMode(false);
-    setEmptyBundlesMode(false);
-    setEmptyQueueMode(false);
-    setIsLoadingRequests(false);
-    setIsLoadingBundles(false);
-    setRequesterScreen('home');
+  const addPledge = (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => {
+    setPledges(prev => [{ id: `PLG-${Date.now()}`, donorHash: `donor_${Math.random().toString(36).substring(2, 8)}`, type, description, locality, maxValue, status: 'awaiting_match', timestamp: new Date().toISOString() }, ...prev]);
+  };
+
+  
+  const issueVoucher = (requestId: string, partnerName: string, partnerType: 'retailer' | 'hospital'): Voucher | null => {
+    const req = poolRequests.find(r => r.id === requestId);
+    if (!req || req.status !== 'verified') return null;
+    const newVoucher: Voucher = {
+      id: 'VCH-' + Date.now(),
+      partnerName,
+      partnerType,
+      description: `${req.category.replace('_', ' ')} settlement`,
+      maxValue: req.amount,
+      status: 'active',
+      issuedToken: req.tokenHash,
+      pin: String(Math.floor(1000 + Math.random() * 9000)),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    };
+    setVouchers(prev => [newVoucher, ...prev]);
+    setPoolRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'voucher_issued' as any } : r));
+    logAction('fulfilment', `Issued voucher ${newVoucher.id} at ${partnerName} (KES ${req.amount})`, req.hashedObjectId);
+    return newVoucher;
+  };
+
+  const expressInterest = (opportunityId: string, title: string) => {
+    const interest: MatchInterest = {
+      id: 'MI-' + Date.now(),
+      opportunityId,
+      title,
+      tokenHash: tokenHash || 'unknown',
+      timestamp: new Date().toLocaleTimeString(),
+    };
+    setMatchInterests(prev => [interest, ...prev]);
   };
 
   return (
-    <AppContext.Provider
-      value={{
-        surface,
-        setSurface,
-        requesterScreen,
-        setRequesterScreen,
-        requesterChannel,
-        setRequesterChannel,
-        language,
-        setLanguage,
-        t,
-        isPhoneFramed,
-        setIsPhoneFramed,
-        phoneNumber,
-        setPhoneNumber,
-        isPhoneVerified,
-        setIsPhoneVerified,
-        activeRequestId,
-        setActiveRequestId,
-        requests,
-        bundles,
-        campaigns,
-        riskFlags,
-        dedupItems,
-        auditLog,
-        consoleRole,
-        setConsoleRole,
-        demoDrawerOpen,
-        setDemoDrawerOpen,
-        partnerPin,
-        setPartnerPin,
-        partnerResult,
-        partnerMessage,
-        redeemPartnerPin,
-        partnerStatements,
-        depotCounts,
-        lockerStocks,
-        opportunityOptIn,
-        setOpportunityOptIn,
-        opportunityDismissed,
-        setOpportunityDismissed,
-        isLoadingRequests,
-        setIsLoadingRequests,
-        isLoadingBundles,
-        setIsLoadingBundles,
-        emptyRequestsMode,
-        setEmptyRequestsMode,
-        emptyBundlesMode,
-        setEmptyBundlesMode,
-        emptyQueueMode,
-        setEmptyQueueMode,
-        addSwapRequest,
-        addPoolRequest,
-        routeFlagToTier4,
-        clearFlagAsFalsePositive,
-        dispatchRequestBatch,
-        addDonorContribution,
-        logAuditEvent,
-        exportComplianceCsv,
-        resetToDefaults
-      }}
-    >
+    <AppContext.Provider value={{
+      tokenHash, initializeSession, logout,
+      swapRequests, poolRequests, riskFlags, campaigns, pledges, auditLog, dedupItems, lockerStocks, depotCounts, donorContributions, vouchers, voucherRedemptions,
+      emptyQueueMode, setEmptyQueueMode,
+      staffRole, staffId, loginStaff, logoutStaff,
+      executeSwap, executePool, withdrawRequest, dispatchRequest, routeFlagToTier4, clearFlagAsFalsePositive, completeOcrCheck, matchPledge, redeemVoucher, logAction,
+      addDonorContribution, addPledge, issueVoucher, expressInterest, matchInterests,
+    }}>
       {children}
     </AppContext.Provider>
   );
@@ -364,8 +299,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
 export const useApp = () => {
   const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
+  if (!context) throw new Error('useApp must be used within AppProvider');
   return context;
 };
+
+

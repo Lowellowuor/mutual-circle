@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Lock, HeartHandshake, GitFork, Users, BookOpen, CreditCard, ArrowRight, Sparkles, Banknote } from 'lucide-react';
 
@@ -108,7 +108,7 @@ export const Phase2Cards: React.FC = () => {
               onClick={() => setSurface('phase2')}
               className="text-[10px] font-mono uppercase bg-purple-100 text-purple-900 px-2 py-0.5 rounded font-bold hover:bg-purple-200 cursor-pointer"
             >
-              Open Sanctuary →
+              Open Sanctuary â†’
             </button>
           </div>
 
@@ -158,3 +158,4 @@ export const Phase2Cards: React.FC = () => {
     </div>
   );
 };
+

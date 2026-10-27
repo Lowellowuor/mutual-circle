@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -113,7 +113,7 @@ export const RequesterShell: React.FC = () => {
         {activeBottomTab === 'home' && (
           <div className="space-y-4">
             
-            {/* Quick Channels Bar (WhatsApp removed, SMS, USSD, Web only) */}
+            {/* Quick Channels Bar (SMS removed, SMS, USSD, Web only) */}
             <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={() => {
@@ -326,16 +326,16 @@ export const RequesterShell: React.FC = () => {
         isOpen={networkInfoOpen}
         onClose={() => setNetworkInfoOpen(false)}
         title="The Mutual Circle"
-        subtitle="LumiereCore CLG · Nairobi Network"
+        subtitle="LumiereCore CLG Â· Nairobi Network"
       >
         <div className="space-y-3 text-sm leading-relaxed text-[#111111]/80">
           <p>
             A resource-sharing network for Nairobi allowing community members to obtain bundles and settle institutional bills without disclosing need.
           </p>
           <div className="p-3.5 bg-[#FAF8F4] rounded-xl border border-[#111111]/10 font-mono text-sm space-y-1.5">
-            <div>• Non-evaluative language: Request, reserve, collect, share.</div>
-            <div>• Separation of duties: No human role holds contact and payment power.</div>
-            <div>• Direct settlement: Funds disburse directly to institutional ledgers.</div>
+            <div>â€¢ Non-evaluative language: Request, reserve, collect, share.</div>
+            <div>â€¢ Separation of duties: No human role holds contact and payment power.</div>
+            <div>â€¢ Direct settlement: Funds disburse directly to institutional ledgers.</div>
           </div>
           <Button fullWidth variant="outline" size="md" onClick={() => setNetworkInfoOpen(false)}>
             {t('btn_close')}
@@ -346,3 +346,4 @@ export const RequesterShell: React.FC = () => {
     </div>
   );
 };
+

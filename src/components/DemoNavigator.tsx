@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Surface, RequesterScreen, ConsoleRole } from '../types';
 import { 
@@ -37,7 +37,7 @@ export const DemoNavigator: React.FC = () => {
     targetSurface: Surface, 
     targetRequesterScreen?: RequesterScreen, 
     targetRole?: ConsoleRole,
-    reqChannel?: 'web' | 'ussd' | 'sms' | 'whatsapp'
+    reqChannel?: 'web' | 'ussd' | 'sms' | 'sms'
   ) => {
     setSurface(targetSurface);
     if (targetRequesterScreen) {
@@ -111,18 +111,18 @@ export const DemoNavigator: React.FC = () => {
               </button>
 
               <button
-                onClick={() => navigateTo('requester', 'channel', undefined, 'whatsapp')}
+                onClick={() => navigateTo('requester', 'channel', undefined, 'sms')}
                 className="text-left px-3 py-2 rounded text-xs transition-colors cursor-pointer flex items-center justify-between hover:bg-white text-[#111111]/80"
               >
-                <span className="font-mono text-[#075E54] font-semibold">↳ WhatsApp Bot Simulator</span>
-                <span className="text-[10px] font-mono bg-[#075E54] text-white px-1.5 py-0.5 rounded">WhatsApp Chat</span>
+                <span className="font-mono text-[#075E54] font-semibold">â†³ SMS Bot Simulator</span>
+                <span className="text-[10px] font-mono bg-[#075E54] text-white px-1.5 py-0.5 rounded">SMS Chat</span>
               </button>
 
               <button
                 onClick={() => navigateTo('requester', 'channel', undefined, 'ussd')}
                 className="text-left px-3 py-2 rounded text-xs transition-colors cursor-pointer flex items-center justify-between hover:bg-white text-[#111111]/80"
               >
-                <span className="font-mono text-[#1F6B4A]">↳ USSD Simulator ([Placeholder USSD code])</span>
+                <span className="font-mono text-[#1F6B4A]">â†³ USSD Simulator ([Placeholder USSD code])</span>
                 <span className="text-[10px] font-mono bg-[#DCE8E0] px-1.5 py-0.5 rounded">Feature Phone</span>
               </button>
 
@@ -130,7 +130,7 @@ export const DemoNavigator: React.FC = () => {
                 onClick={() => navigateTo('requester', 'channel', undefined, 'sms')}
                 className="text-left px-3 py-2 rounded text-xs transition-colors cursor-pointer flex items-center justify-between hover:bg-white text-[#111111]/80"
               >
-                <span className="font-mono text-[#1F6B4A]">↳ SMS Simulator (Shortcode)</span>
+                <span className="font-mono text-[#1F6B4A]">â†³ SMS Simulator (Shortcode)</span>
                 <span className="text-[10px] font-mono bg-[#DCE8E0] px-1.5 py-0.5 rounded">Offline Thread</span>
               </button>
 
@@ -374,7 +374,7 @@ export const DemoNavigator: React.FC = () => {
                   surface === 'phase2' ? 'bg-[#1F6B4A] text-white font-medium' : 'hover:bg-white text-[#111111]/80'
                 }`}
               >
-                <span className="font-semibold text-[#1F6B4A]">✨ Phase 2 Features Hub</span>
+                <span className="font-semibold text-[#1F6B4A]">âœ¨ Phase 2 Features Hub</span>
                 <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">5 Modules</span>
               </button>
             </div>
@@ -394,9 +394,11 @@ export const DemoNavigator: React.FC = () => {
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Demo State</span>
           </button>
-          <span className="text-[11px] text-[#111111]/50">LumiereCore CLG · Nairobi</span>
+          <span className="text-[11px] text-[#111111]/50">LumiereCore CLG Â· Nairobi</span>
         </div>
       </div>
     </div>
   );
 };
+
+

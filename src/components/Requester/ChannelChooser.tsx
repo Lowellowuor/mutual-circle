@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { RequesterChannel } from '../../types';
 import { Globe, MessageSquare, PhoneCall, ArrowRight, Shield } from 'lucide-react';
@@ -41,11 +41,11 @@ export const ChannelChooser: React.FC = () => {
           onClick={() => setRequesterScreen('home')}
           className="text-xs text-[#111111]/60 hover:text-[#111111] mb-2 inline-flex items-center gap-1 cursor-pointer"
         >
-          ← Back to Home
+          â† Back to Home
         </button>
         <h2 className="font-serif text-2xl font-bold text-[#111111]">Choose your channel</h2>
         <p className="text-xs sm:text-sm text-[#111111]/70 mt-1">
-          Access The Mutual Circle on WhatsApp, high-speed web, SMS, or zero-data USSD basic phones.
+          Access The Mutual Circle on SMS, high-speed web, SMS, or zero-data USSD basic phones.
         </p>
       </div>
 
@@ -136,3 +136,4 @@ export const ChannelChooser: React.FC = () => {
     </div>
   );
 };
+

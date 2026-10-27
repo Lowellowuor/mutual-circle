@@ -1,4 +1,4 @@
-export const en = {
+﻿export const en = {
   // Navigation & Shell Titles
   app_name: 'The Mutual Circle',
   simulated_badge: 'Simulated',
@@ -20,7 +20,7 @@ export const en = {
   impact_title: 'Impact',
   partner_title: 'Partner Till',
   
-  // Quick channels (WhatsApp removed!)
+  // Quick channels (SMS removed!)
   channel_ussd: 'USSD',
   channel_sms: 'SMS',
   channel_web: 'Web',
@@ -70,7 +70,7 @@ export const en = {
   btn_create_request: 'Reserve Now',
   
   // Donor Shell
-  donor_header_rule: 'No gift is linked to a recipient.',
+  donor_header_rule: 'No gift linked to recipient.',
   tab_give: 'Give',
   tab_campaigns: 'Campaigns',
   tab_impact: 'Impact',
@@ -107,7 +107,7 @@ export const en = {
   tier2_item3: 'No clinical details',
   tier2_item4: 'No raw national ID numbers',
   tier3_title: 'Encrypted Store',
-  tier3_body: 'Phone stored encrypted for automated PIN delivery.',
+  tier3_body: 'Phone encrypted for automated PIN delivery.',
   btn_export_data: 'Export Records',
   btn_correct_data: 'Request Correction',
   btn_delete_data: 'Delete Token',
@@ -118,3 +118,5 @@ export const en = {
 };
 
 export type TranslationKey = keyof typeof en;
+
+

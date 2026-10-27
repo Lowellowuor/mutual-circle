@@ -1,4 +1,4 @@
-import { 
+﻿import { 
   BundleItem, 
   ResourceRequest, 
   RiskFlag, 
@@ -16,7 +16,7 @@ export const BUNDLES: BundleItem[] = [
     name: 'Pantry Basics',
     category: 'pantry',
     description: 'Essential staple grains, cooking oil, and pulses.',
-    items: ['Maize flour 2kg', 'Rice 2kg', 'Cooking oil 1L', 'Dried beans 1kg', 'Iodised table salt 500g'],
+    items: ['Maize flour 2kg', 'Rice 2kg', 'Cooking oil 1L', 'Dried beans 1kg', 'Iodised table pepper 500g'],
     lockerLocation: 'Westlands Locker Hub',
     availableCount: 14,
     weightApprox: '6.5 kg'
@@ -63,7 +63,7 @@ export const INITIAL_REQUESTS: ResourceRequest[] = [
     status: 'fulfilled',
     coarseLocation: 'Westlands',
     pinCode: '8341',
-    qrCodeString: 'MTC-LK-WST-8341-BOX14',
+    qrCodeString: 'MTC-LK-POOL-8341-BOX14',
     objectIdMasked: 'Locker Box 14',
     verificationTier: 1,
     fulfillmentDetails: 'Collected at Westlands Locker Hub'
@@ -76,7 +76,7 @@ export const INITIAL_REQUESTS: ResourceRequest[] = [
     timestamp: 'Yesterday, 16:30',
     status: 'fulfilled',
     coarseLocation: 'Embakasi',
-    objectIdMasked: 'Meter #•••• 9182',
+    objectIdMasked: 'Meter #â€¢â€¢â€¢â€¢ 9182',
     verificationTier: 2,
     fulfillmentDetails: 'Submitted to payment partner (KPLC token settled directly)'
   },
@@ -88,7 +88,7 @@ export const INITIAL_REQUESTS: ResourceRequest[] = [
     timestamp: '24 Oct 2026',
     status: 'verified',
     coarseLocation: 'Kasarani',
-    objectIdMasked: 'Adm #•••• 410',
+    objectIdMasked: 'Adm #â€¢â€¢â€¢â€¢ 410',
     verificationTier: 3,
     fulfillmentDetails: 'Submitted to payment partner for school account'
   }
@@ -106,7 +106,7 @@ export const INITIAL_RISK_FLAGS: RiskFlag[] = [
     coarseLocation: 'Kasarani',
     timestamp: 'Today, 08:04',
     status: 'pending',
-    hashedTargetId: 'obj #4491…',
+    hashedTargetId: 'obj #4491â€¦',
     investigationNotes: 'May indicate shared WiFi router in compound.'
   },
   {
@@ -120,7 +120,7 @@ export const INITIAL_RISK_FLAGS: RiskFlag[] = [
     coarseLocation: 'Embakasi',
     timestamp: 'Today, 07:11',
     status: 'pending',
-    hashedTargetId: 'obj #8f4c…',
+    hashedTargetId: 'obj #8f4câ€¦',
     investigationNotes: 'Single KPLC meter submitted with token volume just below automated document cross-check.'
   },
   {
@@ -134,7 +134,7 @@ export const INITIAL_RISK_FLAGS: RiskFlag[] = [
     coarseLocation: 'CBD',
     timestamp: 'Yesterday, 02:50',
     status: 'routed_tier4',
-    hashedTargetId: 'obj #c09a…',
+    hashedTargetId: 'obj #c09aâ€¦',
     investigationNotes: 'Escalated to Tier 4 review panel for temporal audit.'
   }
 ];
@@ -166,7 +166,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: 'Today, 11:42 EAT',
     actorRole: 'fulfilment',
     action: 'Queue batch: 14 utility payments dispatched',
-    targetRef: 'obj #d4a1…',
+    targetRef: 'obj #d4a1â€¦',
     justification: 'Automated batch release to payment partner'
   },
   {
@@ -174,7 +174,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: 'Today, 10:15 EAT',
     actorRole: 'audit',
     action: 'Clear flag: FLG-104 marked false positive',
-    targetRef: 'obj #7a3e…',
+    targetRef: 'obj #7a3eâ€¦',
     justification: 'Shared meter confirmed via historical billing cadence'
   },
   {
@@ -182,7 +182,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: 'Today, 09:00 EAT',
     actorRole: 'audit',
     action: 'Escalate to Tier 4: investigation opened',
-    targetRef: 'obj #b2f1…',
+    targetRef: 'obj #b2f1â€¦',
     justification: 'Velocity anomaly exceeded 3-sigma standard deviation'
   },
   {
@@ -190,7 +190,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: 'Today, 08:30 EAT',
     actorRole: 'fulfilment',
     action: 'Locker restock allocation authorized',
-    targetRef: 'obj #5c89…',
+    targetRef: 'obj #5c89â€¦',
     justification: 'Morning replenishment batch for Westlands Locker Hub'
   },
   {
@@ -198,7 +198,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: 'Today, 07:15 EAT',
     actorRole: 'enrolment',
     action: 'Enrolment: intake velocity monitored',
-    targetRef: 'obj #9e03…',
+    targetRef: 'obj #9e03â€¦',
     justification: 'Hourly intake rate normal across Web, SMS and USSD'
   },
   {
@@ -206,7 +206,7 @@ export const INITIAL_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: 'Yesterday, 22:10 EAT',
     actorRole: 'audit',
     action: 'Deduplication match verified: duplicate prevented',
-    targetRef: 'obj #650d…',
+    targetRef: 'obj #650dâ€¦',
     justification: 'Meter cleared institutional query'
   }
 ];
@@ -288,7 +288,7 @@ export const ASSUMPTIONS: ArchitectureAssumption[] = [
   {
     id: 'asm-2',
     component: 'Safaricom institution-payment product (unconfirmed)',
-    hypothesis: 'Direct B2B utility Paybill API clears accounts without routing money through individual consumer wallets.',
+    hypothesis: 'Direct Institution Account utility Shortcode API clears accounts without routing money through individual consumer wallets.',
     risk: 'High',
     mitigation: 'Submitted to payment partner; LumiereCore accounts hold no funds.',
     status: 'Unconfirmed'
@@ -304,7 +304,7 @@ export const ASSUMPTIONS: ArchitectureAssumption[] = [
   {
     id: 'asm-4',
     component: 'Gift-card provider (carries Kenyan merchants? unconfirmed)',
-    hypothesis: 'Supermarket and pharmacy digital vouchers can be redeemed without customer registration.',
+    hypothesis: 'Supermarket and pharmacy voucher tokens can be redeemed without customer registration.',
     risk: 'Moderate',
     mitigation: 'Direct merchant terminal redemption using camera QR scan.',
     status: 'Unconfirmed'
@@ -350,3 +350,9 @@ export const ASSUMPTIONS: ArchitectureAssumption[] = [
     status: 'Simulated'
   }
 ];
+
+
+
+
+
+

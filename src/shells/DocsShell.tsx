@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card } from '../ui/Card';
 import { Chip } from '../ui/Chip';
 import { ASSUMPTIONS } from '../data/mock';
@@ -28,7 +28,7 @@ export const DocsShell: React.FC = () => {
           Architecture Documentation
         </h1>
         <p className="text-xs text-[#111111]/70">
-          WFP Building Blocks adaptation for dignity, non-evaluative resource access, and civil society privacy.
+          WFP Building Blocks adaptation for dignity, non-evaluative resource access, and community partners privacy.
         </p>
       </div>
 
@@ -134,3 +134,4 @@ export const DocsShell: React.FC = () => {
     </div>
   );
 };
+
