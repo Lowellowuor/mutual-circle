@@ -75,7 +75,7 @@ export const SmsDonorSimulator: React.FC = () => {
     switch (state) {
       case 'idle': {
         if (['DONOR', 'HI', 'HELLO', 'START'].includes(t)) {
-          sysReply('Welcome to Mutual Circle Giving. You are an anonymous donor.');
+          sysReply('Welcome to Mutual Circle Giving. You are an anonymous donor.\n\nYour gifts fund a blind pool - never a specific person.');
           showMainMenu();
         } else {
           sysReply('Reply DONOR to start.');
@@ -91,7 +91,7 @@ export const SmsDonorSimulator: React.FC = () => {
           if (profile?.opt_in_ledger) {
             sysReply('Already on the leaderboard as "' + (profile.display_name || 'Anonymous Contributor') + '".\nReply REMOVE to leave, or 0 to go back.');
           } else {
-            sysReply('Join the public giving list?\nReply YES to join, or 0 to go back.');
+            sysReply('Join the public giving list?\nYour total given and gift count are shown. Never a recipient link.\nReply YES to join, or 0 to go back.');
           }
           setState('leaderboard_optin');
         } else if (t === '3') {
@@ -136,7 +136,7 @@ export const SmsDonorSimulator: React.FC = () => {
           sysReply('Processing...');
           const r = await createDonation(donorHash, Math.round(pendingAmount * 100), true, false);
           if (r) {
-            sysReply('Thank you. KES ' + pendingAmount.toLocaleString() + ' added to the pool.\n\nReply 1 to give again, or 0 to go back.');
+            sysReply('Thank you. KES ' + pendingAmount.toLocaleString() + ' added to the blind pool.\n\nYour gift funds a pooled resource - no recipient linkage.\n\nReply 1 to give again, or 0 to go back.');
             setState('give_success');
           } else {
             sysReply('Could not process. Try again.');
