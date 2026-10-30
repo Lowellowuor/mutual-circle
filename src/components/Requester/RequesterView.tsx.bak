@@ -1,0 +1,727 @@
+import React, { useState, useEffect } from 'react';
+import { useApp } from '../../context/AppContext';
+import { peekRate, consumeRate, loadHistory, saveHistory, loadSeen, saveSeen } from '../../services/auth';
+import { setHouseholdSize as apiSetHousehold, getHouseholdSize as apiGetHousehold } from '../../lib/apiClient';
+import {
+  HeartHandshake, Shield, Package, CreditCard, Users, MessageCircle,
+  Home, MapPin, Check, CheckCircle, Clock, Copy, ScanLine, ArrowRight,
+  AlertTriangle, FileText, Zap, GraduationCap, Building2, Droplet, Briefcase,
+  X, Phone, ShieldCheck, ShieldAlert, Eye, EyeOff, RotateCcw, LogOut, AlertCircle, Trash2,
+  MessageSquare, ArrowLeft,
+} from 'lucide-react';
+import { SwapRequest, PoolRequest } from '../../types';
+
+type Tab = 'home' | 'swap' | 'pool' | 'match' | 'bench';
+type SwapStep = 'bundle' | 'location' | 'success';
+type PoolStep = 'category' | 'details' | 'success';
+type PoolCat = 'utility' | 'school_fee' | 'hospital_invoice';
+type IntakeStep = 'phone' | 'otp';
+
+const MAX_REQUESTS = 25;
+const MAX_VALUE = 100000;
+const MAX_OTP_ATTEMPTS = 3;
+const OTP_RESEND_SECONDS = 30;
+
+const BUNDLES = [
+  { id: 'Standard Pantry', name: 'Standard Pantry', desc: 'Maize flour, rice, oil, lentils.', Icon: Package, accent: 'text-[#1F6B4A] bg-[#DCE8E0]' },
+  { id: 'Hygiene Kit', name: 'Hygiene & Dignity', desc: 'Soap, sanitary pads, toothpaste.', Icon: Droplet, accent: 'text-blue-700 bg-blue-50' },
+];
+
+const LOCATIONS = [
+  { id: 'Kibera Hub', sub: '24/7 * 12 available' },
+  { id: 'Mathare Central', sub: '6am-10pm * 18 available' },
+  { id: 'Kawangware Station', sub: '24/7 * 4 available' },
+];
+
+const POOL_CATS: { id: PoolCat; name: string; desc: string; Icon: any; accent: string; objLabel: string; placeholder: string }[] = [
+  { id: 'utility', name: 'Utility Bill', desc: 'KPLC or Nairobi Water', Icon: Zap, accent: 'text-amber-700 bg-amber-50', objLabel: 'Meter number', placeholder: 'e.g. 541234567' },
+  { id: 'school_fee', name: 'School Fees', desc: 'Secondary term fees', Icon: GraduationCap, accent: 'text-[#1F6B4A] bg-[#DCE8E0]', objLabel: 'Admission number', placeholder: 'e.g. 2024118' },
+  { id: 'hospital_invoice', name: 'Hospital Invoice', desc: 'No clinical details', Icon: Building2, accent: 'text-blue-700 bg-blue-50', objLabel: 'Invoice number', placeholder: 'e.g. 78432' },
+];
+
+const OPPORTUNITIES = [
+  { id: 'opp-1', title: 'Warehouse Assistant', commit: '6-month', locality: 'Industrial Area', desc: 'Entry-level. On-the-job training.', Icon: Briefcase, accent: 'text-blue-700 bg-blue-50' },
+  { id: 'opp-2', title: 'Shared room', commit: '12-month', locality: 'Kangemi', desc: 'Vetted household. Rent-free 3 months.', Icon: Home, accent: 'text-[#1F6B4A] bg-[#DCE8E0]' },
+  { id: 'opp-3', title: 'Tailoring apprenticeship', commit: '3-month', locality: 'Kibera', desc: 'Learn with local cooperative.', Icon: GraduationCap, accent: 'text-amber-700 bg-amber-50' },
+  { id: 'opp-4', title: 'Boda spare-parts kit', commit: 'One-off', locality: 'Mathare', desc: 'Tools for repairs.', Icon: Package, accent: 'text-purple-700 bg-purple-50' },
+];
+
+const HELPLINES = [
+  { name: 'Befrienders', number: '0722 178 177', sub: '24/7 * free' },
+  { name: 'Red Cross', number: '1199', sub: 'Crisis & counselling' },
+  { name: 'Emergency', number: '999 / 112', sub: 'Police * ambulance' },
+];
+
+export const RequesterView: React.FC = () => {
+  const { tokenHash, initializeSession, logout, swapRequests, poolRequests, executeSwap, executePool, withdrawRequest, expressInterest, vouchers, voucherRedemptions } = useApp();
+
+  /* ---------- INTAKE STATE ---------- */
+  const [intakeStep, setIntakeStep] = useState<IntakeStep>('phone');
+  const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [householdStep, setHouseholdStep] = useState<boolean>(false);
+  const [householdSize, setHouseholdSize] = useState<number>(1);
+  const [householdMode, setHouseholdMode] = useState<'alone' | 'family' | null>(null);
+  const [householdError, setHouseholdError] = useState<string | null>(null);
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [otpInput, setOtpInput] = useState('');
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpAttempts, setOtpAttempts] = useState(0);
+  const [otpProcessing, setOtpProcessing] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  /* ---------- APP STATE ---------- */
+  const [tab, setTab] = useState<Tab>('home');
+  const [showServer, setShowServer] = useState(false);
+  const [rate, setRate] = useState({ count: 0, value: 0 });
+  const [history, setHistory] = useState<any[]>([]);
+  const [seen, setSeen] = useState<string[]>([]);
+
+  /* ---------- SWAP STATE ---------- */
+  const [swapStep, setSwapStep] = useState<SwapStep>('bundle');
+  const [swapBundle, setSwapBundle] = useState<string | null>(null);
+  const [swapLocation, setSwapLocation] = useState<string | null>(null);
+  const [swapResult, setSwapResult] = useState<SwapRequest | null>(null);
+  const [swapping, setSwapping] = useState(false);
+  const [pinCopied, setPinCopied] = useState(false);
+  const [swapError, setSwapError] = useState<string | null>(null);
+
+  /* ---------- POOL STATE ---------- */
+  const [poolStep, setPoolStep] = useState<PoolStep>('category');
+  const [poolCat, setPoolCat] = useState<PoolCat | null>(null);
+  const [poolObject, setPoolObject] = useState('');
+  const [poolAmount, setPoolAmount] = useState('');
+  const [poolResult, setPoolResult] = useState<PoolRequest | null>(null);
+  const [pooling, setPooling] = useState(false);
+  const [poolError, setPoolError] = useState<string | null>(null);
+
+  /* ---------- MATCH STATE ---------- */
+  const [selectedOpp, setSelectedOpp] = useState<typeof OPPORTUNITIES[0] | null>(null);
+  const [matchConfirmed, setMatchConfirmed] = useState(false);
+  const [matchSent, setMatchSent] = useState<string | null>(null);
+  const [declined, setDeclined] = useState<Set<string>>(new Set());
+
+  /* ---------- EFFECTS ---------- */
+  useEffect(() => {
+    if (!tokenHash) return;
+    const r = peekRate(tokenHash);
+    setRate({ count: r.count, value: r.value });
+    setHistory(loadHistory(tokenHash));
+    setSeen(loadSeen(tokenHash));
+  }, [tokenHash]);
+
+  useEffect(() => {
+    if (!tokenHash) return;
+    const merged = history.map(h => {
+      const live = [...swapRequests, ...poolRequests].find(r => r.id === h.id);
+      return live ? { ...h, status: live.status } : h;
+    });
+    const changed = merged.some((m, i) => m.status !== history[i]?.status);
+    if (changed) {
+      saveHistory(tokenHash, merged);
+      setHistory(merged);
+      const nr = peekRate(tokenHash);
+      setRate({ count: nr.count, value: nr.value });
+    }
+  }, [swapRequests, poolRequests, tokenHash, history]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown(c => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedOpp(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  /* ---------- OTP HANDLERS ---------- */
+  const generateOtp = () => String(Math.floor(1000 + Math.random() * 9000));
+
+  const maskPhone = (p: string): string => {
+  const digits = p.replace(/\D/g, '');
+  if (digits.length < 4) return p;
+  const last3 = digits.slice(-3);
+  const stars = '*'.repeat(Math.max(3, digits.length - 3));
+  const prefix = p.trim().startsWith('+') ? '+' : '';
+  return prefix + stars + last3;
+};
+
+  const handleSendOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 10) {
+      setPhoneError('Please enter a valid phone number (at least 10 digits).');
+      return;
+    }
+    if (digits.length > 15) {
+      setPhoneError('Phone number too long (max 15 digits).');
+      return;
+    }
+    setPhoneError(null);
+    setGeneratedOtp(generateOtp());
+    setOtpInput('');
+    setOtpError(null);
+    setOtpAttempts(0);
+    setResendCooldown(OTP_RESEND_SECONDS);
+    setIntakeStep('otp');
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpInput.length !== 4 || otpProcessing) return;
+    if (otpAttempts >= MAX_OTP_ATTEMPTS) {
+      setOtpError('Too many attempts. Resend a new code or use a different number.');
+      return;
+    }
+    setOtpProcessing(true);
+    await new Promise(r => setTimeout(r, 400));
+    if (otpInput === generatedOtp) {
+      try {
+        await initializeSession(phone, 'web');
+        // Check if household already declared; if not, prompt
+        const hh = await apiGetHousehold((window as any).__mtcToken || '');
+        if (!hh?.declared) {
+          setHouseholdStep(true);
+          setOtpProcessing(false);
+          return;
+        }
+      } catch (err: any) {
+        setOtpError(err?.message || 'Verification failed. Please try again.');
+        setOtpProcessing(false);
+        return;
+      }
+    } else {
+      const remaining = MAX_OTP_ATTEMPTS - otpAttempts - 1;
+      setOtpError(remaining > 0 ? `Incorrect code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.` : 'Too many attempts. Resend a new code.');
+      setOtpAttempts(a => a + 1);
+      setOtpInput('');
+    }
+    setOtpProcessing(false);
+  };
+
+  const handleResend = () => {
+    setGeneratedOtp(generateOtp());
+    setOtpInput('');
+    setOtpError(null);
+    setOtpAttempts(0);
+    setResendCooldown(OTP_RESEND_SECONDS);
+  };
+
+  const handleBackToPhone = () => {
+    setIntakeStep('phone');
+    setOtpInput('');
+    setGeneratedOtp('');
+    setOtpError(null);
+    setOtpAttempts(0);
+    setResendCooldown(0);
+  };
+
+  /* ---------- APP HANDLERS ---------- */
+  const mergedHistory = history;
+  const unseen = mergedHistory.filter(h => h.status === 'submitted_to_partner' && !seen.includes(h.id));
+  const dismissUnseen = () => {
+    if (!tokenHash) return;
+    const next = [...seen, ...unseen.map(u => u.id)];
+    setSeen(next);
+    saveSeen(tokenHash, next);
+  };
+
+  const goTab = (t: Tab) => {
+    setTab(t);
+    if (t === 'swap') { setSwapStep('bundle'); setSwapBundle(null); setSwapLocation(null); setSwapResult(null); setSwapError(null); }
+    if (t === 'pool') { setPoolStep('category'); setPoolCat(null); setPoolObject(''); setPoolAmount(''); setPoolResult(null); setPoolError(null); }
+    if (t === 'match') { setSelectedOpp(null); setMatchSent(null); setMatchConfirmed(false); }
+  };
+
+  const handleReserve = async () => {
+    if (!swapBundle || !swapLocation || rateLimited || swapping) return;
+    setSwapping(true); setSwapError(null);
+    try {
+      const rateCheck = tokenHash ? consumeRate(tokenHash, 0) : { ok: true };
+      if (!rateCheck.ok) { setSwapError((rateCheck as any).reason || 'Daily limit reached.'); setSwapping(false); return; }
+      const res = await executeSwap(swapBundle, swapLocation);
+      if (!res) { setSwapError('Could not reach the locker partner. Please retry.'); setSwapping(false); return; }
+      setSwapResult(res); setSwapStep('success');
+      const next = peekRate(tokenHash!);
+      setRate({ count: next.count, value: next.value });
+      if (tokenHash) setHistory(loadHistory(tokenHash));
+    } catch { setSwapError('Unexpected error. Try again.'); }
+    setSwapping(false);
+  };
+
+  const handleSubmitPool = async () => {
+    if (!poolCat || !poolObject || !numAmount || !objectValid || rateLimited || pooling) return;
+    if (numAmount > valueRemaining) { setPoolError(`Remaining session allowance is KES ${valueRemaining.toLocaleString()}.`); return; }
+    setPooling(true); setPoolError(null);
+    try {
+      const rateCheck = tokenHash ? consumeRate(tokenHash, numAmount) : { ok: true };
+      if (!rateCheck.ok) { setPoolError((rateCheck as any).reason || 'Daily limit reached.'); setPooling(false); return; }
+      const res = await executePool(poolCat, poolObject, numAmount);
+      if (!res) { setPoolError('Object not found in institutional records. Check the number and try again.'); setPooling(false); return; }
+      setPoolResult(res); setPoolStep('success');
+      const next = peekRate(tokenHash!);
+      setRate({ count: next.count, value: next.value });
+      if (tokenHash) setHistory(loadHistory(tokenHash));
+    } catch { setPoolError('Unexpected error. Try again.'); }
+    setPooling(false);
+  };
+
+  const handleWithdraw = (id: string, type: 'swap' | 'pool') => {
+    withdrawRequest(id, type);
+    if (tokenHash) {
+      const h = loadHistory(tokenHash);
+      const updated = h.map((x: any) => x.id === id ? { ...x, status: 'withdrawn' } : x);
+      saveHistory(tokenHash, updated);
+      setHistory(updated);
+    }
+  };
+
+  const copyPin = () => {
+    if (!swapResult) return;
+    navigator.clipboard?.writeText(swapResult.pin);
+    setPinCopied(true); setTimeout(() => setPinCopied(false), 1800);
+  };
+
+  const QrPlaceholder = ({ seed }: { seed: string }) => {
+    const cells = Array.from({ length: 121 }, (_, i) => {
+      const code = seed.charCodeAt(i % seed.length) || 1;
+      return (code * (i + 1)) % 3 === 0;
+    });
+    return (<div className="w-20 h-20 grid grid-cols-11 gap-[1px] p-1 bg-white border-2 border-[#111111] rounded">{cells.map((on, i) => <div key={i} className={on ? 'bg-[#111111]' : 'bg-white'} />)}</div>);
+  };
+
+  /* ---------- DERIVED ---------- */
+  const numAmount = Number(poolAmount);
+  const willEscalate = numAmount > 5000;
+  const objectDigits = poolObject.replace(/\D/g, '').length;
+  const objectValid = objectDigits >= 4;
+  const rateLimited = rate.count >= MAX_REQUESTS || rate.value >= MAX_VALUE;
+  const valueRemaining = Math.max(0, MAX_VALUE - rate.value);
+  const objectError = poolObject.length > 0 && !objectValid ? 'Object number must contain at least 4 digits.' : null;
+
+  const myVouchers = vouchers.filter(v => v.issuedToken === tokenHash);
+  const myVoucherRedemptions = voucherRedemptions
+    .map(r => ({ redemption: r, voucher: vouchers.find(v => v.id === r.voucherId) }))
+    .filter(x => x.voucher && x.voucher.issuedToken === tokenHash);
+  const unseenRedemptions = myVoucherRedemptions.filter(x => x.redemption.status === 'success' && !seen.includes('R-' + x.redemption.id));
+  const dismissRedemptions = () => {
+    if (!tokenHash) return;
+    const next = [...seen, ...unseenRedemptions.map(x => 'R-' + x.redemption.id)];
+    setSeen(next);
+    saveSeen(tokenHash, next);
+  };
+  const sessionStats = (() => {
+    const total = mergedHistory.length;
+    const dispatched = mergedHistory.filter(h => h.status === 'submitted_to_partner').length;
+    const pending = mergedHistory.filter(h => h.status === 'pending_check' || h.status === 'verified').length;
+    const totalValue = mergedHistory.reduce((a, h) => a + (h.amount || 0), 0);
+    return { total, dispatched, pending, totalValue };
+  })();
+
+  /* ============================================================
+     INTAKE - two-step flow (phone ? OTP)
+     ============================================================ */
+  if (!tokenHash) {
+    const renderPhoneStep = () => (
+      <>
+        <div className="text-center space-y-3">
+          <div className="w-14 h-14 bg-[#DCE8E0] text-[#1F6B4A] rounded-2xl flex items-center justify-center mx-auto"><HeartHandshake className="w-7 h-7" /></div>
+          <div><h1 className="font-serif text-2xl font-bold text-[#111111]">Mutual Circle</h1><p className="text-[10px] font-mono text-[#1F6B4A] uppercase tracking-widest mt-1">Web Portal</p></div>
+          <p className="text-xs text-[#111111]/60 leading-relaxed">Food, bills, tuition. Anonymous from the first tap.</p>
+        </div>
+        <form onSubmit={handleSendOtp} className="space-y-3">
+          <div>
+            <label className="text-[10px] font-mono uppercase text-[#111111]/50">Phone number</label>
+            <input type="tel" value={phone} onChange={e => { setPhone(e.target.value); setPhoneError(null); }} placeholder="+254 7XX XXX XXX" autoFocus required className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-3 text-sm font-mono focus:ring-2 focus:ring-[#1F6B4A] focus:outline-none mt-1" />
+          </div>
+          {phoneError && (
+            <div className="text-[10px] text-rose-600 flex items-center gap-1 -mt-1">
+              <AlertCircle className="w-3 h-3 shrink-0" />
+              <span>{phoneError}</span>
+            </div>
+          )}
+          <button type="submit" disabled={!phone} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50">Send verification code</button>
+        </form>
+        <div className="p-3 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2"><Shield className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0 mt-0.5" /><p className="text-[10px] text-[#111111]/60 leading-relaxed">Phone is hashed immediately after verification. Staff see only a token.</p></div>
+      </>
+    );
+
+    const renderOtpStep = () => (
+      <>
+        <div className="text-center space-y-2">
+          <div className="w-14 h-14 bg-[#DCE8E0] text-[#1F6B4A] rounded-2xl flex items-center justify-center mx-auto"><MessageSquare className="w-7 h-7" /></div>
+          <div>
+            <h1 className="font-serif text-xl font-bold text-[#111111]">Verify your number</h1>
+            <p className="text-[11px] text-[#111111]/60 mt-1">We sent a 4-digit code to <strong className="font-mono text-[#111111]">{maskPhone(phone)}</strong></p>
+          </div>
+        </div>
+
+        <div className="p-3 bg-amber-50 border-2 border-dashed border-amber-400 rounded-xl text-center">
+          <div className="text-[9px] font-mono uppercase text-amber-700 tracking-wider font-bold">Demo code</div>
+          <div className="font-mono text-2xl font-bold text-amber-900 tracking-[0.4em] mt-0.5">{generatedOtp}</div>
+          <div className="text-[8px] text-amber-700/70 mt-1">In production this arrives via SMS</div>
+        </div>
+
+        <form onSubmit={handleVerifyOtp} className="space-y-2">
+          <input
+            value={otpInput}
+            onChange={e => { setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4)); setOtpError(null); }}
+            placeholder=""
+            inputMode="numeric"
+            maxLength={4}
+            autoFocus
+            disabled={otpAttempts >= MAX_OTP_ATTEMPTS || otpProcessing}
+            className={'w-full text-center font-mono text-2xl tracking-[0.5em] py-3 bg-white border-2 rounded-xl outline-none transition-colors ' + (otpError ? 'border-rose-300 focus:border-rose-500' : 'border-[#111111]/20 focus:border-[#1F6B4A]') + ' disabled:opacity-50'}
+          />
+          {otpError && (
+            <div className="text-[10px] text-rose-600 flex items-center gap-1 justify-center">
+              <AlertCircle className="w-3 h-3" />{otpError}
+            </div>
+          )}
+          <button type="submit" disabled={otpInput.length !== 4 || otpProcessing || otpAttempts >= MAX_OTP_ATTEMPTS} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+            {otpProcessing ? 'Verifying...' : 'Verify & continue'}
+          </button>
+        </form>
+
+        <div className="text-center text-[10px] text-[#111111]/50">
+          {resendCooldown > 0 ? (
+            <span>Resend code in {resendCooldown}s</span>
+          ) : (
+            <button type="button" onClick={handleResend} className="text-[#1F6B4A] hover:underline font-medium">Resend code</button>
+          )}
+        </div>
+
+        <button type="button" onClick={handleBackToPhone} className="w-full text-center text-[10px] text-[#111111]/40 hover:text-[#111111] flex items-center justify-center gap-1">
+          <ArrowLeft className="w-2.5 h-2.5" /> Use a different number
+        </button>
+      </>
+    );
+
+    return (
+      <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
+        <div className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
+          <div className="bg-[#FAF8F4] rounded-[2rem] overflow-hidden flex flex-col h-[620px]">
+            <div className="px-5 pt-3 pb-1 flex items-center justify-between text-[10px] font-medium text-[#111111]/60">
+              <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded uppercase font-bold">Anonymous</span>
+            </div>
+            <div className="flex-1 flex flex-col justify-center px-6 space-y-5 overflow-y-auto">
+              {intakeStep === 'phone' ? renderPhoneStep() : renderOtpStep()}
+            </div>
+            <div className="p-3 text-center text-[9px] text-[#111111]/40 font-mono border-t border-[#111111]/10">Prefer SMS, USSD, or WhatsApp? Use the top navigation.</div>
+          </div>
+        </div>
+        <div className="w-full max-w-sm space-y-3">
+          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+            <h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> How it works</h3>
+            <div className="space-y-1.5 text-[10px] text-[#111111]/70">
+              {[
+                'Enter any phone number',
+                'Receive a 4-digit verification code (simulated)',
+                'Token is generated on verification (HMAC)',
+                'Raw phone is never stored - only the token',
+                'Your history persists per token, even after refresh',
+              ].map((s, i) => (
+                <div key={s} className="flex gap-2"><span className="font-mono text-[#1F6B4A] font-bold shrink-0">{i + 1}.</span><span>{s}</span></div>
+              ))}
+            </div>
+          </div>
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] text-amber-900 leading-relaxed">
+            <strong>Demo note:</strong> the verification code is displayed on screen. In production it arrives via SMS.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ============================================================
+     DASHBOARD VIEWS
+     ============================================================ */
+  const renderHome = () => (
+    <div className="p-4 space-y-4">
+      <div className="rounded-2xl bg-gradient-to-br from-[#1F6B4A] to-[#18553a] p-4 text-white space-y-1"><HeartHandshake className="w-5 h-5 text-white/80" /><h2 className="font-serif text-lg font-bold leading-tight">Welcome back</h2><p className="text-[10px] text-white/70 font-mono truncate">Token: {tokenHash}</p></div>
+
+      {unseenRedemptions.length > 0 && (
+        <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-purple-900"><CheckCircle className="w-3.5 h-3.5" /> {unseenRedemptions.length} {unseenRedemptions.length === 1 ? 'voucher was' : 'vouchers were'} redeemed</div>
+            <button onClick={dismissRedemptions} aria-label="Dismiss" className="text-purple-700 hover:text-purple-900"><X className="w-3.5 h-3.5" /></button>
+          </div>
+          {unseenRedemptions.slice(0, 2).map(({ redemption, voucher }) => (
+            <div key={redemption.id} className="text-[9px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> * KES {redemption.amount.toLocaleString()} * {redemption.timestamp}</div>
+          ))}
+        </div>
+      )}
+
+      {unseen.length > 0 && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-900"><CheckCircle className="w-3.5 h-3.5" /> {unseen.length} {unseen.length === 1 ? 'request was' : 'requests were'} dispatched</div>
+            <button onClick={dismissUnseen} aria-label="Dismiss" className="text-emerald-700 hover:text-emerald-900"><X className="w-3.5 h-3.5" /></button>
+          </div>
+          <p className="text-[9px] text-emerald-900/70 leading-relaxed">Funds have been sent to the institution. Confirmation SMS within 2 hours.</p>
+        </div>
+      )}
+
+      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+        <div className="flex justify-between items-center"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Session allowance</div><div className="text-[9px] font-mono text-[#111111]/50">{MAX_REQUESTS - rate.count} left</div></div>
+        <div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={(rate.count / MAX_REQUESTS > 0.8 ? 'bg-rose-500 ' : 'bg-[#1F6B4A] ') + 'h-full transition-all'} style={{ width: (rate.count / MAX_REQUESTS) * 100 + '%' }} /></div>
+        <div className="flex justify-between text-[9px] font-mono text-[#111111]/50"><span>{rate.count}/{MAX_REQUESTS} requests</span><span>KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>
+      </div>
+
+      {rateLimited && (<div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><div><div className="text-[10px] font-bold text-rose-900">Daily limit reached</div><p className="text-[9px] text-rose-900/70 mt-0.5">Try again tomorrow or use a different channel.</p></div></div>)}
+
+      <div className="grid grid-cols-2 gap-2">
+        {[{ id: 'swap' as Tab, Icon: Package, l: 'Swap', s: 'Bundles' }, { id: 'pool' as Tab, Icon: CreditCard, l: 'Pool', s: 'Bills & fees' }, { id: 'match' as Tab, Icon: Users, l: 'Match', s: 'Opportunities' }, { id: 'bench' as Tab, Icon: MessageCircle, l: 'Bench', s: 'Peer support' }].map(item => {
+          const I = item.Icon;
+          return (<button key={item.id} onClick={() => goTab(item.id)} disabled={rateLimited && (item.id === 'swap' || item.id === 'pool')} className="p-3 bg-white border border-[#111111]/15 rounded-xl text-left hover:border-[#1F6B4A] transition-colors disabled:opacity-40"><I className="w-4 h-4 text-[#1F6B4A] mb-1.5" /><div className="text-xs font-bold text-[#111111]">{item.l}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{item.s}</div></button>);
+        })}
+      </div>
+
+      {myVouchers.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex justify-between items-center"><h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">My Vouchers</h3><span className="text-[10px] font-mono text-[#111111]/50">{myVouchers.length}</span></div>
+          {myVouchers.map(v => (
+            <div key={v.id} className={'p-2.5 rounded-lg border ' + (v.status === 'active' ? 'bg-purple-50 border-purple-200' : 'bg-[#FAF8F4] border-[#111111]/10 opacity-60')}>
+              <div className="flex justify-between items-start">
+                <div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[#111111] truncate">{v.partnerName}</div><div className="text-[9px] font-mono text-[#111111]/50">{v.description}</div></div>
+                <span className={'text-[8px] font-mono uppercase px-1.5 py-0.5 rounded ' + (v.status === 'active' ? 'bg-purple-200 text-purple-900' : 'bg-black/5 text-[#111111]/50')}>{v.status}</span>
+              </div>
+              <div className="flex items-center justify-between mt-1.5">
+                <div className="text-[10px] font-mono font-bold text-[#111111]">PIN <span className="text-purple-700">{v.pin}</span></div>
+                <div className="text-[9px] font-mono text-[#111111]/60">Max KES {v.maxValue.toLocaleString()}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {mergedHistory.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex justify-between items-center"><h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Your history</h3><span className="text-[10px] font-mono text-[#111111]/50">{mergedHistory.length}</span></div>
+          {mergedHistory.slice(0, 5).map((r: any) => {
+            const isWithdrawn = r.status === 'withdrawn';
+            const canWithdraw = r.type === 'swap' ? r.status === 'reserved' : (r.status === 'verified' || r.status === 'pending_check');
+            return (
+              <div key={r.id} className={'p-2.5 rounded-lg border flex justify-between items-center ' + (isWithdrawn ? 'bg-[#FAF8F4] border-[#111111]/5 opacity-60' : 'bg-white border-[#111111]/10')}>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {r.type === 'swap' ? <Package className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0" /> : <CreditCard className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
+                  <div className="min-w-0 flex-1"><div className={'text-[11px] font-semibold truncate ' + (isWithdrawn ? 'text-[#111111]/40 line-through' : 'text-[#111111]')}>{r.type === 'swap' ? r.bundleCategory : r.category?.replace('_', ' ')}</div><div className="text-[9px] font-mono text-[#111111]/50 truncate">{r.type === 'swap' ? r.lockerLocation : r.hashedObjectId}</div></div>
+                </div>
+                <div className="text-right shrink-0 ml-2 flex flex-col items-end gap-1">
+                  <div className="text-[10px] font-mono font-bold text-[#111111]">{r.type === 'swap' ? `PIN ${r.pin}` : `KES ${r.amount?.toLocaleString()}`}</div>
+                  {canWithdraw ? (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-2.5 h-2.5" />Withdraw</button>) : (<div className={'text-[8px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {mergedHistory.length > 0 && (
+        <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Session summary</div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center"><div className="font-mono text-lg font-bold text-[#111111]">{sessionStats.total}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Requests</div></div>
+            <div className="text-center border-l border-r border-[#111111]/10"><div className="font-mono text-lg font-bold text-emerald-700">{sessionStats.dispatched}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Dispatched</div></div>
+            <div className="text-center"><div className="font-mono text-lg font-bold text-amber-700">{sessionStats.pending}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Pending</div></div>
+          </div>
+          <div className="text-[9px] font-mono text-[#111111]/50 text-center pt-1 border-t border-[#111111]/10">KES {sessionStats.totalValue.toLocaleString()} requested this session</div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSwap = () => {
+    if (swapStep === 'success' && swapResult) {
+      return (
+        <div className="p-4 space-y-3">
+          <div className="text-center pt-2 space-y-2"><div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-200"><CheckCircle className="w-7 h-7" /></div><div><h2 className="font-serif text-xl font-bold text-[#111111]">Locker reserved</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Collect anytime.</p></div></div>
+          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-3">
+            <div className="flex items-start justify-between gap-2">
+              <div><div className="text-[9px] font-mono uppercase text-[#111111]/50">Collection PIN</div><div className="flex items-center gap-1.5 mt-1"><span className="font-mono text-3xl font-bold tracking-widest text-[#1F6B4A]">{swapResult.pin}</span><button onClick={copyPin} aria-label="Copy PIN" className="p-1 rounded hover:bg-[#FAF8F4] text-[#111111]/50">{pinCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}</button></div></div>
+              <QrPlaceholder seed={swapResult.qrPayload} />
+            </div>
+            <div className="pt-2 border-t border-[#111111]/10 space-y-1 text-[10px]">
+              <div className="flex justify-between"><span className="text-[#111111]/50">Bundle</span><span className="font-semibold text-[#111111]">{swapResult.bundleCategory}</span></div>
+              <div className="flex justify-between"><span className="text-[#111111]/50">Locker</span><span className="font-semibold text-[#111111]">{swapResult.lockerLocation}</span></div>
+            </div>
+          </div>
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[9px] uppercase font-bold text-blue-900"><ScanLine className="w-3 h-3" /> How to collect</div><ol className="text-[10px] text-blue-900/80 leading-relaxed list-decimal pl-4 space-y-0.5"><li>Go to {swapResult.lockerLocation}</li><li>Enter PIN at the terminal</li><li>Take your bundle</li></ol></div>
+          <button onClick={() => goTab('home')} className="w-full py-2.5 bg-[#111111] hover:bg-black text-white rounded-xl text-xs font-medium">Done</button>
+        </div>
+      );
+    }
+    return (
+      <div className="p-4 space-y-3">
+        <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Swap</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Reserve a bundle. Collect any time.</p></div>
+        {rateLimited && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[10px] text-rose-900">Daily limit reached. Try again tomorrow.</p></div>}
+        {swapError && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[10px] text-rose-900">{swapError}</p></div>}
+        <div className="flex items-center gap-1.5">
+          {(['bundle', 'location'] as SwapStep[]).map((s, i) => {
+            const active = swapStep === s || (s === 'bundle' && swapStep !== 'bundle');
+            const done = s === 'bundle' && swapStep === 'location';
+            return (<React.Fragment key={s}><div className={'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ' + (active ? 'bg-[#1F6B4A] text-white' : 'bg-[#111111]/10 text-[#111111]/40')}>{done ? <Check className="w-2.5 h-2.5" /> : i + 1}</div>{i < 1 && <div className={'flex-1 h-0.5 ' + (done ? 'bg-[#1F6B4A]' : 'bg-[#111111]/10')} />}</React.Fragment>);
+          })}
+        </div>
+        {swapStep === 'bundle' && (
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#111111]">1. Choose bundle</p>
+            {BUNDLES.map(b => { const I = b.Icon; const selected = swapBundle === b.id; return (<button key={b.id} onClick={() => setSwapBundle(b.id)} className={'w-full p-3 rounded-xl border-2 text-left flex items-start gap-3 transition-all ' + (selected ? 'border-[#1F6B4A] bg-[#FAF8F4]' : 'border-[#111111]/15 bg-white')}><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + b.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111]">{b.name}</div><div className="text-[10px] text-[#111111]/60 mt-0.5 leading-relaxed">{b.desc}</div></div>{selected && <CheckCircle className="w-4 h-4 text-[#1F6B4A] shrink-0" />}</button>); })}
+            <button onClick={() => setSwapStep('location')} disabled={!swapBundle} className="w-full py-2.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-xs font-medium disabled:opacity-40 mt-2">Continue</button>
+          </div>
+        )}
+        {swapStep === 'location' && (
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#111111]">2. Choose location</p>
+            {LOCATIONS.map(l => { const selected = swapLocation === l.id; return (<button key={l.id} onClick={() => setSwapLocation(l.id)} className={'w-full p-3 rounded-xl border-2 text-left flex items-center gap-2.5 transition-all ' + (selected ? 'border-[#1F6B4A] bg-[#FAF8F4]' : 'border-[#111111]/15 bg-white')}><MapPin className="w-4 h-4 text-[#1F6B4A] shrink-0" /><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111]">{l.id}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{l.sub}</div></div>{selected && <CheckCircle className="w-4 h-4 text-[#1F6B4A]" />}</button>); })}
+            <div className="flex gap-2 pt-1"><button onClick={() => setSwapStep('bundle')} className="flex-1 py-2.5 bg-white border border-[#111111]/20 text-[#111111] rounded-xl text-xs font-medium">Back</button><button onClick={handleReserve} disabled={!swapLocation || swapping || rateLimited} className="flex-1 py-2.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-xs font-medium disabled:opacity-40">{swapping ? 'Reserving...' : 'Reserve'}</button></div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderPool = () => {
+    if (poolStep === 'success' && poolResult) {
+      const cat = POOL_CATS.find(c => c.id === poolResult.category);
+      return (
+        <div className="p-4 space-y-3">
+          <div className="text-center pt-2 space-y-2"><div className={'w-14 h-14 rounded-full flex items-center justify-center mx-auto border-2 ' + (poolResult.status === 'pending_check' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-blue-50 text-blue-600 border-blue-200')}><CheckCircle className="w-7 h-7" /></div><div><h2 className="font-serif text-xl font-bold text-[#111111]">{poolResult.status === 'pending_check' ? 'Under review' : 'Request queued'}</h2><p className="text-[11px] text-[#111111]/50 mt-0.5 max-w-[240px] mx-auto">{poolResult.status === 'pending_check' ? 'OCR verification required before dispatch.' : 'Queued for the payment partner.'}</p></div></div>
+          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-1.5 text-[10px]">
+            <div className="flex justify-between"><span className="text-[#111111]/50">Category</span><span className="font-semibold text-[#111111]">{cat?.name}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Ref</span><span className="font-mono font-bold text-[#1F6B4A]">{poolResult.hashedObjectId}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Amount</span><span className="font-mono font-bold text-[#111111]">KES {poolResult.amount.toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Status</span><span className={'font-mono uppercase text-[9px] px-1.5 py-0.5 rounded ' + (poolResult.status === 'pending_check' ? 'bg-amber-50 text-amber-800' : 'bg-blue-50 text-blue-800')}>{poolResult.status.replace(/_/g, ' ')}</span></div>
+          </div>
+          <button onClick={() => goTab('home')} className="w-full py-2.5 bg-[#111111] hover:bg-black text-white rounded-xl text-xs font-medium">Done</button>
+        </div>
+      );
+    }
+    return (
+      <div className="p-4 space-y-3">
+        <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Pool</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Funds go directly to the institution.</p></div>
+        {rateLimited && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[10px] text-rose-900">Daily limit reached.</p></div>}
+        {poolError && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[10px] text-rose-900">{poolError}</p></div>}
+        <div className="flex items-center gap-1.5">
+          {(['category', 'details'] as PoolStep[]).map((s, i) => {
+            const active = poolStep === s || (s === 'category' && poolStep !== 'category');
+            const done = s === 'category' && poolStep === 'details';
+            return (<React.Fragment key={s}><div className={'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ' + (active ? 'bg-blue-600 text-white' : 'bg-[#111111]/10 text-[#111111]/40')}>{done ? <Check className="w-2.5 h-2.5" /> : i + 1}</div>{i < 1 && <div className={'flex-1 h-0.5 ' + (done ? 'bg-blue-600' : 'bg-[#111111]/10')} />}</React.Fragment>);
+          })}
+        </div>
+        {poolStep === 'category' && (
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#111111]">1. What are you paying?</p>
+            {POOL_CATS.map(c => { const I = c.Icon; const selected = poolCat === c.id; return (<button key={c.id} onClick={() => setPoolCat(c.id)} className={'w-full p-3 rounded-xl border-2 text-left flex items-start gap-3 transition-all ' + (selected ? 'border-blue-600 bg-[#FAF8F4]' : 'border-[#111111]/15 bg-white')}><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + c.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111]">{c.name}</div><div className="text-[10px] text-[#111111]/60 mt-0.5">{c.desc}</div></div>{selected && <CheckCircle className="w-4 h-4 text-blue-600 shrink-0" />}</button>); })}
+            {poolCat === 'hospital_invoice' && <div className="p-2 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-1.5"><AlertTriangle className="w-3 h-3 text-rose-600 shrink-0 mt-0.5" /><p className="text-[9px] text-rose-900 leading-relaxed">Only invoice number and amount. <strong>No clinical details</strong> are collected.</p></div>}
+            <button onClick={() => setPoolStep('details')} disabled={!poolCat} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium disabled:opacity-40 mt-1">Continue</button>
+          </div>
+        )}
+        {poolStep === 'details' && (() => {
+          const cat = POOL_CATS.find(c => c.id === poolCat)!;
+          return (
+            <div className="space-y-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#111111]">2. Bill details</p>
+              <div className="space-y-1"><label className="text-[9px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><FileText className="w-2.5 h-2.5" /> {cat.objLabel}</label><input type="text" value={poolObject} onChange={e => { setPoolObject(e.target.value); setPoolError(null); }} placeholder={cat.placeholder} className={'w-full bg-white border rounded-lg px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-blue-600 outline-none ' + (objectError ? 'border-rose-300' : 'border-[#111111]/15')} />{objectError && <div className="text-[9px] text-rose-600 flex items-center gap-1"><AlertCircle className="w-2.5 h-2.5" />{objectError}</div>}{!objectError && objectValid && <div className="text-[9px] text-emerald-700 flex items-center gap-1"><Check className="w-2.5 h-2.5" />Valid format</div>}</div>
+              <div className="space-y-1"><label className="text-[9px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={poolAmount} onChange={e => { setPoolAmount(e.target.value); setPoolError(null); }} placeholder="e.g. 3500" className="w-full bg-white border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-blue-600 outline-none" />{numAmount > 0 && numAmount > valueRemaining && <div className="text-[9px] text-rose-600 flex items-center gap-1"><AlertCircle className="w-2.5 h-2.5" />Exceeds session allowance (KES {valueRemaining.toLocaleString()} left)</div>}</div>
+              {willEscalate && <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-1.5"><AlertTriangle className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" /><p className="text-[9px] text-amber-900 leading-relaxed">Over KES 5,000 triggers <strong>Tier 3 OCR</strong>.</p></div>}
+              <div className="flex gap-2 pt-1"><button onClick={() => setPoolStep('category')} className="flex-1 py-2.5 bg-white border border-[#111111]/20 text-[#111111] rounded-xl text-xs font-medium">Back</button><button onClick={handleSubmitPool} disabled={!objectValid || !numAmount || pooling || rateLimited || numAmount > valueRemaining} className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium disabled:opacity-40">{pooling ? 'Submitting...' : 'Submit'}</button></div>
+            </div>
+          );
+        })()}
+      </div>
+    );
+  };
+
+  const renderMatch = () => {
+    const visible = OPPORTUNITIES.filter(o => !declined.has(o.id));
+    return (
+      <div className="p-4 space-y-3">
+        <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Match</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Opportunities. Opt-in only.</p></div>
+        {matchSent && <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" /><div><p className="text-[10px] font-bold text-emerald-900">Interest sent</p><p className="text-[9px] text-emerald-900/70 mt-0.5">Provider will contact within 48h.</p></div></div>}
+        <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-1.5"><ShieldAlert className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" /><p className="text-[9px] text-amber-900 leading-relaxed">Requires opt-in disclosure. Your token history is never shared.</p></div>
+        <div className="space-y-2">
+          {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/15 rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
+          {visible.map(opp => { const I = opp.Icon; const sent = matchSent === opp.id; return (
+            <div key={opp.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+              <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} * {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-3.5 h-3.5" /></button></div>
+              <p className="text-[10px] text-[#111111]/70 leading-relaxed">{opp.desc}</p>
+              {sent ? (<div className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1 rounded text-center">Interest sent</div>) : (<button onClick={() => { setSelectedOpp(opp); setMatchConfirmed(false); }} className="w-full py-1.5 bg-[#FAF8F4] border border-[#111111]/10 rounded text-[10px] font-medium text-[#1F6B4A] flex items-center justify-center gap-1">Express interest <ArrowRight className="w-2.5 h-2.5" /></button>)}
+            </div>
+          );})}
+        </div>
+        {selectedOpp && (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSelectedOpp(null)}>
+            <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="flex items-start justify-between"><div><div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 text-[8px] font-mono uppercase"><ShieldAlert className="w-2 h-2" /> Requires disclosure</div><h3 className="font-serif text-base font-bold text-[#111111] mt-1.5">{selectedOpp.title}</h3></div><button onClick={() => setSelectedOpp(null)} aria-label="Close" className="text-[#111111]/40"><X className="w-4 h-4" /></button></div>
+              <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg space-y-1"><p className="text-[10px] font-bold text-amber-900">What this means</p><ul className="text-[10px] text-amber-900/80 leading-relaxed list-disc pl-4 space-y-0.5"><li>Provider receives your contact channel</li><li>Your request history is <strong>not</strong> shared</li><li>Withdraw anytime before contact</li></ul></div>
+              <label className="flex items-start gap-2 p-2.5 rounded-lg border border-[#111111]/15 cursor-pointer bg-[#FAF8F4]"><input type="checkbox" checked={matchConfirmed} onChange={e => setMatchConfirmed(e.target.checked)} className="mt-0.5 accent-[#1F6B4A]" /><span className="text-[10px] text-[#111111]/80 leading-relaxed">I consent to being contacted.</span></label>
+              <div className="flex gap-2"><button onClick={() => setSelectedOpp(null)} className="flex-1 py-2 bg-white border border-[#111111]/20 rounded-lg text-[10px] font-medium">Cancel</button><button onClick={() => { setMatchSent(selectedOpp.id); expressInterest(selectedOpp.id, selectedOpp.title); setSelectedOpp(null); }} disabled={!matchConfirmed} className="flex-1 py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[10px] font-medium disabled:opacity-40">Send interest</button></div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderBench = () => (
+    <div className="p-4 space-y-3">
+      <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Bench</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Separate system. Confidential.</p></div>
+      <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[10px] font-bold text-purple-900"><ShieldCheck className="w-3.5 h-3.5" /> Isolated from your account</div><p className="text-[10px] text-purple-900/70 leading-relaxed">No shared identifiers with Swap/Pool.</p></div>
+      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Reach out directly</div>{HELPLINES.map(h => (<div key={h.name} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0"><div><div className="text-[10px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div><div className="text-sm font-bold font-mono text-[#111111]">{h.number}</div><div className="text-[9px] text-[#111111]/50">{h.sub}</div></div><Phone className="w-4 h-4 text-purple-600" /></div>))}</div>
+    </div>
+  );
+
+  const renderContent = () => {
+    if (tab === 'home') return renderHome();
+    if (tab === 'swap') return renderSwap();
+    if (tab === 'pool') return renderPool();
+    if (tab === 'match') return renderMatch();
+    return renderBench();
+  };
+
+  const TABS: { id: Tab; label: string; Icon: typeof Home }[] = [
+    { id: 'home', label: 'Home', Icon: Home }, { id: 'swap', label: 'Swap', Icon: Package }, { id: 'pool', label: 'Pool', Icon: CreditCard }, { id: 'match', label: 'Match', Icon: Users }, { id: 'bench', label: 'Bench', Icon: MessageCircle },
+  ];
+
+  return (
+    <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
+      <div className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
+        <div className="bg-[#FAF8F4] rounded-[2rem] overflow-hidden flex flex-col h-[640px]">
+          <div className="px-5 pt-3 pb-1 flex items-center justify-between text-[10px] font-medium text-[#111111]/60"><span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span><span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded uppercase font-bold">Anonymous</span></div>
+          <div className="px-5 pb-2 border-b border-[#111111]/10 flex items-center justify-between"><div className="flex items-center gap-2"><div className="w-8 h-8 bg-[#1F6B4A] rounded-xl flex items-center justify-center"><HeartHandshake className="w-4 h-4 text-white" /></div><div><div className="text-xs font-bold text-[#111111] leading-tight">Mutual Circle</div><div className="text-[9px] text-[#111111]/40 font-mono truncate max-w-[150px]">{tokenHash}</div></div></div><button onClick={logout} className="text-[#111111]/40 hover:text-rose-600" aria-label="End session" title="End session"><LogOut className="w-4 h-4" /></button></div>
+          <div key={tab} className="flex-1 overflow-y-auto animate-in fade-in duration-200">{renderContent()}</div>
+          <div className="border-t border-[#111111]/10 bg-white"><div className="grid grid-cols-5">{TABS.map(t => { const I = t.Icon; const active = tab === t.id; return (<button key={t.id} onClick={() => goTab(t.id)} className={'py-2.5 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}><I className="w-4 h-4" /><span className="text-[9px] font-medium">{t.label}</span></button>); })}</div></div>
+        </div>
+      </div>
+
+      <div className="w-full max-w-sm space-y-3">
+        <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+          <div className="flex items-center justify-between"><h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View</h3><button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">{showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}{showServer ? 'Hide' : 'Reveal'}</button></div>
+          <div className="space-y-1.5 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
+            <div className="flex justify-between"><span className="text-[#111111]/50">Token (HMAC)</span><span className="text-[#1F6B4A] font-bold truncate ml-2">{tokenHash}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Raw phone</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '******'}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">NONE</span></div>
+            <div className="flex justify-between border-t border-[#111111]/10 pt-1.5 mt-1.5"><span className="text-[#111111]/50">Rate (per token)</span><span className="text-[#111111]">{rate.count} / {MAX_REQUESTS}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Value (per token)</span><span className="text-[#111111]">KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Persisted history</span><span className="text-[#111111]">{mergedHistory.length} records</span></div>
+          </div>
+          {showServer && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[9px] text-rose-800 leading-relaxed mt-2"><strong>Invariant:</strong> phone number is hashed on verification and immediately discarded. Rate limits and history are keyed to the HMAC token, not the session.</div>}
+        </div>
+
+        <div className="p-4 bg-[#FAF8F4] border border-[#111111]/15 rounded-xl space-y-1.5">
+          <h4 className="text-[10px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
+          {['HMAC token (4.1)', 'Simulated OTP verification', 'Per-token rate limits (4.1)', 'Persistent history', 'Withdraw flow', 'The Swap (4.2)', 'The Pool (4.3)', 'Hospital ban on clinical data (4.5)', 'Tier 2/3 escalation (4.8)', 'The Match + decline (4.4)', 'The Bench referral (4.9)'].map(f => (<div key={f} className="flex items-center gap-1.5 text-[10px] text-[#111111]/70"><div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}</div>))}
+        </div>
+
+        <button onClick={() => { goTab('home'); setShowServer(false); logout(); setIntakeStep('phone'); setPhone(''); setOtpInput(''); setGeneratedOtp(''); setOtpAttempts(0); setResendCooldown(0); }} className="w-full py-2 text-xs text-[#111111]/60 hover:text-rose-600 border border-[#111111]/15 rounded-lg bg-white flex items-center justify-center gap-1.5"><RotateCcw className="w-3 h-3" /> Reset session</button>
+      </div>
+    </div>
+  );
+};

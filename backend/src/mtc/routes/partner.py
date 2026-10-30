@@ -1,4 +1,4 @@
-"""Partner till — public redemption endpoint (rate-limited by IP in production)."""
+"""Partner till â€” public redemption endpoint (rate-limited by IP in production)."""
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
@@ -21,3 +21,16 @@ async def redeem(body: RedeemBody, conn: asyncpg.Connection = Depends(get_conn))
     return await redeem_voucher(
         conn, pin=body.pin, partner_name=body.partner_name, amount_pence=body.amount_pence,
     )
+
+@router.get("/redemptions")
+async def list_redemptions(conn: asyncpg.Connection = Depends(get_conn)):
+    rows = await conn.fetch(
+        """SELECT id, voucher_id, partner_name, amount_pence, status, created_at
+           FROM voucher_redemptions ORDER BY created_at DESC LIMIT 100"""
+    )
+    return {"redemptions": [
+        {"id": str(r["id"]), "voucherId": str(r["voucher_id"]),
+         "partnerName": r["partner_name"], "amount_pence": r["amount_pence"],
+         "status": r["status"], "timestamp": r["created_at"].isoformat()}
+        for r in rows
+    ]}

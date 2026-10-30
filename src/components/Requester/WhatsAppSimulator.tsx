@@ -363,7 +363,7 @@ export const WhatsAppSimulator: React.FC = () => {
               </div>
 
               <div className="bg-white/80 rounded-lg p-3 text-[10px] text-[#111111]/70 leading-relaxed border-l-4 border-amber-500">
-                <strong>Spec note:</strong> The R.U.T.H spec (Section 4.1) specifies SMS, USSD, and web only. WhatsApp is an extension with an additional privacy cost — Meta is a 4th party in the aid chain.
+                <strong>Spec note:</strong> The R.U.T.H spec (Section 4.1) specifies SMS, USSD, and web only. WhatsApp is an extension with an additional privacy cost - Meta is a 4th party in the aid chain.
               </div>
             </div>
           )}
@@ -431,7 +431,7 @@ export const WhatsAppSimulator: React.FC = () => {
             WhatsApp Business API is operated by Meta. Every message (content + phone number) passes through Meta's infrastructure. This <strong>breaks the "anonymity from people in the aid chain" principle</strong> for the actual flow, since Meta becomes a 4th party.
           </p>
           <p className="text-[10px] text-amber-900/80 leading-relaxed">
-            <strong>Recommended use:</strong> Donor notifications, partner confirmations, and The Bench outreach — <em>not</em> Swap/Pool intake.
+            <strong>Recommended use:</strong> Donor notifications, partner confirmations, and The Bench outreach - <em>not</em> Swap/Pool intake.
           </p>
         </div>
 

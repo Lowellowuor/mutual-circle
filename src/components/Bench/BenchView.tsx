@@ -5,10 +5,10 @@ import { MessageCircle, Phone, Info, Send, Lock, ShieldAlert, ShieldCheck, Check
 type Tab = 'chat' | 'helplines' | 'info';
 
 const HELPLINES = [
-  { name: 'Befrienders Kenya', number: '0722 178 177', sub: 'Free · 24/7 · confidential', icon: '?' },
-  { name: 'Kenya Red Cross', number: '1199', sub: 'Toll-free · crisis & counselling', icon: '+' },
-  { name: 'Emergency', number: '999 / 112', sub: 'Police · ambulance · fire', icon: '!' },
-  { name: 'GVRC Nairobi', number: '0709 667 000', sub: 'Gender violence recovery · free', icon: '?' },
+  { name: 'Befrienders Kenya', number: '0722 178 177', sub: 'Free * 24/7 * confidential', icon: '?' },
+  { name: 'Kenya Red Cross', number: '1199', sub: 'Toll-free * crisis & counselling', icon: '+' },
+  { name: 'Emergency', number: '999 / 112', sub: 'Police * ambulance * fire', icon: '!' },
+  { name: 'GVRC Nairobi', number: '0709 667 000', sub: 'Gender violence recovery * free', icon: '?' },
 ];
 
 const PEER_REPLIES = [
@@ -57,7 +57,7 @@ export const BenchView: React.FC = () => {
       </div>
       <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5">
         <div className="flex items-center gap-1 text-[10px] font-bold text-purple-900 uppercase tracking-wider"><ShieldAlert className="w-3 h-3" /> Separate system</div>
-        <p className="text-[10px] text-purple-900/80 leading-relaxed">The Bench is <strong>completely isolated</strong> from your Swap / Pool account. Nothing is shared — not your token, not your request history, not your identity.</p>
+        <p className="text-[10px] text-purple-900/80 leading-relaxed">The Bench is <strong>completely isolated</strong> from your Swap / Pool account. Nothing is shared - not your token, not your request history, not your identity.</p>
       </div>
       <div className="space-y-1.5">
         {['No names, tokens, or request history', 'Messages are not stored', 'Cannot be linked to your aid account', 'Free and always available'].map(f => (
@@ -72,11 +72,11 @@ export const BenchView: React.FC = () => {
   const renderChat = () => (
     <div className="flex flex-col h-full">
       <div className="p-2.5 bg-purple-50 border-b border-purple-200 flex items-center justify-between shrink-0">
-        <span className="text-[9px] font-mono text-purple-900 flex items-center gap-1"><Lock className="w-2.5 h-2.5" /> Ephemeral · {sessionId}</span>
+        <span className="text-[9px] font-mono text-purple-900 flex items-center gap-1"><Lock className="w-2.5 h-2.5" /> Ephemeral * {sessionId}</span>
         <button onClick={reset} className="text-[9px] text-rose-600 hover:underline">End</button>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2.5 bg-[#FAF8F4]">
-        <div className="text-center text-[9px] text-[#111111]/40 font-mono">Anonymous · no records kept</div>
+        <div className="text-center text-[9px] text-[#111111]/40 font-mono">Anonymous * no records kept</div>
         {chat.length === 0 && (<div className="text-center py-8 space-y-2"><MessageCircle className="w-8 h-8 text-purple-300 mx-auto" /><p className="text-[11px] text-[#111111]/40">Say hello whenever you are ready.</p></div>)}
         {chat.map((m, i) => (
           <div key={i} className={'flex ' + (m.from === 'user' ? 'justify-end' : 'justify-start')}>

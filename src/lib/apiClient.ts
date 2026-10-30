@@ -1,13 +1,14 @@
 /**
  * Thin backend client.
- *
- * In dev (npm run dev) or when VITE_API_URL is set, calls the real FastAPI
- * backend. In the deployed build without VITE_API_URL, every call fails
- * gracefully so AppContext can fall back to mock data.
- *
- * All errors are returned as null — callers decide whether to fall back.
  */
 const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://127.0.0.1:8000';
+
+// Session-expired event — AppContext subscribes and clears token
+type SessionExpiredHandler = () => void;
+let onSessionExpired: SessionExpiredHandler | null = null;
+export function setSessionExpiredHandler(handler: SessionExpiredHandler | null): void {
+  onSessionExpired = handler;
+}
 
 let backendKnownDown = false;
 
@@ -18,6 +19,11 @@ async function call<T>(path: string, init?: RequestInit): Promise<T | null> {
       ...init,
       headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
     });
+    if (res.status === 401) {
+      // Token invalid — trigger re-login, not a generic failure
+      if (onSessionExpired) onSessionExpired();
+      return null;
+    }
     if (!res.ok) {
       if (res.status >= 500) backendKnownDown = true;
       return null;
@@ -43,7 +49,7 @@ export const issueToken = (phone: string) =>
 
 // --- Requester ---
 export const createSwapRequest = (token: string, bundleCategory: string, lockerLocation: string) =>
-  call<{ id: string; tier: number; status: string; bundle_category: string; locker_location: string; created_at: string }>(
+  call<{ id: string; tier: number; status: string; bundle_category: string; locker_location: string; pin: string; qr_payload: string; created_at: string }>(
     '/requests/swap',
     { method: 'POST', headers: { 'X-Token': token }, body: JSON.stringify({ bundle_category: bundleCategory, locker_location: lockerLocation }) },
   );
@@ -123,4 +129,118 @@ export const redeemVoucher = (pin: string, partnerName: string, amountPence: num
 export const enrolmentMetrics = (sessionToken: string) =>
   call<{ tokens_today: number; rate_limit_hits_today: number; channels: Record<string, number> }>(
     '/enrolment/metrics', { headers: { Authorization: `Bearer ${sessionToken}` } },
+  );
+// --- Campaigns (public read) ---
+export const listCampaigns = () =>
+  call<{ campaigns: any[] }>('/campaigns');
+
+// --- Donor contributions ---
+export const createDonation = (donorHash: string, amountPence: number, isAnonymous: boolean, optInLedger: boolean) =>
+  call<{ id: string; amount_pence: number; is_anonymous: boolean; opt_in_ledger: boolean; created_at: string }>(
+    '/donations',
+    { method: 'POST', headers: { 'X-Donor-Hash': donorHash }, body: JSON.stringify({ amount_pence: amountPence, is_anonymous: isAnonymous, opt_in_ledger: optInLedger }) },
+  );
+
+export const listMyDonations = (donorHash: string) =>
+  call<{ donations: any[] }>('/donations/mine', { headers: { 'X-Donor-Hash': donorHash } });
+
+// --- Pledges ---
+export const createPledge = (donorHash: string, type: 'goods' | 'service_credit', description: string, locality: string, maxValuePence?: number) =>
+  call<{ id: string; type: string; description: string; locality: string; max_value_pence: number | null; status: string; created_at: string }>(
+    '/pledges',
+    { method: 'POST', headers: { 'X-Donor-Hash': donorHash }, body: JSON.stringify({ type, description, locality, max_value_pence: maxValuePence }) },
+  );
+
+export const listMyPledges = (donorHash: string) =>
+  call<{ pledges: any[] }>('/pledges/mine', { headers: { 'X-Donor-Hash': donorHash } });
+
+// --- Match interests (requester side) ---
+export const expressMatchInterest = (token: string, requestId: string, opportunityId: string, title: string) =>
+  call<{ id: string; opportunity_id: string; title: string; status: string; created_at: string }>(
+    `/requests/match/${requestId}/interest`,
+    { method: 'POST', headers: { 'X-Token': token }, body: JSON.stringify({ opportunity_id: opportunityId, title }) },
+  );
+
+// --- Fulfilment: pledges + match interests + vouchers list ---
+export const listFulfilmentPledges = (sessionToken: string) =>
+  call<{ pledges: any[] }>('/fulfilment/pledges', { headers: { Authorization: `Bearer ${sessionToken}` } });
+
+export const matchPledge = (sessionToken: string, pledgeId: string) =>
+  call<{ id: string; status: string }>(`/fulfilment/pledges/${pledgeId}/match`, { method: 'POST', headers: { Authorization: `Bearer ${sessionToken}` } });
+
+export const listMatchInterests = (sessionToken: string) =>
+  call<{ interests: any[] }>('/fulfilment/match-interests', { headers: { Authorization: `Bearer ${sessionToken}` } });
+
+export const closeMatchInterest = (sessionToken: string, interestId: string, status: 'contacted' | 'closed') =>
+  call<{ id: string; status: string }>(
+    `/fulfilment/match-interests/${interestId}/close`,
+    { method: 'POST', headers: { Authorization: `Bearer ${sessionToken}` }, body: JSON.stringify({ status }) },
+  );
+
+export const listAllVouchers = (sessionToken: string) =>
+  call<{ vouchers: any[] }>('/fulfilment/vouchers', { headers: { Authorization: `Bearer ${sessionToken}` } });
+
+// --- Admin (staff - any role can read) ---
+export const getDepot = (sessionToken: string) =>
+  call<{ receivedUnits: number; qualityCheckedUnits: number; packedBundles: number; loadedLockerUnits: number }>(
+    '/admin/depot', { headers: { Authorization: `Bearer ${sessionToken}` } },
+  );
+
+export const getLockerStock = (sessionToken: string) =>
+  call<{ stocks: any[] }>('/admin/locker-stock', { headers: { Authorization: `Bearer ${sessionToken}` } });
+
+export const getDedupItems = (sessionToken: string) =>
+  call<{ items: any[] }>('/admin/dedup', { headers: { Authorization: `Bearer ${sessionToken}` } });
+
+// --- Partner till ---
+export const listPartnerRedemptions = () =>
+  call<{ redemptions: any[] }>('/partner/redemptions');
+/**
+ * Strict token call that surfaces the backend's 4xx/5xx reason instead of
+ * silently returning null. Used by the phone-verification flow so the user
+ * sees "enter a valid number" rather than "Backend unavailable".
+ */
+export async function issueTokenStrict(phone: string): Promise<{ token: string }> {
+  const res = await fetch(`${BASE}/tokens`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone }),
+  });
+  if (!res.ok) {
+    if (res.status === 422) {
+      throw new Error('Please enter a valid phone number (at least 10 digits).');
+    }
+    if (res.status >= 500) {
+      throw new Error('Backend is not reachable. Please try again in a moment.');
+    }
+    throw new Error(`Verification failed (${res.status}). Please try again.`);
+  }
+  return res.json();
+}
+// --- Household declaration ---
+export const setHouseholdSize = (token: string, size: number) =>
+  call<{ household_size: number; declared_at: string }>(
+    '/requests/household',
+    { method: 'POST', headers: { 'X-Token': token }, body: JSON.stringify({ household_size: size }) },
+  );
+
+export const getHouseholdSize = (token: string) =>
+  call<{ household_size: number | null; declared: boolean }>(
+    '/requests/household', { headers: { 'X-Token': token } },
+  );
+// --- Donor leaderboard + profile ---
+export const getDonorLeaderboard = (limit = 20) =>
+  call<{ leaderboard: { display_name: string; total_pence: number; gift_count: number }[] }>(
+    `/donations/leaderboard?limit=${limit}`,
+  );
+
+export const getDonorProfile = (donorHash: string) =>
+  call<{ display_name: string; opt_in_ledger: boolean; has_profile: boolean }>(
+    '/donations/profile', { headers: { 'X-Donor-Hash': donorHash } },
+  );
+
+export const updateDonorProfile = (donorHash: string, displayName: string, optInLedger: boolean) =>
+  call<{ display_name: string; opt_in_ledger: boolean }>(
+    '/donations/profile',
+    { method: 'POST', headers: { 'X-Donor-Hash': donorHash }, body: JSON.stringify({ display_name: displayName, opt_in_ledger: optInLedger }) },
   );

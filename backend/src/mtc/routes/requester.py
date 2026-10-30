@@ -1,4 +1,4 @@
-"""Requester routes â€” token-authenticated via X-Token header."""
+"""Requester routes Ã¢â‚¬â€ token-authenticated via X-Token header."""
 from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel, Field
 
@@ -41,11 +41,16 @@ async def create_swap_route(
         await consume_quota(conn, token_hash=token, value_pence=0)
     except RateLimitExceeded as e:
         raise HTTPException(429, detail={"reason": e.reason, "count": e.count, "value_pence": e.value_pence})
+    hh = await conn.fetchval(
+        "SELECT household_size FROM household_declarations WHERE token_hash = $1",
+        token,
+    )
     return await create_swap(
         conn,
         token_hash=token,
         bundle_category=body.bundle_category,
         locker_location=body.locker_location,
+        household_size=hh,
     )
 
 
@@ -98,3 +103,73 @@ async def list_my_vouchers(
 ):
     from mtc.vouchers.issue import list_vouchers_for_token
     return {"vouchers": await list_vouchers_for_token(conn, token_hash=token)}
+
+class MatchInterestBody(BaseModel):
+    opportunity_id: str = Field(..., min_length=1, max_length=50)
+    title: str = Field(..., min_length=1, max_length=200)
+
+
+@router.post("/match/{request_id}/interest")
+async def express_interest(
+    request_id: str, body: MatchInterestBody,
+    token: str = Depends(require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Express interest in an opportunity (The Match). Requires opt-in disclosure."""
+    row = await conn.fetchrow(
+        """INSERT INTO match_interests (opportunity_id, title, token_hash, status)
+           VALUES ($1, $2, $3, 'pending') RETURNING id, created_at""",
+        body.opportunity_id, body.title, token,
+    )
+    return {
+        "id": str(row["id"]),
+        "opportunity_id": body.opportunity_id,
+        "title": body.title,
+        "status": "pending",
+        "created_at": row["created_at"].isoformat(),
+    }
+
+# --- Household declaration (used to size bundles) ---
+
+class HouseholdBody(BaseModel):
+    household_size: int = Field(..., ge=1, le=20)
+
+
+@router.post("/household")
+async def set_household(
+    body: HouseholdBody,
+    token: str = Depends(require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    row = await conn.fetchrow(
+        """INSERT INTO household_declarations (token_hash, household_size)
+           VALUES ($1, $2)
+           ON CONFLICT (token_hash) DO UPDATE
+           SET household_size = EXCLUDED.household_size,
+               updated_at = now()
+           RETURNING household_size, declared_at, updated_at""",
+        token, body.household_size,
+    )
+    return {
+        "household_size": row["household_size"],
+        "declared_at": row["declared_at"].isoformat(),
+        "updated_at": row["updated_at"].isoformat(),
+    }
+
+
+@router.get("/household")
+async def get_household(
+    token: str = Depends(require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    row = await conn.fetchrow(
+        "SELECT household_size, declared_at FROM household_declarations WHERE token_hash = $1",
+        token,
+    )
+    if row is None:
+        return {"household_size": None, "declared": False}
+    return {
+        "household_size": row["household_size"],
+        "declared": True,
+        "declared_at": row["declared_at"].isoformat(),
+    }

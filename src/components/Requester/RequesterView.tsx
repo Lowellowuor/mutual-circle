@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { peekRate, consumeRate, loadHistory, saveHistory, loadSeen, saveSeen } from '../../services/auth';
+import { setHouseholdSize as apiSetHousehold, getHouseholdSize as apiGetHousehold } from '../../lib/apiClient';
 import {
   HeartHandshake, Shield, Package, CreditCard, Users, MessageCircle,
   Home, MapPin, Check, CheckCircle, Clock, Copy, ScanLine, ArrowRight,
@@ -27,9 +28,9 @@ const BUNDLES = [
 ];
 
 const LOCATIONS = [
-  { id: 'Kibera Hub', sub: '24/7 · 12 available' },
-  { id: 'Mathare Central', sub: '6am–10pm · 18 available' },
-  { id: 'Kawangware Station', sub: '24/7 · 4 available' },
+  { id: 'Kibera Hub', sub: '24/7 * 12 available' },
+  { id: 'Mathare Central', sub: '6am-10pm * 18 available' },
+  { id: 'Kawangware Station', sub: '24/7 * 4 available' },
 ];
 
 const POOL_CATS: { id: PoolCat; name: string; desc: string; Icon: any; accent: string; objLabel: string; placeholder: string }[] = [
@@ -46,9 +47,9 @@ const OPPORTUNITIES = [
 ];
 
 const HELPLINES = [
-  { name: 'Befrienders', number: '0722 178 177', sub: '24/7 · free' },
+  { name: 'Befrienders', number: '0722 178 177', sub: '24/7 * free' },
   { name: 'Red Cross', number: '1199', sub: 'Crisis & counselling' },
-  { name: 'Emergency', number: '999 / 112', sub: 'Police · ambulance' },
+  { name: 'Emergency', number: '999 / 112', sub: 'Police * ambulance' },
 ];
 
 export const RequesterView: React.FC = () => {
@@ -57,6 +58,11 @@ export const RequesterView: React.FC = () => {
   /* ---------- INTAKE STATE ---------- */
   const [intakeStep, setIntakeStep] = useState<IntakeStep>('phone');
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [householdStep, setHouseholdStep] = useState<boolean>(false);
+  const [householdSize, setHouseholdSize] = useState<number>(1);
+  const [householdMode, setHouseholdMode] = useState<'alone' | 'family' | null>(null);
+  const [householdError, setHouseholdError] = useState<string | null>(null);
   const [generatedOtp, setGeneratedOtp] = useState('');
   const [otpInput, setOtpInput] = useState('');
   const [otpError, setOtpError] = useState<string | null>(null);
@@ -136,14 +142,27 @@ export const RequesterView: React.FC = () => {
   /* ---------- OTP HANDLERS ---------- */
   const generateOtp = () => String(Math.floor(1000 + Math.random() * 9000));
 
-  const maskPhone = (p: string) => {
-    if (p.length < 4) return p;
-    return p.slice(0, p.length - 3).replace(/\d/g, '•') + p.slice(-3);
-  };
+  const maskPhone = (p: string): string => {
+  const digits = p.replace(/\D/g, '');
+  if (digits.length < 4) return p;
+  const last3 = digits.slice(-3);
+  const stars = '*'.repeat(Math.max(3, digits.length - 3));
+  const prefix = p.trim().startsWith('+') ? '+' : '';
+  return prefix + stars + last3;
+};
 
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone) return;
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 10) {
+      setPhoneError('Please enter a valid phone number (at least 10 digits).');
+      return;
+    }
+    if (digits.length > 15) {
+      setPhoneError('Phone number too long (max 15 digits).');
+      return;
+    }
+    setPhoneError(null);
     setGeneratedOtp(generateOtp());
     setOtpInput('');
     setOtpError(null);
@@ -159,17 +178,28 @@ export const RequesterView: React.FC = () => {
       setOtpError('Too many attempts. Resend a new code or use a different number.');
       return;
     }
-    setOtpProcessing(true);
-    await new Promise(r => setTimeout(r, 400));
-    if (otpInput === generatedOtp) {
-      await initializeSession(phone, 'web');
-    } else {
+    if (otpInput !== generatedOtp) {
       const remaining = MAX_OTP_ATTEMPTS - otpAttempts - 1;
       setOtpError(remaining > 0 ? `Incorrect code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.` : 'Too many attempts. Resend a new code.');
       setOtpAttempts(a => a + 1);
       setOtpInput('');
+      return;
     }
-    setOtpProcessing(false);
+
+    setOtpProcessing(true);
+    try {
+      const tok = await initializeSession(phone, 'web');
+      const hh = await apiGetHousehold(tok);
+      if (!hh?.declared) {
+        setHouseholdStep(true);
+        setHouseholdMode(null);
+        setHouseholdError(null);
+      }
+    } catch (err: any) {
+      setOtpError(err?.message || 'Verification failed. Please try again.');
+    } finally {
+      setOtpProcessing(false);
+    }
   };
 
   const handleResend = () => {
@@ -207,7 +237,7 @@ export const RequesterView: React.FC = () => {
   };
 
   const handleReserve = async () => {
-    if (!swapBundle || !swapLocation || rateLimited) return;
+    if (!swapBundle || !swapLocation || rateLimited || swapping) return;
     setSwapping(true); setSwapError(null);
     try {
       const rateCheck = tokenHash ? consumeRate(tokenHash, 0) : { ok: true };
@@ -223,7 +253,7 @@ export const RequesterView: React.FC = () => {
   };
 
   const handleSubmitPool = async () => {
-    if (!poolCat || !poolObject || !numAmount || !objectValid || rateLimited) return;
+    if (!poolCat || !poolObject || !numAmount || !objectValid || rateLimited || pooling) return;
     if (numAmount > valueRemaining) { setPoolError(`Remaining session allowance is KES ${valueRemaining.toLocaleString()}.`); return; }
     setPooling(true); setPoolError(null);
     try {
@@ -292,7 +322,7 @@ export const RequesterView: React.FC = () => {
   })();
 
   /* ============================================================
-     INTAKE — two-step flow (phone ? OTP)
+     INTAKE - two-step flow (phone ? OTP)
      ============================================================ */
   if (!tokenHash) {
     const renderPhoneStep = () => (
@@ -305,8 +335,14 @@ export const RequesterView: React.FC = () => {
         <form onSubmit={handleSendOtp} className="space-y-3">
           <div>
             <label className="text-[10px] font-mono uppercase text-[#111111]/50">Phone number</label>
-            <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+254 7XX XXX XXX" autoFocus required className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-3 text-sm font-mono focus:ring-2 focus:ring-[#1F6B4A] focus:outline-none mt-1" />
+            <input type="tel" value={phone} onChange={e => { setPhone(e.target.value); setPhoneError(null); }} placeholder="+254 7XX XXX XXX" autoFocus required className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-3 text-sm font-mono focus:ring-2 focus:ring-[#1F6B4A] focus:outline-none mt-1" />
           </div>
+          {phoneError && (
+            <div className="text-[10px] text-rose-600 flex items-center gap-1 -mt-1">
+              <AlertCircle className="w-3 h-3 shrink-0" />
+              <span>{phoneError}</span>
+            </div>
+          )}
           <button type="submit" disabled={!phone} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50">Send verification code</button>
         </form>
         <div className="p-3 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2"><Shield className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0 mt-0.5" /><p className="text-[10px] text-[#111111]/60 leading-relaxed">Phone is hashed immediately after verification. Staff see only a token.</p></div>
@@ -333,7 +369,7 @@ export const RequesterView: React.FC = () => {
           <input
             value={otpInput}
             onChange={e => { setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4)); setOtpError(null); }}
-            placeholder="• • • •"
+            placeholder=""
             inputMode="numeric"
             maxLength={4}
             autoFocus
@@ -386,7 +422,7 @@ export const RequesterView: React.FC = () => {
                 'Enter any phone number',
                 'Receive a 4-digit verification code (simulated)',
                 'Token is generated on verification (HMAC)',
-                'Raw phone is never stored — only the token',
+                'Raw phone is never stored - only the token',
                 'Your history persists per token, even after refresh',
               ].map((s, i) => (
                 <div key={s} className="flex gap-2"><span className="font-mono text-[#1F6B4A] font-bold shrink-0">{i + 1}.</span><span>{s}</span></div>
@@ -415,7 +451,7 @@ export const RequesterView: React.FC = () => {
             <button onClick={dismissRedemptions} aria-label="Dismiss" className="text-purple-700 hover:text-purple-900"><X className="w-3.5 h-3.5" /></button>
           </div>
           {unseenRedemptions.slice(0, 2).map(({ redemption, voucher }) => (
-            <div key={redemption.id} className="text-[9px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> · KES {redemption.amount.toLocaleString()} · {redemption.timestamp}</div>
+            <div key={redemption.id} className="text-[9px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> * KES {redemption.amount.toLocaleString()} * {redemption.timestamp}</div>
           ))}
         </div>
       )}
@@ -612,7 +648,7 @@ export const RequesterView: React.FC = () => {
           {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/15 rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
           {visible.map(opp => { const I = opp.Icon; const sent = matchSent === opp.id; return (
             <div key={opp.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
-              <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} · {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-3.5 h-3.5" /></button></div>
+              <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} * {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-3.5 h-3.5" /></button></div>
               <p className="text-[10px] text-[#111111]/70 leading-relaxed">{opp.desc}</p>
               {sent ? (<div className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1 rounded text-center">Interest sent</div>) : (<button onClick={() => { setSelectedOpp(opp); setMatchConfirmed(false); }} className="w-full py-1.5 bg-[#FAF8F4] border border-[#111111]/10 rounded text-[10px] font-medium text-[#1F6B4A] flex items-center justify-center gap-1">Express interest <ArrowRight className="w-2.5 h-2.5" /></button>)}
             </div>
@@ -648,6 +684,141 @@ export const RequesterView: React.FC = () => {
     return renderBench();
   };
 
+  const handleHouseholdComplete = async (size: number) => {
+    if (!tokenHash) return;
+    try {
+      await apiSetHousehold(tokenHash, size);
+      setHouseholdStep(false);
+      setHouseholdMode(null);
+      setHouseholdError(null);
+    } catch {
+      setHouseholdError('Could not save. Please try again.');
+    }
+  };
+
+  const renderHouseholdStep = () => (
+    <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
+      <div className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
+        <div className="bg-[#FAF8F4] rounded-[2rem] overflow-hidden flex flex-col h-[620px]">
+          <div className="px-5 pt-3 pb-1 flex items-center justify-between text-[10px] font-medium text-[#111111]/60">
+            <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded uppercase font-bold">Welcome</span>
+          </div>
+          <div className="flex-1 flex flex-col justify-center px-6 space-y-5 overflow-y-auto">
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 bg-[#DCE8E0] text-[#1F6B4A] rounded-2xl flex items-center justify-center mx-auto">
+                <Users className="w-7 h-7" />
+              </div>
+              <div>
+                <h1 className="font-serif text-xl font-bold text-[#111111]">Who is this for?</h1>
+                <p className="text-[11px] text-[#111111]/60 mt-1">This helps us prepare the right bundle size.</p>
+              </div>
+            </div>
+
+            {householdMode === null && (
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleHouseholdComplete(1)}
+                  className="w-full p-4 bg-white border-2 border-[#111111]/15 hover:border-[#1F6B4A] rounded-xl text-left transition-colors"
+                >
+                  <div className="text-sm font-bold text-[#111111]">Just me</div>
+                  <div className="text-[10px] text-[#111111]/50 mt-0.5">A standard bundle for one person</div>
+                </button>
+                <button
+                  onClick={() => { setHouseholdMode('family'); setHouseholdSize(2); }}
+                  className="w-full p-4 bg-white border-2 border-[#111111]/15 hover:border-[#1F6B4A] rounded-xl text-left transition-colors"
+                >
+                  <div className="text-sm font-bold text-[#111111]">My household</div>
+                  <div className="text-[10px] text-[#111111]/50 mt-0.5">Bundles sized for 2 or more people</div>
+                </button>
+              </div>
+            )}
+
+            {householdMode === 'family' && (
+              <div className="space-y-3">
+                <div className="text-center">
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/60">
+                    How many people, including you?
+                  </label>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {[2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                    <button
+                      key={n}
+                      onClick={() => setHouseholdSize(n)}
+                      className={'py-3 rounded-xl border-2 text-center font-mono text-sm font-bold transition-all ' + (householdSize === n ? 'bg-[#1F6B4A] text-white border-[#1F6B4A]' : 'bg-white border-[#111111]/15 text-[#111111] hover:border-[#111111]/30')}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <div className="text-center pt-1">
+                  <button
+                    onClick={() => setHouseholdSize(10)}
+                    className={'px-4 py-2 rounded-lg border-2 font-mono text-xs font-bold transition-all ' + (householdSize >= 10 ? 'bg-[#1F6B4A] text-white border-[#1F6B4A]' : 'bg-white border-[#111111]/15 text-[#111111]')}
+                  >
+                    10 or more
+                  </button>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={() => { setHouseholdMode(null); setHouseholdError(null); }}
+                    className="flex-1 py-2.5 bg-white border border-[#111111]/20 text-[#111111] rounded-xl text-xs font-medium"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => handleHouseholdComplete(householdSize)}
+                    className="flex-1 py-2.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-xs font-medium"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {householdError && (
+              <div className="text-[10px] text-rose-600 flex items-center gap-1 justify-center">
+                <AlertCircle className="w-3 h-3" />
+                {householdError}
+              </div>
+            )}
+          </div>
+          <div className="p-3 text-center text-[9px] text-[#111111]/40 font-mono border-t border-[#111111]/10">
+            You can update this later in your profile
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full max-w-sm space-y-3">
+        <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+          <h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-[#1F6B4A]" />
+            Why we ask
+          </h3>
+          <p className="text-[10px] text-[#111111]/70 leading-relaxed">
+            Your household size determines the bundle variant. A single person gets one week of staples. A family of five gets a larger bundle with more of the same items.
+          </p>
+          <p className="text-[10px] text-[#111111]/70 leading-relaxed">
+            We never share this information. It is used only to size your bundle correctly.
+          </p>
+        </div>
+        <div className="p-4 bg-[#FAF8F4] border border-[#111111]/15 rounded-xl space-y-1.5">
+          <h4 className="text-[10px] font-bold text-[#111111] uppercase tracking-wider">Bundle sizes</h4>
+          <div className="text-[10px] text-[#111111]/70 space-y-1">
+            <div className="flex justify-between"><span>1 person</span><span className="font-mono">Small</span></div>
+            <div className="flex justify-between"><span>2-3 people</span><span className="font-mono">Standard</span></div>
+            <div className="flex justify-between"><span>4-6 people</span><span className="font-mono">Large</span></div>
+            <div className="flex justify-between"><span>7+ people</span><span className="font-mono">Family</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (householdStep) {
+    return renderHouseholdStep();
+  }
   const TABS: { id: Tab; label: string; Icon: typeof Home }[] = [
     { id: 'home', label: 'Home', Icon: Home }, { id: 'swap', label: 'Swap', Icon: Package }, { id: 'pool', label: 'Pool', Icon: CreditCard }, { id: 'match', label: 'Match', Icon: Users }, { id: 'bench', label: 'Bench', Icon: MessageCircle },
   ];
@@ -668,7 +839,7 @@ export const RequesterView: React.FC = () => {
           <div className="flex items-center justify-between"><h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View</h3><button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">{showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}{showServer ? 'Hide' : 'Reveal'}</button></div>
           <div className="space-y-1.5 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
             <div className="flex justify-between"><span className="text-[#111111]/50">Token (HMAC)</span><span className="text-[#1F6B4A] font-bold truncate ml-2">{tokenHash}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Raw phone</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '••••••'}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Raw phone</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '******'}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">NONE</span></div>
             <div className="flex justify-between border-t border-[#111111]/10 pt-1.5 mt-1.5"><span className="text-[#111111]/50">Rate (per token)</span><span className="text-[#111111]">{rate.count} / {MAX_REQUESTS}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Value (per token)</span><span className="text-[#111111]">KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>

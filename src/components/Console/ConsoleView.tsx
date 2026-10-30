@@ -56,10 +56,10 @@ export const ConsoleView: React.FC = () => {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
-    const ok = loginStaff(loginRole, loginId, loginPin);
+    const ok = await loginStaff(loginRole, loginId, loginPin);
     if (!ok) { setLoginError('Invalid ID or PIN for this role.'); setLoginPin(''); return; }
     setLoginId(STAFF_CREDS[loginRole].id); setLoginPin(STAFF_CREDS[loginRole].pin); setTab('queue'); setAuditSub('flags'); setReceipt(null);
   };
@@ -134,7 +134,7 @@ export const ConsoleView: React.FC = () => {
   const ocrQueue = poolRequests.filter(r => r.status === 'pending_check');
   const awaitingPledges = pledges.filter(p => p.status === 'awaiting_match');
 
-  const handleDispatch = (id: string) => { const r = dispatchRequest(id, 'pool'); if (r) { setReceipt(r); setTimeout(() => setReceipt(null), 6000); } };
+  const handleDispatch = async (id: string) => { const r = await dispatchRequest(id, 'pool'); if (r) { setReceipt(r); setTimeout(() => setReceipt(null), 6000); } };
 
   const downloadCsv = () => {
     const rows = auditLog.map(e => ({ time: e.timestamp, role: e.actorRole, action: e.action, target: e.targetHash }));
@@ -148,11 +148,11 @@ export const ConsoleView: React.FC = () => {
     setTimeout(() => { setExportModal(false); setExportSuccess(false); }, 1500);
   };
 
-  const handleRedeem = (e: React.FormEvent) => {
+  const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
     const amt = Number(tillAmount);
     if (!tillPin || !amt) return;
-    const res = redeemVoucher(tillPin, amt, tillPartner);
+    const res = await redeemVoucher(tillPin, amt, tillPartner);
     setTillResult(res);
     if (res.ok) { setTillPin(''); setTillAmount(''); }
   };
@@ -193,7 +193,7 @@ export const ConsoleView: React.FC = () => {
           <div className="text-[10px] font-bold text-amber-900 flex items-center gap-1"><Package className="w-3 h-3" /> Incoming pledges ({awaitingPledges.length})</div>
           {awaitingPledges.map(p => (
             <div key={p.id} className="p-2 bg-white border border-[#111111]/10 rounded-lg flex justify-between items-start gap-2">
-              <div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[#111111] truncate">{p.description}</div><div className="text-[9px] font-mono text-[#111111]/50">{p.locality} Â· {p.type === 'service_credit' ? 'credit' : 'goods'}</div></div>
+              <div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[#111111] truncate">{p.description}</div><div className="text-[9px] font-mono text-[#111111]/50">{p.locality} * {p.type === 'service_credit' ? 'credit' : 'goods'}</div></div>
               <button onClick={() => matchPledge(p.id)} className="px-2 py-1 bg-amber-700 text-white rounded text-[9px] font-semibold whitespace-nowrap">Match</button>
             </div>
           ))}
@@ -205,7 +205,7 @@ export const ConsoleView: React.FC = () => {
           <div className="flex justify-between items-center">
             <div className="text-[10px] font-bold text-blue-900 flex items-center gap-1"><Users className="w-3 h-3" /> Match interests</div>
             <div className="text-[9px] font-mono text-blue-900/60">
-              {matchInterests.filter(m => m.status === 'pending').length} pending Â· {matchInterests.filter(m => m.status === 'contacted').length} contacted Â· {matchInterests.filter(m => m.status === 'closed').length} closed
+              {matchInterests.filter(m => m.status === 'pending').length} pending * {matchInterests.filter(m => m.status === 'contacted').length} contacted * {matchInterests.filter(m => m.status === 'closed').length} closed
             </div>
           </div>
           {matchInterests.slice(0, 4).map(m => (
@@ -213,7 +213,7 @@ export const ConsoleView: React.FC = () => {
               <div className="flex justify-between items-start gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="text-[10px] font-semibold text-[#111111] truncate">{m.title}</div>
-                  <div className="text-[9px] font-mono text-[#111111]/50">{m.timestamp} Â· token {m.tokenHash.slice(0, 8)}â€¦</div>
+                  <div className="text-[9px] font-mono text-[#111111]/50">{m.timestamp} * token {m.tokenHash.slice(0, 8)}...</div>
                 </div>
                 <span className={'text-[8px] font-mono uppercase px-1.5 py-0.5 rounded shrink-0 ' + (m.status === 'pending' ? 'bg-blue-100 text-blue-800' : m.status === 'contacted' ? 'bg-amber-100 text-amber-800' : 'bg-black/5 text-[#111111]/50')}>{m.status}</span>
               </div>
@@ -319,7 +319,7 @@ export const ConsoleView: React.FC = () => {
             <div className="p-8 bg-white border border-[#111111]/15 rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs font-bold text-[#111111]">No pending OCR</p></div>
           ) : ocrQueue.map(r => (
             <div key={r.id} className="p-3 bg-white border border-amber-200 rounded-xl space-y-2">
-              <div className="flex items-center justify-between"><span className="font-mono text-[10px] text-[#111111]/50">{r.id}</span><span className="text-[9px] font-mono bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold">T3 Â· OCR</span></div>
+              <div className="flex items-center justify-between"><span className="font-mono text-[10px] text-[#111111]/50">{r.id}</span><span className="text-[9px] font-mono bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold">T3 * OCR</span></div>
               <div><div className="font-bold text-[11px] text-[#111111] uppercase">{r.category.replace('_', ' ')}</div><div className="text-[10px] font-mono text-[#1F6B4A]">{r.hashedObjectId}</div></div>
               <div className="flex items-center justify-between"><span className="font-mono font-bold text-xs text-[#111111]">KES {r.amount.toLocaleString()}</span><span className="text-[9px] font-mono text-[#111111]/50">{r.timestamp}</span></div>
               <div className="p-2 bg-amber-50 border border-amber-200 rounded text-[9px] text-amber-900 leading-relaxed">Awaiting bill photo OCR verification. <strong>SLA:</strong> 4 business hours. Escalates to Tier 4 if unresolved.</div>
@@ -345,7 +345,7 @@ export const ConsoleView: React.FC = () => {
             <div key={item.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-1.5">
               <div className="flex justify-between items-start"><span className="font-mono font-bold text-[10px] text-[#1F6B4A]">{item.hashedObjectId}</span><span className={'px-1.5 py-0.5 rounded text-[8px] uppercase font-mono ' + (item.status === 'blocked' ? 'bg-rose-50 text-rose-800' : 'bg-amber-50 text-amber-800')}>{item.status.replace('_', ' ')}</span></div>
               <div className="text-[10px] text-[#111111]/70">{item.objectType}</div>
-              <div className="text-[9px] font-mono text-[#111111]/50">First: {item.firstFundedBy} Â· {item.firstFundedDate}</div>
+              <div className="text-[9px] font-mono text-[#111111]/50">First: {item.firstFundedBy} * {item.firstFundedDate}</div>
               <div className="text-[9px] font-mono text-amber-700">Duplicate: {item.duplicateAttemptDate}</div>
             </div>
           ))}
@@ -394,7 +394,7 @@ export const ConsoleView: React.FC = () => {
 
   const renderTill = () => (
     <div className="p-4 space-y-3">
-      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[11px]"><Store className="w-3.5 h-3.5" /> Partner Till</div><p className="text-[10px] text-[#111111]/60 mt-1">R.U.T.H 4.5 â€” voucher redemption.</p></div>
+      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[11px]"><Store className="w-3.5 h-3.5" /> Partner Till</div><p className="text-[10px] text-[#111111]/60 mt-1">R.U.T.H 4.5 - voucher redemption.</p></div>
 
       <form onSubmit={handleRedeem} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
         <div><label className="text-[9px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[10px] font-mono mt-1 outline-none"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
@@ -419,7 +419,7 @@ export const ConsoleView: React.FC = () => {
           <div className="p-3 bg-white border border-[#111111]/10 rounded-lg text-center"><p className="text-[10px] text-[#111111]/40">No redemptions yet</p></div>
         ) : voucherRedemptions.slice(0, 4).map(r => (
           <div key={r.id} className="p-2 bg-white border border-[#111111]/10 rounded-lg flex justify-between text-[10px]">
-            <div><div className="font-mono font-bold text-[#111111]">{r.voucherId} Â· {r.pin}</div><div className="text-[9px] text-[#111111]/50">{r.partnerName} Â· {r.timestamp}</div></div>
+            <div><div className="font-mono font-bold text-[#111111]">{r.voucherId} * {r.pin}</div><div className="text-[9px] text-[#111111]/50">{r.partnerName} * {r.timestamp}</div></div>
             <span className={'text-[8px] font-mono uppercase px-1.5 py-0.5 rounded self-start ' + (r.status === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800')}>{r.status}</span>
           </div>
         ))}
@@ -428,7 +428,7 @@ export const ConsoleView: React.FC = () => {
       <div className="space-y-1.5">
         <div className="flex justify-between items-center">
           <div className="text-[9px] font-mono uppercase text-[#111111]/50">Issued vouchers</div>
-          <div className="text-[9px] font-mono text-[#111111]/40">{vouchers.filter(v => v.status === 'active').length} active Â· {vouchers.length} total</div>
+          <div className="text-[9px] font-mono text-[#111111]/40">{vouchers.filter(v => v.status === 'active').length} active * {vouchers.length} total</div>
         </div>
         {vouchers.length === 0 ? (
           <div className="p-3 bg-white border border-[#111111]/10 rounded-lg text-center">
@@ -439,7 +439,7 @@ export const ConsoleView: React.FC = () => {
             <div className="flex justify-between items-start">
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold text-[#111111] truncate">{v.partnerName}</div>
-                <div className="text-[9px] font-mono text-[#111111]/50">PIN <strong className="text-purple-700">{v.pin}</strong> Â· {v.description}</div>
+                <div className="text-[9px] font-mono text-[#111111]/50">PIN <strong className="text-purple-700">{v.pin}</strong> * {v.description}</div>
               </div>
               <div className="text-right shrink-0 ml-2">
                 <div className="text-[10px] font-mono font-bold text-[#111111]">KES {v.maxValue.toLocaleString()}</div>
@@ -460,7 +460,7 @@ export const ConsoleView: React.FC = () => {
           <thead className="text-[#111111]/50 uppercase font-mono"><tr><th className="pb-2">Role</th><th className="pb-2 text-center">Id</th><th className="pb-2 text-center">Pay</th><th className="pb-2 text-center">Flag</th><th className="pb-2 text-center">Log</th></tr></thead>
           <tbody className="divide-y divide-[#111111]/5">
             {[{ r: 'Enrolment', p: [true, false, false, false] }, { r: 'Fulfilment', p: [false, true, false, false] }, { r: 'Audit', p: [false, false, true, true] }].map(row => (
-              <tr key={row.r}><td className="py-2 font-semibold text-[#111111] text-[10px]">{row.r}</td>{row.p.map((has, i) => <td key={i} className={'py-2 text-center font-mono font-bold ' + (has ? 'text-emerald-700' : 'text-rose-700')}>{has ? '?' : 'Ã—'}</td>)}</tr>
+              <tr key={row.r}><td className="py-2 font-semibold text-[#111111] text-[10px]">{row.r}</td>{row.p.map((has, i) => <td key={i} className={'py-2 text-center font-mono font-bold ' + (has ? 'text-emerald-700' : 'text-rose-700')}>{has ? '?' : '?'}</td>)}</tr>
             ))}
           </tbody>
         </table>
@@ -497,8 +497,8 @@ export const ConsoleView: React.FC = () => {
       <div className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
         <div className="bg-[#F5F5F5] rounded-[2rem] overflow-hidden flex flex-col h-[680px]">
           <div className="px-5 pt-3 pb-1 flex items-center justify-between text-[10px] font-medium text-[#111111]/60"><span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span><span className="text-[8px] font-mono bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded uppercase font-bold">{roleLabel[staffRole as Role]}</span></div>
-          <div className="px-5 pb-2 border-b border-[#111111]/10 flex items-center justify-between"><div><h1 className="font-serif text-base font-bold text-[#111111]">Operations</h1><p className="text-[9px] font-mono text-[#111111]/40">Logged in Â· {staffId}</p></div><button onClick={logoutStaff} className="text-rose-600 hover:underline text-[9px] font-mono flex items-center gap-0.5"><LogOut className="w-3 h-3" />Logout</button></div>
-          <div className="px-3 py-2 border-b border-[#111111]/10 bg-white"><div className="text-[9px] font-mono text-[#111111]/50 uppercase">Current role: <strong className="text-[#1F6B4A]">{roleLabel[staffRole as Role]}</strong> Â· logout to switch</div></div>
+          <div className="px-5 pb-2 border-b border-[#111111]/10 flex items-center justify-between"><div><h1 className="font-serif text-base font-bold text-[#111111]">Operations</h1><p className="text-[9px] font-mono text-[#111111]/40">Logged in * {staffId}</p></div><button onClick={logoutStaff} className="text-rose-600 hover:underline text-[9px] font-mono flex items-center gap-0.5"><LogOut className="w-3 h-3" />Logout</button></div>
+          <div className="px-3 py-2 border-b border-[#111111]/10 bg-white"><div className="text-[9px] font-mono text-[#111111]/50 uppercase">Current role: <strong className="text-[#1F6B4A]">{roleLabel[staffRole as Role]}</strong> * logout to switch</div></div>
           <div key={staffRole + tab + auditSub} className="flex-1 overflow-y-auto animate-in fade-in duration-200">{renderContent()}</div>
           <div className="border-t border-[#111111]/10 bg-white"><div className="grid grid-cols-5">{[{ id: 'queue' as Tab, Icon: Activity, l: 'Queue' }, { id: 'depot' as Tab, Icon: Boxes, l: 'Depot' }, { id: 'till' as Tab, Icon: Store, l: 'Till' }, { id: 'matrix' as Tab, Icon: Layers, l: 'Matrix' }, { id: 'tiers' as Tab, Icon: ShieldCheck, l: 'Tiers' }].map(t => { const I = t.Icon; const active = tab === t.id; return (<button key={t.id} onClick={() => setTab(t.id)} className={'py-2 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}><I className="w-3.5 h-3.5" /><span className="text-[8px] font-medium">{t.l}</span></button>); })}</div></div>
         </div>
@@ -523,7 +523,7 @@ export const ConsoleView: React.FC = () => {
 
         <div className="p-4 bg-[#FAF8F4] border border-[#111111]/15 rounded-xl space-y-1.5">
           <h4 className="text-[10px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
-          {['Separate credentials (4.8)', 'Login gate', 'Verification tiers 1â€“4 (4.8)', 'OCR completion (4.8)', 'Deduplication (4.7)', 'Audit log + export (4.7)', 'POCAMLA export (6)', 'Partner vouchers (4.5)', 'Pledge matching (4.4)', 'Match interests panel', 'Depot + locker stock (4.2)'].map(f => (
+          {['Separate credentials (4.8)', 'Login gate', 'Verification tiers 1-4 (4.8)', 'OCR completion (4.8)', 'Deduplication (4.7)', 'Audit log + export (4.7)', 'POCAMLA export (6)', 'Partner vouchers (4.5)', 'Pledge matching (4.4)', 'Match interests panel', 'Depot + locker stock (4.2)'].map(f => (
             <div key={f} className="flex items-center gap-1.5 text-[10px] text-[#111111]/70"><div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}</div>
           ))}
         </div>
@@ -538,7 +538,7 @@ export const ConsoleView: React.FC = () => {
               <h3 className="font-serif text-base font-bold text-[#111111]">Issue Partner Voucher</h3>
               <button onClick={() => { setIssueModal(null); setIssueSuccess(null); }} className="text-[#111111]/40" aria-label="Close"><X className="w-4 h-4" /></button>
             </div>
-            <p className="text-[10px] text-[#111111]/60 leading-relaxed">R.U.T.H 4.5 â€” requester receives a PIN to redeem at the partner till. Settled monthly in bulk.</p>
+            <p className="text-[10px] text-[#111111]/60 leading-relaxed">R.U.T.H 4.5 - requester receives a PIN to redeem at the partner till. Settled monthly in bulk.</p>
             <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-lg text-[10px] font-mono space-y-1">
               <div className="flex justify-between"><span className="text-[#111111]/50">Request</span><span className="font-bold">{issueModal.requestId}</span></div>
               <div className="flex justify-between"><span className="text-[#111111]/50">Value</span><span className="font-bold">KES {issueModal.amount.toLocaleString()}</span></div>
@@ -558,7 +558,7 @@ export const ConsoleView: React.FC = () => {
             )}
             <div className="flex gap-2">
               <button onClick={() => { setIssueModal(null); setIssueSuccess(null); }} className="flex-1 py-2 bg-white border border-[#111111]/20 rounded-lg text-[10px] font-medium">Close</button>
-              <button onClick={() => { const v = issueVoucher(issueModal.requestId, issuePartner, issuePartner === 'Kenyatta Hospital' ? 'hospital' : 'retailer'); if (v) setIssueSuccess(v.pin); }} disabled={!!issueSuccess} className="flex-1 py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[10px] font-semibold disabled:opacity-40">{issueSuccess ? 'Issued ?' : 'Issue'}</button>
+              <button onClick={async () => { const v = await issueVoucher(issueModal.requestId, issuePartner, issuePartner === 'Kenyatta Hospital' ? 'hospital' : 'retailer'); if (v) setIssueSuccess(v.pin); }} disabled={!!issueSuccess} className="flex-1 py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[10px] font-semibold disabled:opacity-40">{issueSuccess ? 'Issued ?' : 'Issue'}</button>
             </div>
           </div>
         </div>

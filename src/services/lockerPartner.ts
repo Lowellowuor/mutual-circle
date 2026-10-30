@@ -7,7 +7,7 @@ export interface LockerReservation {
 }
 
 export async function reserveLocker(bundleId: string, lockerLocation: string): Promise<LockerReservation> {
-  // MOCK — replace with CHUI / ParcelPoint API call
+  // MOCK - replace with CHUI / ParcelPoint API call
   return {
     reservationId: `res_${Date.now()}`,
     lockerBankId: lockerLocation,
