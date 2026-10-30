@@ -1,28 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { getHelplines } from '../../lib/apiClient';
 import { MessageCircle, Phone, Info, Send, Lock, ShieldAlert, ShieldCheck, Check, X, RotateCcw, Eye, EyeOff, Info as InfoIcon } from 'lucide-react';
 
 type Tab = 'chat' | 'helplines' | 'info';
 
-const HELPLINES = [
-  { name: 'Befrienders Kenya', number: '0722 178 177', sub: 'Free * 24/7 * confidential', icon: '?' },
-  { name: 'Kenya Red Cross', number: '1199', sub: 'Toll-free * crisis & counselling', icon: '+' },
-  { name: 'Emergency', number: '999 / 112', sub: 'Police * ambulance * fire', icon: '!' },
-  { name: 'GVRC Nairobi', number: '0709 667 000', sub: 'Gender violence recovery * free', icon: '?' },
-];
 
-const PEER_REPLIES = [
-  'Thank you for sharing. You are in a safe, judgment-free space. Take your time.',
-  'That sounds heavy. What feels most urgent for you right now?',
-  'You do not have to carry this alone. Would you like me to walk you through grounding exercises, or would you prefer to talk?',
-  'What you are feeling is valid. Many people in similar situations have said the same.',
-  'If at any moment you want to speak with a professional, the helplines tab is always there.',
-  'Thank you for trusting this space. Is there anything specific that would help today?',
-];
+
+
 
 export const BenchView: React.FC = () => {
   const { swapRequests, poolRequests, donorContributions } = useApp();
   const [entered, setEntered] = useState(false);
+  const [helplines, setHelplines] = useState<{ id: string; name: string; number: string; sub: string; category: string }[]>([]);
   const [tab, setTab] = useState<Tab>('chat');
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState<{ from: 'user' | 'peer'; text: string }[]>([]);
@@ -31,17 +21,18 @@ export const BenchView: React.FC = () => {
   const [peerIdx, setPeerIdx] = useState(0);
   const [sessionId] = useState(() => 'BS-' + Math.random().toString(36).substring(2, 10).toUpperCase());
 
+  useEffect(() => {
+    (async () => {
+      const h = await getHelplines();
+      if (h) setHelplines(h.helplines);
+    })();
+  }, []);
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
     setChat(prev => [...prev, { from: 'user', text: message }]);
     setMessage('');
-    setReplying(true);
-    setTimeout(() => {
-      setChat(prev => [...prev, { from: 'peer', text: PEER_REPLIES[peerIdx % PEER_REPLIES.length] }]);
-      setPeerIdx(prev => prev + 1);
-      setReplying(false);
-    }, 1100);
   };
 
   const reset = () => { setEntered(false); setTab('chat'); setChat([]); setMessage(''); setShowServer(false); setPeerIdx(0); };
@@ -100,10 +91,10 @@ export const BenchView: React.FC = () => {
         <p className="text-[10px] text-purple-900/70 mt-1 leading-relaxed">If you or someone else is in danger, call <strong>999</strong> now.</p>
       </div>
       <div className="space-y-2">
-        {HELPLINES.map(h => (
+        {helplines.map(h => (
           <div key={h.name} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-1">
             <div className="text-[9px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div>
-            <div className="flex items-center justify-between"><div className="text-base font-bold text-[#111111] font-mono">{h.number}</div><div className="w-7 h-7 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-[11px] font-bold">{h.icon}</div></div>
+            <div className="flex items-center justify-between"><div className="text-base font-bold text-[#111111] font-mono">{h.number}</div><div className="w-7 h-7 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-[11px] font-bold"><Phone className="w-3.5 h-3.5 text-purple-600" /></div></div>
             <div className="text-[10px] text-[#111111]/50">{h.sub}</div>
           </div>
         ))}

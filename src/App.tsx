@@ -3,15 +3,16 @@ import { AppProvider } from './context/AppContext';
 import { RequesterView } from './components/Requester/RequesterView';
 import { ConsoleView } from './components/Console/ConsoleView';
 import { DonorView } from './components/Donor/DonorView';
+import { SmsDonorSimulator } from './components/Donor/SmsDonorSimulator';
 import { ArchitectureView } from './components/Architecture/ArchitectureView';
 import { BenchView } from './components/Bench/BenchView';
 import { SmsSimulator } from './components/Requester/SmsSimulator';
 import { UssdSimulator } from './components/Requester/UssdSimulator';
 import { WhatsAppSimulator } from './components/Requester/WhatsAppSimulator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { LayoutDashboard, User, HeartHandshake, Workflow, MessageCircle, Smartphone, PhoneCall, MessageSquare, RotateCcw } from 'lucide-react';
+import { LayoutDashboard, User, HeartHandshake, Workflow, MessageCircle, Smartphone, PhoneCall, MessageSquare, RotateCcw , Heart } from 'lucide-react';
 
-type View = 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'console' | 'donor' | 'architecture' | 'bench';
+type View = 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'console' | 'donor' | 'sms-donor' | 'architecture' | 'bench';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('requester');
@@ -23,6 +24,7 @@ function App() {
     { id: 'whatsapp' as View, label: 'WhatsApp', icon: MessageSquare },
     { id: 'console' as View, label: 'Operations', icon: LayoutDashboard },
     { id: 'donor' as View, label: 'Donor Portal', icon: HeartHandshake },
+    { id: 'sms-donor' as View, label: 'SMS Donor', icon: Heart },
     { id: 'architecture' as View, label: 'Architecture', icon: Workflow },
     { id: 'bench' as View, label: 'The Bench', icon: MessageCircle },
   ] as const;
@@ -90,6 +92,15 @@ function App() {
             )}
             {currentView === 'console' && <ConsoleView />}
             {currentView === 'donor' && <DonorView />}
+            {currentView === 'sms-donor' && (
+              <div className="space-y-4">
+                <div className="text-center space-y-1">
+                  <h1 className="font-serif text-3xl font-bold text-[#111111]">SMS Donor Channel</h1>
+                  <p className="text-sm text-[#111111]/60">Type DONOR to begin. STOP to opt out.</p>
+                </div>
+                <SmsDonorSimulator />
+              </div>
+            )}
             {currentView === 'architecture' && <ArchitectureView />}
             {currentView === 'bench' && <BenchView />}
           </div>
