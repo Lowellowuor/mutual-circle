@@ -7,8 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from mtc.config import settings
 from mtc.db.main import close_pool, get_pool, health_check
+from mtc.routes.audit import router as audit_router
+from mtc.routes.fulfilment import router as fulfilment_router
 from mtc.routes.public import router as public_router
 from mtc.routes.requester import router as requester_router
+from mtc.routes.staff import router as staff_router
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -28,7 +31,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Mutual Circle API",
-    version="0.3.0",
+    version="0.4.0",
     description="Anonymized resource-sharing network — R.U.T.H prototype backend",
     lifespan=lifespan,
 )
@@ -47,17 +50,20 @@ app.add_middleware(
 
 app.include_router(public_router)
 app.include_router(requester_router)
+app.include_router(staff_router)
+app.include_router(fulfilment_router)
+app.include_router(audit_router)
 
 
 @app.get("/")
 async def root():
-    return {"service": "mutual-circle-api", "version": "0.3.0"}
+    return {"service": "mutual-circle-api", "version": "0.4.0"}
 
 
 @app.get("/health")
 async def health():
     db = await health_check()
-    return {"ok": True, "environment": settings.environment, "version": "0.3.0", **db}
+    return {"ok": True, "environment": settings.environment, "version": "0.4.0", **db}
 
 
 @app.get("/ready")
