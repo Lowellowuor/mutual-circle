@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppProvider } from './context/AppContext';
 import { RequesterView } from './components/Requester/RequesterView';
+import { RequesterMessages } from './components/Requester/Messages';
 import { ConsoleView } from './components/Console/ConsoleView';
 import { DonorView } from './components/Donor/DonorView';
 import { SmsDonorSimulator } from './components/Donor/SmsDonorSimulator';
@@ -10,15 +11,16 @@ import { SmsSimulator } from './components/Requester/SmsSimulator';
 import { UssdSimulator } from './components/Requester/UssdSimulator';
 import { WhatsAppSimulator } from './components/Requester/WhatsAppSimulator';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { LayoutDashboard, User, HeartHandshake, Workflow, MessageCircle, Smartphone, PhoneCall, MessageSquare, RotateCcw , Heart } from 'lucide-react';
+import { LayoutDashboard, User, HeartHandshake, Workflow, MessageCircle, Smartphone, PhoneCall, MessageSquare, RotateCcw , Heart , Bell } from 'lucide-react';
 
-type View = 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'console' | 'donor' | 'sms-donor' | 'architecture' | 'bench';
+type View = 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'console' | 'donor' | 'sms-donor' | 'architecture' | 'bench' | 'messages';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('requester');
 
   const navItems = [
     { id: 'requester' as View, label: 'Mutual Circle', icon: User },
+    { id: 'messages' as View, label: 'Messages', icon: Bell },
     { id: 'sms' as View, label: 'SMS', icon: Smartphone },
     { id: 'ussd' as View, label: 'USSD', icon: PhoneCall },
     { id: 'whatsapp' as View, label: 'WhatsApp', icon: MessageSquare },
@@ -63,6 +65,7 @@ function App() {
 
           <div className="max-w-5xl mx-auto p-4 md:p-8">
             {currentView === 'requester' && <RequesterView />}
+            {currentView === 'messages' && <RequesterMessages />}
             {currentView === 'sms' && (
               <div className="space-y-4">
                 <div className="text-center space-y-1">

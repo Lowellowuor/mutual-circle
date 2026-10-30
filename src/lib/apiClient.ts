@@ -266,3 +266,38 @@ export const getDistribution = () =>
   call<{ total_pence: number; by_category: { category: string; label: string; count: number; total_pence: number; percentage: number }[] }>(
     '/stats/distribution',
   );
+// --- Requester notifications (Gap 1) ---
+export const getNotifications = (token: string) =>
+  call<{ notifications: { id: string; request_id: string | null; template: string; content: string; status: string; created_at: string; sent_at: string | null }[] }>(
+    '/notifications/mine', { headers: { 'X-Token': token } },
+  );
+
+export const getUnreadNotificationCount = (token: string) =>
+  call<{ unread_count: number }>('/notifications/unread_count', { headers: { 'X-Token': token } });
+
+// --- Public ledger (Gap 2) ---
+export const getPublicLedger = (limit = 20) =>
+  call<{
+    total_pooled_pence: number;
+    entry_count: number;
+    chain_ok: boolean;
+    broken_at: { index: number; reason: string } | null;
+    last_entries: { id: string; object_hash: string; category: string; amount_pence: number; entry_hash_prefix: string; previous_hash_prefix: string; created_at: string }[];
+  }>(`/ledger/public?limit=${limit}`);
+
+// --- Partner API (Gap 3) ---
+export const getPartnerMe = (partnerKey: string) =>
+  call<{ id: string; name: string; type: string; contact_email: string }>(
+    '/partners/me', { headers: { 'X-Partner-Key': partnerKey } },
+  );
+
+export const getPartnerRedemptions = (partnerKey: string) =>
+  call<{ kind: string; redemptions: any[] }>(
+    '/partners/me/redemptions', { headers: { 'X-Partner-Key': partnerKey } },
+  );
+
+export const confirmPartnerRequest = (partnerKey: string, requestId: string, confirmationType: 'delivered' | 'settled' | 'disputed', note = '') =>
+  call<{ ok: boolean; request_id: string; confirmation_type: string }>(
+    `/partners/me/confirm/${requestId}`,
+    { method: 'POST', headers: { 'X-Partner-Key': partnerKey }, body: JSON.stringify({ confirmation_type: confirmationType, note }) },
+  );
