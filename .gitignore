@@ -6,3 +6,17 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Python backend
+backend/.env
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/.uvicorn.log
+backend/.uvicorn.err
+backend/.uvicorn.pid
+*.pyc
+
+# Python build artifacts
+*.egg-info/
+*.egg-info
