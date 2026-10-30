@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { peekRate, consumeRate, loadHistory, saveHistory, loadSeen, saveSeen } from '../../services/auth';
-import { setHouseholdSize as apiSetHousehold, getHouseholdSize as apiGetHousehold } from '../../lib/apiClient';
+import { setHouseholdSize as apiSetHousehold, getHouseholdSize as apiGetHousehold, getOpportunities, getHelplines } from '../../lib/apiClient';
 import {
   HeartHandshake, Shield, Package, CreditCard, Users, MessageCircle,
   Home, MapPin, Check, CheckCircle, Clock, Copy, ScanLine, ArrowRight,
@@ -37,19 +37,6 @@ const POOL_CATS: { id: PoolCat; name: string; desc: string; Icon: any; accent: s
   { id: 'utility', name: 'Utility Bill', desc: 'KPLC or Nairobi Water', Icon: Zap, accent: 'text-amber-700 bg-amber-50', objLabel: 'Meter number', placeholder: 'e.g. 541234567' },
   { id: 'school_fee', name: 'School Fees', desc: 'Secondary term fees', Icon: GraduationCap, accent: 'text-[#1F6B4A] bg-[#DCE8E0]', objLabel: 'Admission number', placeholder: 'e.g. 2024118' },
   { id: 'hospital_invoice', name: 'Hospital Invoice', desc: 'No clinical details', Icon: Building2, accent: 'text-blue-700 bg-blue-50', objLabel: 'Invoice number', placeholder: 'e.g. 78432' },
-];
-
-const OPPORTUNITIES = [
-  { id: 'opp-1', title: 'Warehouse Assistant', commit: '6-month', locality: 'Industrial Area', desc: 'Entry-level. On-the-job training.', Icon: Briefcase, accent: 'text-blue-700 bg-blue-50' },
-  { id: 'opp-2', title: 'Shared room', commit: '12-month', locality: 'Kangemi', desc: 'Vetted household. Rent-free 3 months.', Icon: Home, accent: 'text-[#1F6B4A] bg-[#DCE8E0]' },
-  { id: 'opp-3', title: 'Tailoring apprenticeship', commit: '3-month', locality: 'Kibera', desc: 'Learn with local cooperative.', Icon: GraduationCap, accent: 'text-amber-700 bg-amber-50' },
-  { id: 'opp-4', title: 'Boda spare-parts kit', commit: 'One-off', locality: 'Mathare', desc: 'Tools for repairs.', Icon: Package, accent: 'text-purple-700 bg-purple-50' },
-];
-
-const HELPLINES = [
-  { name: 'Befrienders', number: '0722 178 177', sub: '24/7 * free' },
-  { name: 'Red Cross', number: '1199', sub: 'Crisis & counselling' },
-  { name: 'Emergency', number: '999 / 112', sub: 'Police * ambulance' },
 ];
 
 export const RequesterView: React.FC = () => {
@@ -96,10 +83,12 @@ export const RequesterView: React.FC = () => {
   const [poolError, setPoolError] = useState<string | null>(null);
 
   /* ---------- MATCH STATE ---------- */
-  const [selectedOpp, setSelectedOpp] = useState<typeof OPPORTUNITIES[0] | null>(null);
+  const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
   const [matchConfirmed, setMatchConfirmed] = useState(false);
   const [matchSent, setMatchSent] = useState<string | null>(null);
   const [declined, setDeclined] = useState<Set<string>>(new Set());
+  const [opportunities, setOpportunities] = useState<{ id: string; type: string; title: string; description: string; locality: string; commit: string; posted_at: string }[]>([]);
+  const [helplines, setHelplines] = useState<{ id: string; name: string; number: string; sub: string; category: string }[]>([]);
 
   /* ---------- EFFECTS ---------- */
   useEffect(() => {
@@ -140,6 +129,28 @@ export const RequesterView: React.FC = () => {
   }, []);
 
   /* ---------- OTP HANDLERS ---------- */
+  useEffect(() => {
+    (async () => {
+      const [opps, helps] = await Promise.all([getOpportunities(), getHelplines()]);
+      if (opps) setOpportunities(opps.opportunities);
+      if (helps) setHelplines(helps.helplines);
+    })();
+  }, []);
+
+  const OPP_ICONS: Record<string, any> = { job: Briefcase, housing: Home, training: GraduationCap, transport: Package };
+  const OPP_COLORS: Record<string, string> = {
+    job: 'text-blue-700 bg-blue-50',
+    housing: 'text-[#1F6B4A] bg-[#DCE8E0]',
+    training: 'text-amber-700 bg-amber-50',
+    transport: 'text-purple-700 bg-purple-50',
+  };
+  const opportunitiesWithIcons = opportunities.map(o => ({
+    ...o,
+    Icon: OPP_ICONS[o.type] || Briefcase,
+    accent: OPP_COLORS[o.type] || 'text-blue-700 bg-blue-50',
+    desc: o.description,
+  }));
+
   const generateOtp = () => String(Math.floor(1000 + Math.random() * 9000));
 
   const maskPhone = (p: string): string => {
@@ -638,7 +649,7 @@ export const RequesterView: React.FC = () => {
   };
 
   const renderMatch = () => {
-    const visible = OPPORTUNITIES.filter(o => !declined.has(o.id));
+    const visible = opportunitiesWithIcons.filter(o => !declined.has(o.id));
     return (
       <div className="p-4 space-y-3">
         <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Match</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Opportunities. Opt-in only.</p></div>
@@ -672,7 +683,7 @@ export const RequesterView: React.FC = () => {
     <div className="p-4 space-y-3">
       <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Bench</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Separate system. Confidential.</p></div>
       <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[10px] font-bold text-purple-900"><ShieldCheck className="w-3.5 h-3.5" /> Isolated from your account</div><p className="text-[10px] text-purple-900/70 leading-relaxed">No shared identifiers with Swap/Pool.</p></div>
-      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Reach out directly</div>{HELPLINES.map(h => (<div key={h.name} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0"><div><div className="text-[10px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div><div className="text-sm font-bold font-mono text-[#111111]">{h.number}</div><div className="text-[9px] text-[#111111]/50">{h.sub}</div></div><Phone className="w-4 h-4 text-purple-600" /></div>))}</div>
+      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Reach out directly</div>{helplines.map(h => (<div key={h.id} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0"><div><div className="text-[10px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div><div className="text-sm font-bold font-mono text-[#111111]">{h.number}</div><div className="text-[9px] text-[#111111]/50">{h.sub}</div></div><Phone className="w-4 h-4 text-purple-600" /></div>))}</div>
     </div>
   );
 
