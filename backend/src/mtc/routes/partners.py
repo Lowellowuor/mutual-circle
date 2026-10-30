@@ -36,6 +36,24 @@ async def require_partner(
     }
 
 
+@router.get("/public")
+async def public_partners(conn: asyncpg.Connection = Depends(get_conn)):
+    """Public partner directory - trust signals only, no reconciliation data."""
+    rows = await conn.fetch(
+        "SELECT id, name, type FROM partners WHERE active = TRUE ORDER BY name"
+    )
+    regions = {
+        "CHUI": "Nairobi * 12 hubs",
+        "KPLC": "National",
+        "NAIVAS": "Nairobi * 8 stores",
+    }
+    return {
+        "partners": [
+            {"id": r["id"], "name": r["name"], "type": r["type"], "region": regions.get(r["id"], "Kenya")}
+            for r in rows
+        ]
+    }
+
 @router.get("/me")
 async def partner_me(partner: dict = Depends(require_partner)):
     return partner

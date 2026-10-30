@@ -1,7 +1,11 @@
-import React from 'react';
-import { Workflow, ShieldCheck, Database, Building2, Smartphone, Users, AlertTriangle, FileText, Gavel, Layers } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Workflow, ShieldCheck, Database, Building2, Smartphone, Users, AlertTriangle, FileText, Gavel, Layers, RefreshCw, Download, ShieldAlert } from 'lucide-react';
+import { getPublicLedger, downloadPublicLedgerCsv } from '../../lib/apiClient';
 
 export const ArchitectureView: React.FC = () => {
+  const [ledgerData, setLedgerData] = useState<any>(null);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [ledgerDownloading, setLedgerDownloading] = useState(false);
   const assumptions = [
     { id: 1, item: 'Reserve compartments and expose reservation/PIN APIs (CHUI / ParcelPoint)', status: 'Unconfirmed' },
     { id: 2, item: 'Utilities, schools, and hospitals offer balance/invoice lookup', status: 'Unconfirmed' },
@@ -29,6 +33,25 @@ export const ArchitectureView: React.FC = () => {
     { n: 4, name: 'East Africa', items: ['Re-map payment & locker per country', 'Do not assume Kenyan partners transfer'] },
   ];
 
+  const fetchLedger = async () => {
+    setLedgerLoading(true);
+    try {
+      const r = await getPublicLedger(10);
+      if (r) setLedgerData(r);
+    } finally {
+      setLedgerLoading(false);
+    }
+  };
+
+  const handleDownloadLedger = async () => {
+    setLedgerDownloading(true);
+    try { await downloadPublicLedgerCsv(); } catch {}
+    setLedgerDownloading(false);
+  };
+
+  useEffect(() => {
+    fetchLedger();
+  }, []);
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div className="space-y-2">
@@ -140,6 +163,48 @@ export const ArchitectureView: React.FC = () => {
           <li><strong>State & telecom:</strong> anonymity does not extend to telecoms or law enforcement - Kenyan SIMs are National-ID registered.</li>
           <li><strong>Compliance:</strong> direct settlement avoids cash handling; the shortcode holder carries AML duties under POCAMLA.</li>
         </ul>
+      </div>
+
+      <div className="p-6 bg-white border border-[#111111]/15 rounded-2xl space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#1F6B4A]" />
+            <h2 className="font-serif text-lg font-bold text-[#111111]">Live Ledger Verification</h2>
+          </div>
+          <button onClick={fetchLedger} disabled={ledgerLoading} className="text-xs font-medium flex items-center gap-1 px-3 py-1.5 bg-white border border-[#111111]/15 rounded-lg hover:bg-black/5 disabled:opacity-50">
+            <RefreshCw className={'w-3 h-3 ' + (ledgerLoading ? 'animate-spin' : '')} /> Refresh
+          </button>
+        </div>
+
+        {ledgerData && (
+          <div className={'p-4 rounded-xl border-2 ' + (ledgerData.chain_ok ? 'bg-emerald-50 border-emerald-300' : 'bg-rose-50 border-rose-300')}>
+            <div className="flex items-center gap-2 mb-2">
+              {ledgerData.chain_ok ? <ShieldCheck className="w-5 h-5 text-emerald-700" /> : <ShieldAlert className="w-5 h-5 text-rose-700" />}
+              <span className={'font-serif text-base font-bold ' + (ledgerData.chain_ok ? 'text-emerald-900' : 'text-rose-900')}>
+                {ledgerData.chain_ok ? 'Chain verified' : 'Chain broken'}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2 mt-2 border-t border-[#111111]/10">
+              <div>
+                <div className="text-[9px] font-mono uppercase text-[#111111]/50">Total pooled</div>
+                <div className="font-mono text-sm font-bold text-[#111111]">KES {(ledgerData.total_pooled_pence / 100).toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-[9px] font-mono uppercase text-[#111111]/50">Settled entries</div>
+                <div className="font-mono text-sm font-bold text-[#111111]">{ledgerData.entry_count}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <button onClick={handleDownloadLedger} disabled={ledgerDownloading || !ledgerData || ledgerData.entry_count === 0} className="text-xs font-medium flex items-center gap-1.5 px-3 py-2 bg-[#111111] hover:bg-black text-white rounded-lg disabled:opacity-40">
+          <Download className="w-3.5 h-3.5" />
+          {ledgerDownloading ? 'Downloading...' : 'Download full CSV'}
+        </button>
+
+        <p className="text-[10px] text-[#111111]/60 leading-relaxed">
+          Download the CSV and independently recompute the HMAC chain. Same verification runs internally. Blockchain not required — an append-only Postgres table with a unique constraint and a hash chain provides identical guarantees.
+        </p>
       </div>
     </div>
   );

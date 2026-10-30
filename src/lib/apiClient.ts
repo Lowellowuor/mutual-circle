@@ -301,3 +301,38 @@ export const confirmPartnerRequest = (partnerKey: string, requestId: string, con
     `/partners/me/confirm/${requestId}`,
     { method: 'POST', headers: { 'X-Partner-Key': partnerKey }, body: JSON.stringify({ confirmation_type: confirmationType, note }) },
   );
+// --- Public ledger CSV download (Gap 2) ---
+export async function downloadPublicLedgerCsv(): Promise<void> {
+  const res = await fetch(`${BASE}/ledger/public.csv`);
+  if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+  const blob = await res.blob();
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = 'mutual-circle-ledger.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+// --- Partner statement CSV download (Gap 3) ---
+export async function downloadPartnerStatement(partnerKey: string, partnerId: string): Promise<void> {
+  const res = await fetch(`${BASE}/partners/me/statement.csv`, {
+    headers: { 'X-Partner-Key': partnerKey },
+  });
+  if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+  const blob = await res.blob();
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = `mutual-circle-statement-${partnerId}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+// --- Public partner directory (donor view) ---
+export const getPublicPartners = () =>
+  call<{ partners: { id: string; name: string; type: string; region: string }[] }>(
+    '/partners/public',
+  );

@@ -242,7 +242,9 @@ function mergeById<T extends { id: string }>(a: T[], b: T[]): T[] {
 }
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [tokenHash, setTokenHash] = useState<string | null>(null);
+  const [tokenHash, setTokenHash] = useState<string | null>(() => {
+    try { return localStorage.getItem('mtc-token'); } catch { return null; }
+  });
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [staffRole, setStaffRole] = useState<StaffRole | null>(null);
   const [staffId, setStaffId] = useState<string | null>(null);
@@ -407,10 +409,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const initializeSession = async (phone: string, channel: 'web' | 'sms' | 'ussd' = 'web'): Promise<string> => {
     const r = await api.issueTokenStrict(phone);
     setTokenHash(r.token);
+    try { localStorage.setItem('mtc-token', r.token); } catch {}
     return r.token;
   };
 
-  const logout = () => setTokenHash(null);
+  const logout = () => {
+    setTokenHash(null);
+    try { localStorage.removeItem('mtc-token'); } catch {}
+  };
 
   const loginStaff = async (role: StaffRole, id: string, pin: string): Promise<boolean> => {
     const r = await api.staffLogin(role, id, pin);

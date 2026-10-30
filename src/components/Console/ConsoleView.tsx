@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { STAFF_CREDS } from '../../services/auth';
+import { DetailModal } from './DetailModal';
 import {
   ShieldCheck, ShieldAlert, CheckCircle, Send, AlertTriangle, Users, Activity,
   Download, X, Layers, Boxes, Package, Truck, Check, Eye, EyeOff, RotateCcw,
-  LogIn, LogOut, Store, KeyRound, Lock,
+  LogIn, LogOut, Store, KeyRound, Lock, Building2, RefreshCw, Zap,
 } from 'lucide-react';
+import { getPartnerMe, getPartnerRedemptions, confirmPartnerRequest, downloadPartnerStatement } from '../../lib/apiClient';
 
 type Role = 'enrolment' | 'fulfilment' | 'audit';
-type Tab = 'queue' | 'depot' | 'till' | 'matrix' | 'tiers';
+type Tab = 'queue' | 'depot' | 'till' | 'matrix' | 'tiers' | 'partners';
 type AuditSub = 'flags' | 'ocr' | 'fp' | 'dedup' | 'log';
 type Filter = 'all' | 'swap' | 'pool' | 'pending' | 'dispatched';
 
@@ -44,6 +46,14 @@ export const ConsoleView: React.FC = () => {
   const [issuePartner, setIssuePartner] = useState<'Naivas Kibera' | 'Kenyatta Hospital'>('Naivas Kibera');
   const [issueSuccess, setIssueSuccess] = useState<string | null>(null);
 
+  const [selectedPartner, setSelectedPartner] = useState('chui-demo-key-2026');
+  const [partnerInfo, setPartnerInfo] = useState<{ id: string; name: string; type: string } | null>(null);
+  const [partnerRedemptions, setPartnerRedemptions] = useState<any[]>([]);
+  const [partnerLoading, setPartnerLoading] = useState(false);
+  const [confirmingPartner, setConfirmingPartner] = useState<string | null>(null);
+  const [selectedDetail, setSelectedDetail] = useState<{ type: 'pool' | 'swap' | 'flag' | 'dedup' | 'pledge' | 'match' | 'voucher'; item: any } | null>(null);
+  const [partnerDownloading, setPartnerDownloading] = useState(false);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -55,6 +65,23 @@ export const ConsoleView: React.FC = () => {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
+  useEffect(() => {
+    if (tab !== 'partners') return;
+    let cancelled = false;
+    setPartnerLoading(true);
+    (async () => {
+      const [me, red] = await Promise.all([
+        getPartnerMe(selectedPartner),
+        getPartnerRedemptions(selectedPartner),
+      ]);
+      if (!cancelled) {
+        if (me) setPartnerInfo(me);
+        if (red) setPartnerRedemptions(red.redemptions || []);
+        setPartnerLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedPartner, tab]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -294,7 +321,7 @@ export const ConsoleView: React.FC = () => {
           {riskFlags.length === 0 ? (
             <div className="p-8 bg-white border border-[#111111]/15 rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs text-[#111111]/60">No active flags</p></div>
           ) : riskFlags.map(flag => (
-            <div key={flag.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+            <div key={flag.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedDetail({ type: 'flag', item: flag })}>
               <div className="flex items-start justify-between gap-1">
                 <div className="flex items-center gap-1 flex-wrap min-w-0"><span className={'px-1.5 py-0.5 rounded text-[8px] uppercase font-bold ' + (flag.severity === 'high' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800')}>{flag.severity}</span><span className="font-mono text-[9px] text-[#111111]/50">{flag.id}</span></div>
                 <span className="text-[9px] font-mono text-[#111111]/40 shrink-0">{flag.timestamp}</span>
@@ -481,11 +508,126 @@ export const ConsoleView: React.FC = () => {
     </div>
   );
 
+
+  const handlePartnerConfirm = async (requestId: string) => {
+    setConfirmingPartner(requestId);
+    const r = await confirmPartnerRequest(selectedPartner, requestId, 'delivered');
+    if (r?.ok) {
+      const red = await getPartnerRedemptions(selectedPartner);
+      if (red) setPartnerRedemptions(red.redemptions || []);
+    }
+    setConfirmingPartner(null);
+  };
+
+  const handlePartnerStatement = async () => {
+    if (!partnerInfo) return;
+    setPartnerDownloading(true);
+    try { await downloadPartnerStatement(selectedPartner, partnerInfo.id); } catch {}
+    setPartnerDownloading(false);
+  };
+
+  const renderPartners = () => (
+    <div className="p-4 space-y-3">
+      <div>
+        <h2 className="font-serif text-base font-bold text-[#111111]">Partners</h2>
+        <p className="text-[10px] text-[#111111]/50 mt-0.5">External reconciliation</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-1.5">
+        {[
+          { key: 'chui-demo-key-2026', label: 'CHUI', Icon: Package },
+          { key: 'kplc-demo-key-2026', label: 'KPLC', Icon: Zap },
+          { key: 'naivas-demo-key-2026', label: 'Naivas', Icon: Store },
+        ].map(p => {
+          const Icon = p.Icon;
+          const active = selectedPartner === p.key;
+          return (
+            <button
+              key={p.key}
+              onClick={() => setSelectedPartner(p.key)}
+              className={'p-2 rounded-lg border-2 text-center transition-all ' + (active ? 'bg-[#1F6B4A] text-white border-[#1F6B4A]' : 'bg-white border-[#111111]/15 text-[#111111] hover:border-[#111111]/30')}
+            >
+              <Icon className="w-3.5 h-3.5 mx-auto mb-0.5" />
+              <div className="text-[9px] font-bold">{p.label}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      {partnerLoading ? (
+        <div className="p-6 text-center text-[10px] text-[#111111]/50">Loading...</div>
+      ) : partnerInfo ? (
+        <>
+          <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-1">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-[#1F6B4A]" />
+              <div className="text-[11px] font-bold text-[#111111] leading-tight">{partnerInfo.name}</div>
+            </div>
+            <div className="text-[9px] font-mono text-[#111111]/50 uppercase">{partnerInfo.type}</div>
+            <div className="flex justify-between pt-1.5 border-t border-[#111111]/10 text-[9px] font-mono">
+              <span className="text-[#111111]/50">Total: {partnerRedemptions.length}</span>
+              <span className="text-emerald-700">Confirmed: {partnerRedemptions.filter((r: any) => r.confirmed).length}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handlePartnerStatement}
+            disabled={partnerDownloading || partnerRedemptions.length === 0}
+            className="w-full py-2 bg-[#111111] text-white rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1 disabled:opacity-40"
+          >
+            <Download className="w-3 h-3" /> {partnerDownloading ? 'Downloading...' : 'Statement CSV'}
+          </button>
+
+          <div className="space-y-1.5">
+            {partnerRedemptions.length === 0 ? (
+              <div className="p-6 text-center text-[10px] text-[#111111]/40">No fulfillments yet</div>
+            ) : partnerRedemptions.slice(0, 15).map((r: any) => {
+              const details = r.category
+                ? (r.category as string).replace('_', ' ')
+                : (r.metadata?.bundle || 'Bundle');
+              return (
+                <div key={r.id} className="p-2 bg-white border border-[#111111]/10 rounded-lg space-y-1.5">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[10px] font-semibold text-[#111111] capitalize truncate">{details}</div>
+                      <div className="text-[9px] font-mono text-[#111111]/50 truncate">
+                        {String(r.id).slice(0, 8)}… · {(r.status || '').replace(/_/g, ' ')}
+                      </div>
+                    </div>
+                    {r.amount_pence !== undefined && r.amount_pence > 0 && (
+                      <div className="text-[10px] font-mono font-bold text-[#111111] shrink-0">
+                        KES {(r.amount_pence / 100).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                  {r.confirmed ? (
+                    <div className="text-[9px] font-mono text-emerald-700 flex items-center gap-1">
+                      <Check className="w-2.5 h-2.5" /> Confirmed
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handlePartnerConfirm(r.id)}
+                      disabled={confirmingPartner === r.id}
+                      className="w-full py-1 bg-[#1F6B4A] text-white rounded text-[9px] font-semibold flex items-center justify-center gap-1 disabled:opacity-40"
+                    >
+                      <Check className="w-2.5 h-2.5" /> {confirmingPartner === r.id ? 'Confirming...' : 'Confirm delivery'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+
   const renderContent = () => {
     if (tab === 'queue') { if (staffRole === 'enrolment') return renderEnrolment(); if (staffRole === 'audit') return renderAudit(); return renderFulfilment(); }
     if (tab === 'depot') return renderDepot();
     if (tab === 'till') return renderTill();
     if (tab === 'matrix') return renderMatrix();
+    if (tab === 'partners') return renderPartners();
     return renderTiers();
   };
 
@@ -500,7 +642,7 @@ export const ConsoleView: React.FC = () => {
           <div className="px-5 pb-2 border-b border-[#111111]/10 flex items-center justify-between"><div><h1 className="font-serif text-base font-bold text-[#111111]">Operations</h1><p className="text-[9px] font-mono text-[#111111]/40">Logged in * {staffId}</p></div><button onClick={logoutStaff} className="text-rose-600 hover:underline text-[9px] font-mono flex items-center gap-0.5"><LogOut className="w-3 h-3" />Logout</button></div>
           <div className="px-3 py-2 border-b border-[#111111]/10 bg-white"><div className="text-[9px] font-mono text-[#111111]/50 uppercase">Current role: <strong className="text-[#1F6B4A]">{roleLabel[staffRole as Role]}</strong> * logout to switch</div></div>
           <div key={staffRole + tab + auditSub} className="flex-1 overflow-y-auto animate-in fade-in duration-200">{renderContent()}</div>
-          <div className="border-t border-[#111111]/10 bg-white"><div className="grid grid-cols-5">{[{ id: 'queue' as Tab, Icon: Activity, l: 'Queue' }, { id: 'depot' as Tab, Icon: Boxes, l: 'Depot' }, { id: 'till' as Tab, Icon: Store, l: 'Till' }, { id: 'matrix' as Tab, Icon: Layers, l: 'Matrix' }, { id: 'tiers' as Tab, Icon: ShieldCheck, l: 'Tiers' }].map(t => { const I = t.Icon; const active = tab === t.id; return (<button key={t.id} onClick={() => setTab(t.id)} className={'py-2 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}><I className="w-3.5 h-3.5" /><span className="text-[8px] font-medium">{t.l}</span></button>); })}</div></div>
+          <div className="border-t border-[#111111]/10 bg-white"><div className="grid grid-cols-6">{[{ id: 'queue' as Tab, Icon: Activity, l: 'Queue' }, { id: 'depot' as Tab, Icon: Boxes, l: 'Depot' }, { id: 'till' as Tab, Icon: Store, l: 'Till' }, { id: 'matrix' as Tab, Icon: Layers, l: 'Matrix' }, { id: 'tiers' as Tab, Icon: ShieldCheck, l: 'Tiers' }, { id: 'partners' as Tab, Icon: Building2, l: 'Partners' }].map(t => { const I = t.Icon; const active = tab === t.id; return (<button key={t.id} onClick={() => setTab(t.id)} className={'py-2 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}><I className="w-3.5 h-3.5" /><span className="text-[8px] font-medium">{t.l}</span></button>); })}</div></div>
         </div>
       </div>
 
@@ -530,6 +672,10 @@ export const ConsoleView: React.FC = () => {
 
         <button onClick={() => { setTab('queue'); setAuditSub('flags'); setFilter('all'); setReceipt(null); setShowRaw(false); setTillResult(null); setIssueModal(null); setIssueSuccess(null); }} className="w-full py-2 text-xs text-[#111111]/60 hover:text-[#111111] border border-[#111111]/15 rounded-lg bg-white flex items-center justify-center gap-1.5"><RotateCcw className="w-3 h-3" /> Reset view</button>
       </div>
+
+      {selectedDetail && (
+        <DetailModal type={selectedDetail.type} item={selectedDetail.item} onClose={() => setSelectedDetail(null)} />
+      )}
 
       {issueModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">

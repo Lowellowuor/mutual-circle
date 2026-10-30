@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { getDonorLeaderboard, getDonorProfile, updateDonorProfile, getImpactStats, getDistribution } from '../../lib/apiClient';
+import { SmsDonorSimulator } from './SmsDonorSimulator';
+import { DonorActivityModal } from './DonorActivityModal';
+import { getDonorLeaderboard, getDonorProfile, updateDonorProfile, getImpactStats, getDistribution, getPublicPartners } from '../../lib/apiClient';
 import {
   HeartHandshake, ShieldCheck, Check, Home, Wallet, Package, TrendingUp,
   MapPin, Zap, ChevronRight, Clock, Eye, EyeOff, RotateCcw, Lock, Trophy, Edit2,
@@ -27,6 +29,13 @@ export const DonorView: React.FC = () => {
   const [pLocality, setPLocality] = useState('Nairobi County');
   const [pProcessing, setPProcessing] = useState(false);
     const [showServer, setShowServer] = useState(false);
+  const [channel, setChannel] = useState<'web' | 'sms'>('web');
+
+  // TS2367 workaround: channel is narrowed to 'web' after the early-return at line 612.
+  // Parameter target avoids the narrowing - channel === target compares to 'web' | 'sms'.
+  const channelBtnClass = (target: 'web' | 'sms') =>
+    'px-2 py-0.5 rounded text-[9px] font-mono uppercase font-bold transition-colors ' +
+    (channel === target ? 'bg-[#1F6B4A] text-white' : 'bg-[#FAF8F4] text-[#111111]/40 border border-[#111111]/15');
   const [impactStats, setImpactStats] = useState<{ total_pooled_pence: number; bundles_delivered: number; utility_meters_paid: number; student_terms_paid: number } | null>(null);
   const [distribution, setDistribution] = useState<{ category: string; label: string; count: number; total_pence: number; percentage: number }[]>([]);
   const [leaderboard, setLeaderboard] = useState<{ display_name: string; total_pence: number; gift_count: number }[]>([]);
@@ -36,6 +45,8 @@ export const DonorView: React.FC = () => {
   const [profileOptIn, setProfileOptIn] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [dismissedClosures, setDismissedClosures] = useState<Set<string>>(new Set());
+  const [publicPartners, setPublicPartners] = useState<{ id: string; name: string; type: string; region: string }[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<any | null>(null);
 
   const finalAmount = custom ? Number(custom) : selected;
   const totalGiven = donorContributions.reduce((a, c) => a + c.amount, 0);
@@ -88,7 +99,8 @@ export const DonorView: React.FC = () => {
         setProfileName(p.display_name || '');
         setProfileOptIn(p.opt_in_ledger);
       }
-      const [impact, dist] = await Promise.all([getImpactStats(), getDistribution()]);
+      const [impact, dist, partners] = await Promise.all([getImpactStats(), getDistribution(), getPublicPartners()]);
+      if (partners) setPublicPartners(partners.partners || []);
       if (impact) setImpactStats(impact);
       if (dist) setDistribution(dist.by_category);
     })();
@@ -289,6 +301,33 @@ export const DonorView: React.FC = () => {
             </div>
             <ChevronRight className="w-4 h-4 text-[#111111]/40" />
           </button>
+          {publicPartners.length > 0 && (
+            <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2">
+              <div className="flex justify-between items-center">
+                <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Who we work with</h3>
+                <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Verified</span>
+              </div>
+              <div className="space-y-1.5">
+                {publicPartners.map(p => (
+                  <div key={p.id} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-[#FAF8F4] flex items-center justify-center text-[8px] font-bold text-[#1F6B4A] border border-[#111111]/10">
+                        {p.id.slice(0, 2)}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-semibold text-[#111111] truncate">{p.name}</div>
+                        <div className="text-[9px] font-mono text-[#111111]/50 truncate">{p.region}</div>
+                      </div>
+                    </div>
+                    <span className="text-[8px] font-mono uppercase text-[#111111]/40 shrink-0">{p.type}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[9px] text-[#111111]/50 leading-relaxed pt-1 border-t border-[#111111]/10">
+                We never share your contribution with these partners. They receive pooled settlement, never your identity or a specific recipient's.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -297,7 +336,7 @@ export const DonorView: React.FC = () => {
             </div>
             {hasActivity ? (
               activityFeed.slice(0, 10).map(item => (
-                <div key={item.id} className="p-2.5 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2">
+                <div key={item.id} className="p-2.5 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedActivity(item)}>
                   <div className={'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ' + (item.kind === 'donation' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700')}>
                     {item.kind === 'donation' ? <Wallet className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
                   </div>
@@ -576,6 +615,19 @@ export const DonorView: React.FC = () => {
     );
   };
 
+  if (channel === 'sms') {
+    return (
+      <div className="min-h-screen bg-[#F6F4EE] flex flex-col items-center py-6 px-4">
+        <button
+          onClick={() => setChannel('web')}
+          className="self-start max-w-[340px] w-full mb-3 text-xs font-medium text-[#111111]/60 hover:text-[#111111]"
+        >
+          Back to Donor Portal
+        </button>
+        <SmsDonorSimulator />
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
       <div className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
@@ -589,7 +641,20 @@ export const DonorView: React.FC = () => {
               <div className="w-8 h-8 bg-[#1F6B4A] rounded-xl flex items-center justify-center"><HeartHandshake className="w-4 h-4 text-white" /></div>
               <div><div className="text-xs font-bold text-[#111111] leading-tight">Donor Portal</div><div className="text-[9px] text-[#111111]/40 font-mono">Blind-pooled</div></div>
             </div>
-            <Lock className="w-3.5 h-3.5 text-[#1F6B4A]" />
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setChannel('web')}
+                className={channelBtnClass('web')}
+              >
+                Web
+              </button>
+              <button
+                onClick={() => setChannel('sms')}
+                className={channelBtnClass('sms')}
+              >
+                SMS
+              </button>
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto">{renderContent()}</div>
           <div className="border-t border-[#111111]/10 bg-white">
@@ -597,7 +662,7 @@ export const DonorView: React.FC = () => {
               {TABS.map(t => {
                 const Icon = t.Icon;
                 const active = tab === t.id && screen === 'tab';
-                return (
+  return (
                   <button key={t.id} onClick={() => goTab(t.id)} className={'py-2.5 flex flex-col items-center gap-0.5 transition-colors ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
                     <Icon className="w-4 h-4" /><span className="text-[9px] font-medium">{t.label}</span>
                   </button>
@@ -609,6 +674,7 @@ export const DonorView: React.FC = () => {
       </div>
 
       <div className="w-full max-w-sm space-y-3">
+      
         <div className="p-4 rounded-xl bg-white border border-[#111111]/15 space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-sm font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View</h3>
@@ -635,6 +701,9 @@ export const DonorView: React.FC = () => {
 
         <button onClick={() => { resetFlow(); setTab('home'); setShowServer(false); }} className="w-full py-2 text-xs text-[#111111]/60 hover:text-[#111111] border border-[#111111]/15 rounded-lg bg-white flex items-center justify-center gap-1.5"><RotateCcw className="w-3 h-3" /> Reset Simulator</button>
       </div>
+      {selectedActivity && (
+        <DonorActivityModal item={selectedActivity} onClose={() => setSelectedActivity(null)} />
+      )}
     </div>
   );
 };

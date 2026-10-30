@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { peekRate, consumeRate, loadHistory, saveHistory, loadSeen, saveSeen } from '../../services/auth';
-import { setHouseholdSize as apiSetHousehold, getHouseholdSize as apiGetHousehold, getOpportunities, getHelplines } from '../../lib/apiClient';
+import { setHouseholdSize as apiSetHousehold, getHouseholdSize as apiGetHousehold, getOpportunities, getHelplines, getUnreadNotificationCount } from '../../lib/apiClient';
 import {
   HeartHandshake, Shield, Package, CreditCard, Users, MessageCircle,
   Home, MapPin, Check, CheckCircle, Clock, Copy, ScanLine, ArrowRight,
   AlertTriangle, FileText, Zap, GraduationCap, Building2, Droplet, Briefcase,
-  X, Phone, ShieldCheck, ShieldAlert, Eye, EyeOff, RotateCcw, LogOut, AlertCircle, Trash2,
+  X, Phone, ShieldCheck, ShieldAlert, Eye, EyeOff, RotateCcw, LogOut, Bell, AlertCircle, Trash2,
   MessageSquare, ArrowLeft,
 } from 'lucide-react';
 import { SwapRequest, PoolRequest } from '../../types';
+import { RequesterMessages } from './Messages';
 
 type Tab = 'home' | 'swap' | 'pool' | 'match' | 'bench';
 type SwapStep = 'bundle' | 'location' | 'success';
@@ -60,6 +61,8 @@ export const RequesterView: React.FC = () => {
   /* ---------- APP STATE ---------- */
   const [tab, setTab] = useState<Tab>('home');
   const [showServer, setShowServer] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [rate, setRate] = useState({ count: 0, value: 0 });
   const [history, setHistory] = useState<any[]>([]);
   const [seen, setSeen] = useState<string[]>([]);
@@ -127,6 +130,19 @@ export const RequesterView: React.FC = () => {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
+
+  // Poll unread notification count (bell badge)
+  useEffect(() => {
+    if (!tokenHash) { setUnreadCount(0); return; }
+    let cancelled = false;
+    const fetchCount = async () => {
+      const r = await getUnreadNotificationCount(tokenHash);
+      if (!cancelled) setUnreadCount(r?.unread_count || 0);
+    };
+    fetchCount();
+    const t = setInterval(fetchCount, 30000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [tokenHash]);
 
   /* ---------- OTP HANDLERS ---------- */
   useEffect(() => {
@@ -839,7 +855,15 @@ export const RequesterView: React.FC = () => {
       <div className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
         <div className="bg-[#FAF8F4] rounded-[2rem] overflow-hidden flex flex-col h-[640px]">
           <div className="px-5 pt-3 pb-1 flex items-center justify-between text-[10px] font-medium text-[#111111]/60"><span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span><span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded uppercase font-bold">Anonymous</span></div>
-          <div className="px-5 pb-2 border-b border-[#111111]/10 flex items-center justify-between"><div className="flex items-center gap-2"><div className="w-8 h-8 bg-[#1F6B4A] rounded-xl flex items-center justify-center"><HeartHandshake className="w-4 h-4 text-white" /></div><div><div className="text-xs font-bold text-[#111111] leading-tight">Mutual Circle</div><div className="text-[9px] text-[#111111]/40 font-mono truncate max-w-[150px]">{tokenHash}</div></div></div><button onClick={logout} className="text-[#111111]/40 hover:text-rose-600" aria-label="End session" title="End session"><LogOut className="w-4 h-4" /></button></div>
+          <div className="px-5 pb-2 border-b border-[#111111]/10 flex items-center justify-between"><div className="flex items-center gap-2"><div className="w-8 h-8 bg-[#1F6B4A] rounded-xl flex items-center justify-center"><HeartHandshake className="w-4 h-4 text-white" /></div><div><div className="text-xs font-bold text-[#111111] leading-tight">Mutual Circle</div><div className="text-[9px] text-[#111111]/40 font-mono truncate max-w-[150px]">{tokenHash}</div></div></div><div className="flex items-center gap-1">
+      <button onClick={() => setShowMessages(true)} className="relative text-[#111111]/40 hover:text-[#1F6B4A] p-1 rounded" aria-label="Messages" title="Messages">
+        <Bell className="w-4 h-4" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] bg-rose-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center px-0.5">{unreadCount > 9 ? '9+' : unreadCount}</span>
+        )}
+      </button>
+      <button onClick={logout} className="text-[#111111]/40 hover:text-rose-600 p-1 rounded" aria-label="End session" title="End session"><LogOut className="w-4 h-4" /></button>
+    </div></div>
           <div key={tab} className="flex-1 overflow-y-auto animate-in fade-in duration-200">{renderContent()}</div>
           <div className="border-t border-[#111111]/10 bg-white"><div className="grid grid-cols-5">{TABS.map(t => { const I = t.Icon; const active = tab === t.id; return (<button key={t.id} onClick={() => goTab(t.id)} className={'py-2.5 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}><I className="w-4 h-4" /><span className="text-[9px] font-medium">{t.label}</span></button>); })}</div></div>
         </div>
@@ -866,6 +890,24 @@ export const RequesterView: React.FC = () => {
 
         <button onClick={() => { goTab('home'); setShowServer(false); logout(); setIntakeStep('phone'); setPhone(''); setOtpInput(''); setGeneratedOtp(''); setOtpAttempts(0); setResendCooldown(0); }} className="w-full py-2 text-xs text-[#111111]/60 hover:text-rose-600 border border-[#111111]/15 rounded-lg bg-white flex items-center justify-center gap-1.5"><RotateCcw className="w-3 h-3" /> Reset session</button>
       </div>
+      {showMessages && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center p-4 pt-12 overflow-y-auto" onClick={() => setShowMessages(false)}>
+          <div className="bg-[#F6F4EE] rounded-2xl max-w-2xl w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-[#111111]/10 px-5 py-3 flex items-center justify-between rounded-t-2xl z-10">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#1F6B4A]" />
+                <h2 className="font-serif text-base font-bold text-[#111111]">Messages</h2>
+              </div>
+              <button onClick={() => setShowMessages(false)} className="text-[#111111]/40 hover:text-[#111111] p-1 rounded" aria-label="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4">
+              <RequesterMessages />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
