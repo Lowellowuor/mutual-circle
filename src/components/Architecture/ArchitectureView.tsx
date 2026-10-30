@@ -69,11 +69,11 @@ export const ArchitectureView: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div className="p-4 bg-emerald-50/50 border border-emerald-200 rounded-xl">
             <h4 className="text-[10px] font-mono uppercase font-bold text-emerald-900 mb-2">Stored</h4>
-            {dataRules.map(r => <div key={r.stored} className="py-1 border-b border-emerald-200/60 last:border-0 text-emerald-950">* {r.stored}</div>)}
+            {dataRules.map(r => <div key={r.stored} className="py-1 border-b border-emerald-200/60 last:border-0 text-emerald-950">· {r.stored}</div>)}
           </div>
           <div className="p-4 bg-rose-50/50 border border-rose-200 rounded-xl">
             <h4 className="text-[10px] font-mono uppercase font-bold text-rose-900 mb-2">Never stored</h4>
-            {dataRules.map(r => <div key={r.not} className="py-1 border-b border-rose-200/60 last:border-0 text-rose-950">? {r.not}</div>)}
+            {dataRules.map(r => <div key={r.not} className="py-1 border-b border-rose-200/60 last:border-0 text-rose-950">× {r.not}</div>)}
           </div>
         </div>
       </div>
@@ -96,7 +96,7 @@ export const ArchitectureView: React.FC = () => {
           {phases.map(p => (
             <div key={p.n} className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl">
               <div className="flex items-center gap-1.5 mb-2"><span className="text-[10px] font-mono bg-[#1F6B4A] text-white w-5 h-5 rounded-full flex items-center justify-center font-bold">{p.n}</span><span className="font-bold text-[11px] text-[#111111]">{p.name}</span></div>
-              <ul className="space-y-1 text-[10px] text-[#111111]/70">{p.items.map(i => <li key={i} className="flex gap-1"><span className="text-[#1F6B4A]">"</span>{i}</li>)}</ul>
+              <ul className="space-y-1 text-[10px] text-[#111111]/70">{p.items.map(i => <li key={i} className="flex gap-1"><span className="text-[#1F6B4A]">›</span>{i}</li>)}</ul>
             </div>
           ))}
         </div>
@@ -125,9 +125,9 @@ export const ArchitectureView: React.FC = () => {
       <div className="p-5 bg-white border border-[#111111]/15 rounded-2xl space-y-2 text-xs">
         <h3 className="font-serif text-sm font-bold text-[#111111]">Coverage Snapshot</h3>
         <div className="grid grid-cols-2 gap-2 pt-1">
-          <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-lg"><div className="text-[9px] font-mono uppercase text-emerald-900 font-bold">Built & functional</div><div className="text-[10px] text-emerald-900/80 mt-1 leading-relaxed">Tokenisation * rate limits * Swap * Pool * Tiers * Audit * OCR * Vouchers * Bench * Donor * Console * CSV export</div></div>
-          <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg"><div className="text-[9px] font-mono uppercase text-amber-900 font-bold">Mocked (interfaces clean)</div><div className="text-[10px] text-amber-900/80 mt-1 leading-relaxed">M-Pesa STK * CHUI lockers * utility lookup * OCR pipeline * staff IdP * Meta WhatsApp</div></div>
-          <div className="p-2 bg-rose-50 border border-rose-200 rounded-lg"><div className="text-[9px] font-mono uppercase text-rose-900 font-bold">Not built (disclosed)</div><div className="text-[10px] text-rose-900/80 mt-1 leading-relaxed">Real ledger (Phase 2) * ML fraud model * DPA review * production Bench infra * CBK threshold tracking</div></div>
+          <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-lg"><div className="text-[9px] font-mono uppercase text-emerald-900 font-bold">Built & functional</div><div className="text-[10px] text-emerald-900/80 mt-1 leading-relaxed">Tokenisation · rate limits · Swap · Pool · Tiers · Audit · OCR · Vouchers · Bench · Donor · Console · CSV export</div></div>
+          <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg"><div className="text-[9px] font-mono uppercase text-amber-900 font-bold">Mocked (interfaces clean)</div><div className="text-[10px] text-amber-900/80 mt-1 leading-relaxed">M-Pesa STK · CHUI lockers · utility lookup · OCR pipeline · staff IdP · Meta WhatsApp</div></div>
+          <div className="p-2 bg-rose-50 border border-rose-200 rounded-lg"><div className="text-[9px] font-mono uppercase text-rose-900 font-bold">Not built (disclosed)</div><div className="text-[10px] text-rose-900/80 mt-1 leading-relaxed">Real ledger (Phase 2) · ML fraud model · DPA review · production Bench infra · CBK threshold tracking</div></div>
           <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg"><div className="text-[9px] font-mono uppercase text-blue-900 font-bold">Structural tension</div><div className="text-[10px] text-blue-900/80 mt-1 leading-relaxed">Proof-of-delivery to donors cannot exist without breaking blind pooling. Disclosed in Donor Impact tab.</div></div>
         </div>
       </div>
