@@ -27,3 +27,9 @@ backend/.uvicorn.pid
 *.mockfix.bak
 *.premodal.bak
 *.landing.bak
+
+# Local venv + integration-test logs
+.venv/
+backend/.test.log
+backend/.test.err
+.test.*
