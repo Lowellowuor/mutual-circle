@@ -1,13 +1,4 @@
-"""Mutual Circle API — main entrypoint.
-
-Endpoints in Day 1:
-  GET /          — service identity
-  GET /health    — liveness + DB state
-  GET /ready     — readiness (fails if DB not connected)
-
-The app boots even if the database is unreachable, so that CI and staging
-environments can run without a database. /ready is the honest signal.
-"""
+"""Mutual Circle API — main entrypoint."""
 import logging
 from contextlib import asynccontextmanager
 
@@ -16,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from mtc.config import settings
 from mtc.db.main import close_pool, get_pool, health_check
+from mtc.routes.public import router as public_router
+from mtc.routes.requester import router as requester_router
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -35,12 +28,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Mutual Circle API",
-    version="0.1.0",
+    version="0.3.0",
     description="Anonymized resource-sharing network — R.U.T.H prototype backend",
     lifespan=lifespan,
 )
 
-# CORS: allow local frontend dev and the deployed GitHub Pages frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -53,27 +45,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(public_router)
+app.include_router(requester_router)
+
 
 @app.get("/")
 async def root():
-    return {"service": "mutual-circle-api", "version": "0.1.0"}
+    return {"service": "mutual-circle-api", "version": "0.3.0"}
 
 
 @app.get("/health")
 async def health():
     db = await health_check()
-    return {
-        "ok": True,
-        "environment": settings.environment,
-        "version": "0.1.0",
-        **db,
-    }
+    return {"ok": True, "environment": settings.environment, "version": "0.3.0", **db}
 
 
 @app.get("/ready")
 async def ready():
     db = await health_check()
-    return {
-        "ready": db.get("db") == "connected",
-        **db,
-    }
+    return {"ready": db.get("db") == "connected", **db}
