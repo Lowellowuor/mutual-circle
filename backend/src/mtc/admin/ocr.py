@@ -10,6 +10,7 @@ On completion: status → 'verified'. From there, Fulfilment can dispatch.
 import asyncpg
 
 from mtc.audit.log import append_audit
+from mtc.notifications.service import notify
 
 
 class OcrConflict(Exception):
@@ -46,6 +47,11 @@ async def complete_ocr(
             target_hash=req["hashed_object_id"],
             metadata={"amount_pence": req["amount_pence"], "tier": req["tier"]},
         )
+
+    await notify(
+        conn, req["token_hash"], request_id, "verified",
+        {"ref": req["hashed_object_id"]},
+    )
 
     return {"request_id": request_id, "status": "verified"}
 

@@ -17,6 +17,7 @@ import asyncpg
 
 from mtc.audit.log import append_audit
 from mtc.ledger.append import DuplicateObjectError, append_entry
+from mtc.notifications.service import notify
 
 
 class DispatchConflict(Exception):
@@ -75,6 +76,11 @@ async def dispatch_pool_request(
             target_hash=req["hashed_object_id"],
             metadata={"receipt": receipt, "amount_pence": req["amount_pence"]},
         )
+
+    await notify(
+        conn, req["token_hash"], request_id, "dispatched",
+        {"ref": req["hashed_object_id"]},
+    )
 
     return {
         "request_id": request_id,

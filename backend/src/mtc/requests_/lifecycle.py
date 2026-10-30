@@ -7,6 +7,8 @@ Enforces transitions:
 """
 import asyncpg
 
+from mtc.notifications.service import notify
+
 
 class WithdrawNotAllowed(Exception):
     def __init__(self, current_status: str):
@@ -40,6 +42,11 @@ async def withdraw_request(
         """,
         request_id,
     )
+    await notify(
+        conn, token_hash, request_id, "withdrawn",
+        {"ref": row["id"]},
+    )
+
     return {
         "id": str(updated["id"]),
         "status": updated["status"],

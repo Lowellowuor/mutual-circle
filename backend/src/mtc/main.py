@@ -16,7 +16,10 @@ from mtc.routes.fulfilment import router as fulfilment_router
 from mtc.routes.partner import router as partner_router
 from mtc.routes.pledges import router as pledges_router
 from mtc.routes.helplines import router as helplines_router
+from mtc.routes.ledger_public import router as ledger_public_router
+from mtc.routes.notifications import router as notifications_router
 from mtc.routes.opportunities import router as opportunities_router
+from mtc.routes.partners import router as partners_router
 from mtc.routes.public import router as public_router
 from mtc.routes.requester import router as requester_router
 from mtc.routes.staff import router as staff_router
@@ -67,6 +70,9 @@ app.include_router(admin_router)
 app.include_router(opportunities_router)
 app.include_router(helplines_router)
 app.include_router(stats_router)
+app.include_router(notifications_router)
+app.include_router(ledger_public_router)
+app.include_router(partners_router)
 
 
 @app.get("/")

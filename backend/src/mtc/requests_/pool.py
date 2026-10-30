@@ -6,6 +6,7 @@ the amount and category — see mtc.requests_.tiers.
 """
 import asyncpg
 
+from mtc.notifications.service import notify
 from mtc.requests_.tiers import assign_tier, initial_status
 
 
@@ -27,6 +28,12 @@ async def create_pool(
         """,
         token_hash, category, amount_pence, hashed_object_id, tier, status,
     )
+    pool_template = "pool_pending" if status == "pending_check" else "pool_submitted"
+    await notify(
+        conn, token_hash, str(row["id"]), pool_template,
+        {"ref": hashed_object_id},
+    )
+
     return {
         "id": str(row["id"]),
         "type": "pool",

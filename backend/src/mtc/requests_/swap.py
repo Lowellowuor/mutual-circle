@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 import asyncpg
 
+from mtc.notifications.service import notify
 from mtc.requests_.tiers import assign_tier, initial_status
 
 
@@ -55,6 +56,11 @@ async def create_swap(
         """,
         token_hash, json.dumps(metadata), tier, status,
     )
+    await notify(
+        conn, token_hash, str(row["id"]), "swap_submitted",
+        {"location": locker_location, "pin": pin},
+    )
+
     return {
         "id": str(row["id"]),
         "type": "swap",
