@@ -53,7 +53,7 @@ function App() {
             <button
               onClick={handleReset}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-white/60 border border-white/10 ml-2"
-              title="Reset demo — clears all state"
+              title="Reset demo â€” clears all state"
             >
               <RotateCcw className="w-3.5 h-3.5" /> Reset
             </button>

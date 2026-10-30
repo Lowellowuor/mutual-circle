@@ -27,9 +27,9 @@ const BUNDLES = [
 ];
 
 const LOCATIONS = [
-  { id: 'Kibera Hub', sub: '24/7 · 12 available' },
-  { id: 'Mathare Central', sub: '6am–10pm · 18 available' },
-  { id: 'Kawangware Station', sub: '24/7 · 4 available' },
+  { id: 'Kibera Hub', sub: '24/7 Â· 12 available' },
+  { id: 'Mathare Central', sub: '6amâ€“10pm Â· 18 available' },
+  { id: 'Kawangware Station', sub: '24/7 Â· 4 available' },
 ];
 
 const POOL_CATS: { id: PoolCat; name: string; desc: string; Icon: any; accent: string; objLabel: string; placeholder: string }[] = [
@@ -46,9 +46,9 @@ const OPPORTUNITIES = [
 ];
 
 const HELPLINES = [
-  { name: 'Befrienders', number: '0722 178 177', sub: '24/7 · free' },
+  { name: 'Befrienders', number: '0722 178 177', sub: '24/7 Â· free' },
   { name: 'Red Cross', number: '1199', sub: 'Crisis & counselling' },
-  { name: 'Emergency', number: '999 / 112', sub: 'Police · ambulance' },
+  { name: 'Emergency', number: '999 / 112', sub: 'Police Â· ambulance' },
 ];
 
 export const RequesterView: React.FC = () => {
@@ -138,7 +138,7 @@ export const RequesterView: React.FC = () => {
 
   const maskPhone = (p: string) => {
     if (p.length < 4) return p;
-    return p.slice(0, p.length - 3).replace(/\d/g, '•') + p.slice(-3);
+    return p.slice(0, p.length - 3).replace(/\d/g, 'â€¢') + p.slice(-3);
   };
 
   const handleSendOtp = (e: React.FormEvent) => {
@@ -292,7 +292,7 @@ export const RequesterView: React.FC = () => {
   })();
 
   /* ============================================================
-     INTAKE — two-step flow (phone ? OTP)
+     INTAKE â€” two-step flow (phone ? OTP)
      ============================================================ */
   if (!tokenHash) {
     const renderPhoneStep = () => (
@@ -333,7 +333,7 @@ export const RequesterView: React.FC = () => {
           <input
             value={otpInput}
             onChange={e => { setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4)); setOtpError(null); }}
-            placeholder="• • • •"
+            placeholder="â€¢ â€¢ â€¢ â€¢"
             inputMode="numeric"
             maxLength={4}
             autoFocus
@@ -386,7 +386,7 @@ export const RequesterView: React.FC = () => {
                 'Enter any phone number',
                 'Receive a 4-digit verification code (simulated)',
                 'Token is generated on verification (HMAC)',
-                'Raw phone is never stored — only the token',
+                'Raw phone is never stored â€” only the token',
                 'Your history persists per token, even after refresh',
               ].map((s, i) => (
                 <div key={s} className="flex gap-2"><span className="font-mono text-[#1F6B4A] font-bold shrink-0">{i + 1}.</span><span>{s}</span></div>
@@ -415,7 +415,7 @@ export const RequesterView: React.FC = () => {
             <button onClick={dismissRedemptions} aria-label="Dismiss" className="text-purple-700 hover:text-purple-900"><X className="w-3.5 h-3.5" /></button>
           </div>
           {unseenRedemptions.slice(0, 2).map(({ redemption, voucher }) => (
-            <div key={redemption.id} className="text-[9px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> · KES {redemption.amount.toLocaleString()} · {redemption.timestamp}</div>
+            <div key={redemption.id} className="text-[9px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> Â· KES {redemption.amount.toLocaleString()} Â· {redemption.timestamp}</div>
           ))}
         </div>
       )}
@@ -612,7 +612,7 @@ export const RequesterView: React.FC = () => {
           {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/15 rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
           {visible.map(opp => { const I = opp.Icon; const sent = matchSent === opp.id; return (
             <div key={opp.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
-              <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} · {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-3.5 h-3.5" /></button></div>
+              <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} Â· {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-3.5 h-3.5" /></button></div>
               <p className="text-[10px] text-[#111111]/70 leading-relaxed">{opp.desc}</p>
               {sent ? (<div className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1 rounded text-center">Interest sent</div>) : (<button onClick={() => { setSelectedOpp(opp); setMatchConfirmed(false); }} className="w-full py-1.5 bg-[#FAF8F4] border border-[#111111]/10 rounded text-[10px] font-medium text-[#1F6B4A] flex items-center justify-center gap-1">Express interest <ArrowRight className="w-2.5 h-2.5" /></button>)}
             </div>
@@ -668,7 +668,7 @@ export const RequesterView: React.FC = () => {
           <div className="flex items-center justify-between"><h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View</h3><button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">{showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}{showServer ? 'Hide' : 'Reveal'}</button></div>
           <div className="space-y-1.5 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
             <div className="flex justify-between"><span className="text-[#111111]/50">Token (HMAC)</span><span className="text-[#1F6B4A] font-bold truncate ml-2">{tokenHash}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Raw phone</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '••••••'}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Raw phone</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : 'â€¢â€¢â€¢â€¢â€¢â€¢'}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">NONE</span></div>
             <div className="flex justify-between border-t border-[#111111]/10 pt-1.5 mt-1.5"><span className="text-[#111111]/50">Rate (per token)</span><span className="text-[#111111]">{rate.count} / {MAX_REQUESTS}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Value (per token)</span><span className="text-[#111111]">KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>

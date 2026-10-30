@@ -126,7 +126,7 @@ export const DonorView: React.FC = () => {
           {campaigns.some(c => c.isClosed && c.pooledAmount >= c.targetAmount) && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
               <div className="text-[10px] font-bold text-emerald-900 flex items-center gap-1"><Check className="w-3 h-3" /> Campaign you supported has closed</div>
-              <p className="text-[10px] text-emerald-900/70 leading-relaxed">Kibera Pantry Bundles · 500/500 bundles covered. Thank you.</p>
+              <p className="text-[10px] text-emerald-900/70 leading-relaxed">Kibera Pantry Bundles Â· 500/500 bundles covered. Thank you.</p>
             </div>
           )}
           <div className="grid grid-cols-2 gap-2.5">
@@ -144,7 +144,7 @@ export const DonorView: React.FC = () => {
               {donorContributions.slice(0, 3).map(c => (
                 <div key={c.id} className="p-2.5 bg-white border border-[#111111]/10 rounded-xl flex justify-between text-xs">
                   <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-600" /><span className="font-mono font-bold text-[#111111]">KES {c.amount.toLocaleString()}</span></div>
-                  <span className="text-[9px] text-[#111111]/50 font-mono">{c.isAnonymous ? 'Anon' : 'Named'}{c.optInLedger ? ' · Ledger' : ''}</span>
+                  <span className="text-[9px] text-[#111111]/50 font-mono">{c.isAnonymous ? 'Anon' : 'Named'}{c.optInLedger ? ' Â· Ledger' : ''}</span>
                 </div>
               ))}
             </div>
@@ -173,7 +173,7 @@ export const DonorView: React.FC = () => {
             </label>
             <label className="flex items-center gap-3 p-3 bg-white border border-[#111111]/10 rounded-xl cursor-pointer">
               <input type="checkbox" checked={ledger} onChange={e => setLedger(e.target.checked)} className="accent-[#1F6B4A] w-4 h-4" />
-              <div className="flex-1"><div className="text-xs font-semibold text-[#111111]">Show in recognition ledger</div><div className="text-[10px] text-[#111111]/50">Aggregate · no recipient link</div></div>
+              <div className="flex-1"><div className="text-xs font-semibold text-[#111111]">Show in recognition ledger</div><div className="text-[10px] text-[#111111]/50">Aggregate Â· no recipient link</div></div>
             </label>
           </div>
           <button onClick={handleGive} disabled={processing || finalAmount <= 0} className="w-full py-3.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50 mt-2">{processing ? 'Processing...' : `Contribute KES ${finalAmount.toLocaleString()}`}</button>
@@ -251,10 +251,10 @@ export const DonorView: React.FC = () => {
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-1.5">
           <div className="text-[10px] font-bold text-rose-900">What we cannot show you</div>
           <ul className="text-[10px] text-rose-900/80 leading-relaxed space-y-0.5">
-            <li>× Which specific person received your money</li>
-            <li>× Their name, age, or precise location</li>
-            <li>× Their medical condition (if any)</li>
-            <li>× Which of your contributions went to which bill</li>
+            <li>Ã— Which specific person received your money</li>
+            <li>Ã— Their name, age, or precise location</li>
+            <li>Ã— Their medical condition (if any)</li>
+            <li>Ã— Which of your contributions went to which bill</li>
           </ul>
           <p className="text-[9px] text-rose-900/60 pt-1 border-t border-rose-200 leading-relaxed">Not because we are hiding it. Because this data does not exist on our servers. That is the entire point.</p>
         </div>
@@ -262,11 +262,11 @@ export const DonorView: React.FC = () => {
         <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2">
           <div className="flex justify-between items-center">
             <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Recognition Ledger</h3>
-            <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in · Live</span>
+            <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in Â· Live</span>
           </div>
           {donorContributions.length > 0 && (
             <div className="p-2 bg-emerald-50 border border-emerald-200 rounded text-[9px] text-emerald-900 font-mono">
-              {donorContributions.filter(c => c.optInLedger).length} your contribution{donorContributions.filter(c => c.optInLedger).length !== 1 ? 's' : ''} visible · KES {liveLedgerTotal.toLocaleString()}
+              {donorContributions.filter(c => c.optInLedger).length} your contribution{donorContributions.filter(c => c.optInLedger).length !== 1 ? 's' : ''} visible Â· KES {liveLedgerTotal.toLocaleString()}
             </div>
           )}
           {liveLedger.slice(0, 8).map((r: any) => (
@@ -325,8 +325,8 @@ export const DonorView: React.FC = () => {
             <button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">{showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}{showServer ? 'Hide' : 'Reveal'}</button>
           </div>
           <div className="space-y-2 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
-            <div className="flex justify-between"><span className="text-[#111111]/50">Donor hash</span><span className="text-[#1F6B4A] font-bold">{showServer ? 'donor_8f4c2e' : '••••••'}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '••••••'}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Donor hash</span><span className="text-[#1F6B4A] font-bold">{showServer ? 'donor_8f4c2e' : 'â€¢â€¢â€¢â€¢â€¢â€¢'}</span></div>
+            <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : 'â€¢â€¢â€¢â€¢â€¢â€¢'}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Recipient link</span><span className="text-rose-600 font-bold">NONE</span></div>
             <div className="flex justify-between border-t border-[#111111]/10 pt-2 mt-2"><span className="text-[#111111]/50">Session total</span><span className="text-[#111111] font-bold">KES {totalGiven.toLocaleString()}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Contributions</span><span className="text-[#111111]">{donorContributions.length}</span></div>
@@ -338,7 +338,7 @@ export const DonorView: React.FC = () => {
 
         <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#111111]/15 space-y-1.5">
           <h4 className="text-[11px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
-          {['Blind pooling (4.6)', 'Cohort campaigns (4.6)', 'Recognition ledger opt-in (4.6)', 'The Match — goods & service credit (4.4)', 'Coarse locality (4.4)', 'Anonymous by default', 'No recipient linkage'].map(f => (
+          {['Blind pooling (4.6)', 'Cohort campaigns (4.6)', 'Recognition ledger opt-in (4.6)', 'The Match â€” goods & service credit (4.4)', 'Coarse locality (4.4)', 'Anonymous by default', 'No recipient linkage'].map(f => (
             <div key={f} className="flex items-center gap-1.5 text-[10px] text-[#111111]/70"><div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}</div>
           ))}
         </div>

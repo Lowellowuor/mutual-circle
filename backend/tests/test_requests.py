@@ -1,4 +1,4 @@
-"""Day 3 tests — prove tier assignment, request persistence, rate limits, withdrawal."""
+"""Day 3 tests â€” prove tier assignment, request persistence, rate limits, withdrawal."""
 import asyncpg
 import pytest
 import pytest_asyncio
@@ -16,12 +16,12 @@ from mtc.tokens.hmac import is_valid_token_format, issue_token
 async def clean_conn():
     pool = await get_pool()
     async with pool.acquire() as conn:
-        await conn.execute("TRUNCATE requests, rate_counters RESTART IDENTITY")
+        await conn.execute("TRUNCATE requests, rate_counters RESTART IDENTITY CASCADE")
         try:
             yield conn
         finally:
             try:
-                await conn.execute("TRUNCATE requests, rate_counters RESTART IDENTITY")
+                await conn.execute("TRUNCATE requests, rate_counters RESTART IDENTITY CASCADE")
             except Exception:
                 pass
 

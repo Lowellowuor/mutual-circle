@@ -366,7 +366,7 @@ export const UssdSimulator: React.FC = () => {
                   Dial USSD
                 </button>
                 <div className="text-white/40 text-[10px] text-center mt-4">
-                  Simulated session · KES {COST_PER_SESSION} (mock)
+                  Simulated session Â· KES {COST_PER_SESSION} (mock)
                 </div>
               </div>
             ) : (
@@ -382,7 +382,7 @@ export const UssdSimulator: React.FC = () => {
 
           {showInput && (
             <form onSubmit={handleInput} className="p-3 bg-black border-t border-white/10 flex gap-2">
-              <span className="text-[#00ff88] text-xs font-mono py-2">›</span>
+              <span className="text-[#00ff88] text-xs font-mono py-2">â€º</span>
               <input
                 ref={inputRef}
                 type="text"
@@ -452,7 +452,7 @@ export const UssdSimulator: React.FC = () => {
             <div className="mt-2 pt-2 border-t border-[#111111]/10">
               <div className="text-[9px] font-mono uppercase text-[#111111]/40 mb-1">Event log</div>
               {activityLog.slice(-4).map((entry, i) => (
-                <div key={i} className="text-[9px] font-mono text-[#111111]/60">› {entry}</div>
+                <div key={i} className="text-[9px] font-mono text-[#111111]/60">â€º {entry}</div>
               ))}
             </div>
           )}

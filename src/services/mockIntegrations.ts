@@ -1,4 +1,4 @@
-﻿export const reserveLockerSlot = async (location: string): Promise<{ pin: string; qr: string }> => {
+export const reserveLockerSlot = async (location: string): Promise<{ pin: string; qr: string }> => {
   await new Promise(r => setTimeout(r, 600));
   return {
     pin: String(Math.floor(1000 + Math.random() * 9000)),

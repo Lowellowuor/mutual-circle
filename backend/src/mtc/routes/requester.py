@@ -1,4 +1,4 @@
-"""Requester routes — token-authenticated via X-Token header."""
+"""Requester routes â€” token-authenticated via X-Token header."""
 from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel, Field
 
@@ -90,3 +90,11 @@ async def withdraw_route(
         raise HTTPException(403, "Token does not own this request")
     except WithdrawNotAllowed as e:
         raise HTTPException(409, f"Cannot withdraw from status '{e.current_status}'")
+
+@router.get("/vouchers/mine", tags=["vouchers"])
+async def list_my_vouchers(
+    token: str = Depends(require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    from mtc.vouchers.issue import list_vouchers_for_token
+    return {"vouchers": await list_vouchers_for_token(conn, token_hash=token)}

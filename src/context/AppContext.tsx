@@ -1,13 +1,25 @@
 import React, { createContext, useContext, useState } from 'react';
 import { generateHMAC } from '../lib/hash';
+import {
+  issueToken as apiIssueToken,
+  createSwapRequest as apiCreateSwap,
+  createPoolRequest as apiCreatePool,
+  listMyRequests as apiListRequests,
+  staffLogin as apiStaffLogin,
+  staffLogout as apiStaffLogout,
+  dispatchRequest as apiDispatch,
+  completeOcr as apiCompleteOcr,
+  issueVoucher as apiIssueVoucher,
+  auditFlags as apiAuditFlags,
+  routeFlagToTier4 as apiRouteFlag,
+  clearFlag as apiClearFlag,
+} from '../lib/apiClient';
 import { reserveLockerSlot, verifyObjectLevel } from '../services/mockIntegrations';
 import { verifyStaffCredentials, STAFF_CREDS, appendHistory } from '../services/auth';
 import {
   PoolRequest, SwapRequest, RiskFlag, VerificationTier, Campaign, Pledge, AuditLogEntry,
   DedupItem, LockerStock, DepotCounts, DonorContribution, StaffRole, Voucher, VoucherRedemption,
 } from '../types';
-
-interface MatchInterest { id: string; opportunityId: string; title: string; tokenHash: string; timestamp: string }
 
 interface AppContextType {
   tokenHash: string | null;
@@ -27,6 +39,7 @@ interface AppContextType {
   vouchers: Voucher[];
   voucherRedemptions: VoucherRedemption[];
   matchInterests: MatchInterest[];
+  closeMatchInterest: (id: string, status: 'contacted' | 'closed') => void;
   emptyQueueMode: boolean;
   setEmptyQueueMode: (v: boolean) => void;
 
@@ -47,7 +60,6 @@ interface AppContextType {
   logAction: (role: StaffRole | 'system', action: string, targetHash: string) => void;
   issueVoucher: (requestId: string, partnerName: string, partnerType: 'retailer' | 'hospital') => Voucher | null;
   expressInterest: (opportunityId: string, title: string) => void;
-  matchInterests: { id: string; opportunityId: string; title: string; tokenHash: string; timestamp: string }[];
   addDonorContribution: (amount: number, isAnonymous: boolean, optInLedger: boolean) => void;
   addPledge: (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => void;
 }
@@ -71,13 +83,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ]);
 
   const [poolRequests, setPoolRequests] = useState<PoolRequest[]>([
-    { id: 'POOL-2001', tokenHash: 'a4f8b29c...', category: 'utility', hashedObjectId: 'obj #8f4c�', amount: 3500, tier: 2, status: 'verified', timestamp: '5 mins ago' },
-    { id: 'POOL-2002', tokenHash: 'e11d8a2b...', category: 'hospital_invoice', hashedObjectId: 'obj #c9d2�', amount: 12000, tier: 3, status: 'pending_check', timestamp: '15 mins ago' },
-    { id: 'POOL-2003', tokenHash: 'b55a1f9c...', category: 'school_fee', hashedObjectId: 'obj #7a1e�', amount: 8500, tier: 2, status: 'verified', timestamp: '30 mins ago' },
+    { id: 'POOL-2001', tokenHash: 'a4f8b29c...', category: 'utility', hashedObjectId: 'obj #8f4cÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦', amount: 3500, tier: 2, status: 'verified', timestamp: '5 mins ago' },
+    { id: 'POOL-2002', tokenHash: 'e11d8a2b...', category: 'hospital_invoice', hashedObjectId: 'obj #c9d2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦', amount: 12000, tier: 3, status: 'pending_check', timestamp: '15 mins ago' },
+    { id: 'POOL-2003', tokenHash: 'b55a1f9c...', category: 'school_fee', hashedObjectId: 'obj #7a1eÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦', amount: 8500, tier: 2, status: 'verified', timestamp: '30 mins ago' },
   ]);
 
   const [riskFlags, setRiskFlags] = useState<RiskFlag[]>([
-    { id: 'FLG-101', targetHash: 'obj #c9d2�', severity: 'high', title: 'Amount just under threshold', description: 'Request amount is KES 12,000, just below the KES 15,000 Tier 4 threshold.', status: 'pending', timestamp: '2 mins ago' },
+    { id: 'FLG-101', targetHash: 'obj #c9d2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦', severity: 'high', title: 'Amount just under threshold', description: 'Request amount is KES 12,000, just below the KES 15,000 Tier 4 threshold.', status: 'pending', timestamp: '2 mins ago' },
     { id: 'FLG-102', targetHash: 'a4f8b29c...', severity: 'elevated', title: 'Device clustering detected', description: '3 tokens generated from same physical device in 24h.', status: 'pending', timestamp: '1 hr ago' },
   ]);
 
@@ -94,16 +106,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [donorContributions, setDonorContributions] = useState<DonorContribution[]>([]);
 
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([
-    { id: 'LOG-001', timestamp: '10:42:11', actorRole: 'fulfilment', action: 'Dispatched POOL-2001 to payment partner', targetHash: 'obj #8f4c�' },
-    { id: 'LOG-002', timestamp: '10:38:04', actorRole: 'audit', action: 'Routed FLG-101 to Tier 4 review', targetHash: 'obj #c9d2�' },
+    { id: 'LOG-001', timestamp: '10:42:11', actorRole: 'fulfilment', action: 'Dispatched POOL-2001 to payment partner', targetHash: 'obj #8f4cÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦' },
+    { id: 'LOG-002', timestamp: '10:38:04', actorRole: 'audit', action: 'Routed FLG-101 to Tier 4 review', targetHash: 'obj #c9d2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦' },
     { id: 'LOG-003', timestamp: '10:15:33', actorRole: 'enrolment', action: 'Weekly salt rotated (SHA256-WK43)', targetHash: 'system' },
-    { id: 'LOG-004', timestamp: '09:52:18', actorRole: 'audit', action: 'Cleared FLG-097 as false positive', targetHash: 'obj #3a8e�' },
+    { id: 'LOG-004', timestamp: '09:52:18', actorRole: 'audit', action: 'Cleared FLG-097 as false positive', targetHash: 'obj #3a8eÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦' },
   ]);
 
   const [dedupItems] = useState<DedupItem[]>([
-    { id: 'DEDUP-1', hashedObjectId: 'obj #8f4c�', objectType: 'KPLC meter', firstFundedBy: 'Partner A', firstFundedDate: '2024-04-12', duplicateAttemptDate: '2024-04-18', status: 'blocked' },
-    { id: 'DEDUP-2', hashedObjectId: 'obj #7a1e�', objectType: 'School admission', firstFundedBy: 'Cohort CMP-1', firstFundedDate: '2024-03-02', duplicateAttemptDate: '2024-04-20', status: 'blocked' },
-    { id: 'DEDUP-3', hashedObjectId: 'obj #d3b1�', objectType: 'Hospital invoice', firstFundedBy: 'Partner B', firstFundedDate: '2024-04-10', duplicateAttemptDate: '2024-04-15', status: 'under_review' },
+    { id: 'DEDUP-1', hashedObjectId: 'obj #8f4cÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦', objectType: 'KPLC meter', firstFundedBy: 'Partner A', firstFundedDate: '2024-04-12', duplicateAttemptDate: '2024-04-18', status: 'blocked' },
+    { id: 'DEDUP-2', hashedObjectId: 'obj #7a1eÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦', objectType: 'School admission', firstFundedBy: 'Cohort CMP-1', firstFundedDate: '2024-03-02', duplicateAttemptDate: '2024-04-20', status: 'blocked' },
+    { id: 'DEDUP-3', hashedObjectId: 'obj #d3b1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦', objectType: 'Hospital invoice', firstFundedBy: 'Partner B', firstFundedDate: '2024-04-10', duplicateAttemptDate: '2024-04-15', status: 'under_review' },
   ]);
 
   const [lockerStocks] = useState<LockerStock[]>([
@@ -126,6 +138,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [matchInterests, setMatchInterests] = useState<MatchInterest[]>([]);
 
   const initializeSession = async (phone: string, channel: 'web' | 'sms' | 'ussd') => {
+    // Try backend first ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â the real HMAC lives there, not in the browser
+    const backendResp = await apiIssueToken(phone);
+    if (backendResp?.token) {
+      setTokenHash(backendResp.token);
+      return;
+    }
+    // Fallback: client-side HMAC (deployed build without a backend)
     const hash = await generateHMAC(phone);
     setTokenHash(hash);
   };
@@ -139,9 +158,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const ok = verifyStaffCredentials(role, id, pin);
     if (ok) {
       setStaffRole(role);
-      setStaffId(STAFF_CREDS[role].id);
-      try { sessionStorage.setItem('mtc-staff-role', role); sessionStorage.setItem('mtc-staff-id', STAFF_CREDS[role].id); } catch {}
-      logAction(role, `Logged in as ${STAFF_CREDS[role].label}`, 'system');
+      setStaffId(STAFF_CREDS[role as 'enrolment' | 'fulfilment' | 'audit'].id);
+      try { sessionStorage.setItem('mtc-staff-role', role); sessionStorage.setItem('mtc-staff-id', STAFF_CREDS[role as 'enrolment' | 'fulfilment' | 'audit'].id); } catch {}
+      logAction(role, `Logged in as ${STAFF_CREDS[role as 'enrolment' | 'fulfilment' | 'audit'].label}`, 'system');
     }
     return ok;
   };
@@ -156,6 +175,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const executeSwap = async (category: string, location: string, tokenOverride?: string): Promise<SwapRequest | null> => {
     const token = tokenOverride || tokenHash;
     if (!token) return null;
+
+    // Try backend
+    const backendResp = await apiCreateSwap(token, category, location);
+    if (backendResp) {
+      const { pin, qr } = await reserveLockerSlot(location);
+      const newReq: SwapRequest = {
+        id: backendResp.id, tokenHash: token, bundleCategory: category, lockerLocation: location,
+        status: 'reserved', pin, qrPayload: qr, timestamp: backendResp.created_at,
+      };
+      setSwapRequests(prev => [newReq, ...prev]);
+      appendHistory(token, { ...newReq, type: 'swap' });
+      return newReq;
+    }
+
+    // Fallback
     const { pin, qr } = await reserveLockerSlot(location);
     const newReq: SwapRequest = { id: `SWP-${Date.now()}`, tokenHash: token, bundleCategory: category, lockerLocation: location, status: 'reserved', pin, qrPayload: qr, timestamp: new Date().toLocaleString() };
     setSwapRequests(prev => [newReq, ...prev]);
@@ -170,7 +204,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const tier: VerificationTier = amount > 5000 ? 3 : 2;
     const check = await verifyObjectLevel(objectId, amount);
     if (!check.isValid) return null;
-    const newReq: PoolRequest = { id: `POOL-${Date.now()}`, tokenHash: token, category, hashedObjectId: `obj #${hashedObj.slice(0, 4)}�`, amount, tier, status: check.requiresOcr ? 'pending_check' : 'verified', timestamp: new Date().toLocaleString() };
+    const newReq: PoolRequest = { id: `POOL-${Date.now()}`, tokenHash: token, category, hashedObjectId: `obj #${hashedObj.slice(0, 4)}ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦`, amount, tier, status: check.requiresOcr ? 'pending_check' : 'verified', timestamp: new Date().toLocaleString() };
     setPoolRequests(prev => [newReq, ...prev]);
     appendHistory(token, { ...newReq, type: 'pool' });
     return newReq;
@@ -200,12 +234,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const routeFlagToTier4 = (flagId: string) => {
     setRiskFlags(prev => prev.map(f => f.id === flagId ? { ...f, status: 'routed_tier4' } : f));
-    logAction('audit', `Routed ${flagId} to Tier 4`, 'obj #c9d2�');
+    logAction('audit', `Routed ${flagId} to Tier 4`, 'obj #c9d2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦');
   };
 
   const clearFlagAsFalsePositive = (flagId: string, note: string) => {
     setRiskFlags(prev => prev.map(f => f.id === flagId ? { ...f, status: 'cleared_false_positive', investigationNotes: note } : f));
-    logAction('audit', `Cleared ${flagId} as false positive`, 'obj #8f4c�');
+    logAction('audit', `Cleared ${flagId} as false positive`, 'obj #8f4cÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦');
   };
 
   const completeOcrCheck = (requestId: string) => {
@@ -283,6 +317,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMatchInterests(prev => [interest, ...prev]);
   };
 
+  const closeMatchInterest = (id: string, status: 'contacted' | 'closed') => {
+    setMatchInterests(prev => prev.map(m => m.id === id ? { ...m, status } : m));
+  };
   return (
     <AppContext.Provider value={{
       tokenHash, initializeSession, logout,
@@ -290,7 +327,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       emptyQueueMode, setEmptyQueueMode,
       staffRole, staffId, loginStaff, logoutStaff,
       executeSwap, executePool, withdrawRequest, dispatchRequest, routeFlagToTier4, clearFlagAsFalsePositive, completeOcrCheck, matchPledge, redeemVoucher, logAction,
-      addDonorContribution, addPledge, issueVoucher, expressInterest, matchInterests,
+      addDonorContribution, addPledge, issueVoucher, expressInterest, matchInterests, closeMatchInterest,
     }}>
       {children}
     </AppContext.Provider>
