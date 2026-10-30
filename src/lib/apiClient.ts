@@ -244,3 +244,25 @@ export const updateDonorProfile = (donorHash: string, displayName: string, optIn
     '/donations/profile',
     { method: 'POST', headers: { 'X-Donor-Hash': donorHash }, body: JSON.stringify({ display_name: displayName, opt_in_ledger: optInLedger }) },
   );
+// --- Opportunities (The Match) ---
+export const getOpportunities = () =>
+  call<{ opportunities: { id: string; type: string; title: string; description: string; locality: string; commit: string; posted_at: string }[] }>(
+    '/opportunities',
+  );
+
+// --- Helplines (Section 4.9) ---
+export const getHelplines = () =>
+  call<{ helplines: { id: string; name: string; number: string; sub: string; category: string }[] }>(
+    '/helplines',
+  );
+
+// --- Public aggregate stats (no mocks — real DB state) ---
+export const getImpactStats = () =>
+  call<{ total_pooled_pence: number; bundles_delivered: number; utility_meters_paid: number; student_terms_paid: number }>(
+    '/stats/impact',
+  );
+
+export const getDistribution = () =>
+  call<{ total_pence: number; by_category: { category: string; label: string; count: number; total_pence: number; percentage: number }[] }>(
+    '/stats/distribution',
+  );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { getDonorLeaderboard, getDonorProfile, updateDonorProfile } from '../../lib/apiClient';
+import { getDonorLeaderboard, getDonorProfile, updateDonorProfile, getImpactStats, getDistribution } from '../../lib/apiClient';
 import {
   HeartHandshake, ShieldCheck, Check, Home, Wallet, Package, TrendingUp,
   MapPin, Zap, ChevronRight, Clock, Eye, EyeOff, RotateCcw, Lock, Trophy, Edit2,
@@ -9,12 +9,7 @@ import {
 type Tab = 'home' | 'give' | 'pledge' | 'campaigns' | 'impact' | 'leaders';
 type Screen = 'tab' | 'give_success' | 'pledge_success';
 
-const SAMPLE_LEDGER = [
-  { id: 'S1', name: 'Nairobi Tech Workers', amount: 25000, when: '5h ago' },
-  { id: 'S2', name: 'Anonymous Contributor', amount: 5000, when: '2h ago' },
-  { id: 'S3', name: 'Anonymous Contributor', amount: 2500, when: '1d ago' },
-  { id: 'S4', name: 'Mombasa Community Fund', amount: 100000, when: '2d ago' },
-];
+
 
 export const DonorView: React.FC = () => {
   const { campaigns, pledges, donorContributions, addDonorContribution, addPledge, donorHash } = useApp();
@@ -31,7 +26,9 @@ export const DonorView: React.FC = () => {
   const [pValue, setPValue] = useState('');
   const [pLocality, setPLocality] = useState('Nairobi County');
   const [pProcessing, setPProcessing] = useState(false);
-  const [showServer, setShowServer] = useState(false);
+    const [showServer, setShowServer] = useState(false);
+  const [impactStats, setImpactStats] = useState<{ total_pooled_pence: number; bundles_delivered: number; utility_meters_paid: number; student_terms_paid: number } | null>(null);
+  const [distribution, setDistribution] = useState<{ category: string; label: string; count: number; total_pence: number; percentage: number }[]>([]);
   const [leaderboard, setLeaderboard] = useState<{ display_name: string; total_pence: number; gift_count: number }[]>([]);
   const [myProfile, setMyProfile] = useState<{ display_name: string; opt_in_ledger: boolean; has_profile: boolean } | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -45,9 +42,19 @@ export const DonorView: React.FC = () => {
 
   const liveLedger = [
     ...donorContributions.filter(c => c.optInLedger).map(c => ({
-      id: c.id, name: 'Anonymous Contributor', amount: c.amount, when: 'just now', isLive: true,
+      id: c.id,
+      name: myProfile?.display_name || 'You',
+      amount: c.amount,
+      when: formatRelativeTime(c.timestamp),
+      isLive: true as const,
     })),
-    ...SAMPLE_LEDGER.map(s => ({ ...s, isLive: false })),
+    ...leaderboard.filter(l => l.display_name !== (myProfile?.display_name || 'You')).map((l, i) => ({
+      id: 'lb-' + i,
+      name: l.display_name,
+      amount: l.total_pence / 100,
+      when: l.gift_count + ' gift' + (l.gift_count === 1 ? '' : 's'),
+      isLive: false as const,
+    })),
   ];
   const liveLedgerTotal = donorContributions.filter(c => c.optInLedger).reduce((a, c) => a + c.amount, 0);
 
@@ -81,6 +88,9 @@ export const DonorView: React.FC = () => {
         setProfileName(p.display_name || '');
         setProfileOptIn(p.opt_in_ledger);
       }
+      const [impact, dist] = await Promise.all([getImpactStats(), getDistribution()]);
+      if (impact) setImpactStats(impact);
+      if (dist) setDistribution(dist.by_category);
     })();
   }, [donorHash, donorContributions.length]);
 
@@ -497,10 +507,10 @@ export const DonorView: React.FC = () => {
         <div><h2 className="font-serif text-lg font-bold text-[#111111]">Impact</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Aggregate. Never individual.</p></div>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: 'Total Pooled', value: '4.12M', sub: 'KES' },
-            { label: 'Bundles', value: '1,842', sub: 'Food & hygiene' },
-            { label: 'Utility Meters', value: '620', sub: 'Power & water' },
-            { label: 'Students', value: '415', sub: 'Term fees' },
+            { label: 'Total Pooled', value: impactStats ? 'KES ' + (impactStats.total_pooled_pence / 100).toLocaleString() : '—', sub: 'Committed' },
+            { label: 'Bundles', value: impactStats ? impactStats.bundles_delivered.toLocaleString() : '—', sub: 'Food & hygiene' },
+            { label: 'Utility Meters', value: impactStats ? impactStats.utility_meters_paid.toLocaleString() : '—', sub: 'Power & water' },
+            { label: 'Students', value: impactStats ? impactStats.student_terms_paid.toLocaleString() : '—', sub: 'Term fees' },
           ].map(s => (
             <div key={s.label} className="p-3 bg-white border border-[#111111]/15 rounded-xl">
               <div className="text-[9px] font-mono uppercase text-[#111111]/50 tracking-wider">{s.label}</div>
@@ -511,12 +521,24 @@ export const DonorView: React.FC = () => {
         </div>
         <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2.5">
           <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Distribution</h3>
-          {[{ l: 'Food & hygiene', p: 42, c: 'bg-[#1F6B4A]' }, { l: 'Utility bills', p: 34, c: 'bg-blue-600' }, { l: 'School fees', p: 24, c: 'bg-amber-600' }].map(r => (
-            <div key={r.l} className="space-y-1">
-              <div className="flex justify-between text-[10px] font-mono"><span className="text-[#111111]/70">{r.l}</span><span className="font-bold text-[#111111]">{r.p}%</span></div>
-              <div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={'h-full ' + r.c} style={{ width: r.p + '%' }} /></div>
+          {distribution.length === 0 ? (
+            <div className="text-center py-2">
+              <p className="text-[10px] text-[#111111]/50">No settled disbursements yet. Distribution will appear as data accrues.</p>
             </div>
-          ))}
+          ) : distribution.filter(r => r.count > 0).map(r => {
+            const colorMap: Record<string, string> = {
+              swap_bundle: 'bg-[#1F6B4A]',
+              utility: 'bg-blue-600',
+              school_fee: 'bg-amber-600',
+              hospital_invoice: 'bg-rose-600',
+            };
+            return (
+              <div key={r.category} className="space-y-1">
+                <div className="flex justify-between text-[10px] font-mono"><span className="text-[#111111]/70">{r.label}</span><span className="font-bold text-[#111111]">{r.percentage}%</span></div>
+                <div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={'h-full ' + (colorMap[r.category] || 'bg-[#1F6B4A]')} style={{ width: r.percentage + '%' }} /></div>
+              </div>
+            );
+          })}
         </div>
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-1.5">
           <div className="text-[10px] font-bold text-rose-900">What we cannot show you</div>
@@ -532,27 +554,25 @@ export const DonorView: React.FC = () => {
         <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2">
           <div className="flex justify-between items-center">
             <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Recognition Ledger</h3>
-            <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in * Live</span>
+            <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in</span>
           </div>
-          {donorContributions.length > 0 && (
-            <div className="p-2 bg-emerald-50 border border-emerald-200 rounded text-[9px] text-emerald-900 font-mono">
-              {donorContributions.filter(c => c.optInLedger).length} your contribution{donorContributions.filter(c => c.optInLedger).length !== 1 ? 's' : ''} visible * KES {liveLedgerTotal.toLocaleString()}
+          {leaderboard.length === 0 ? (
+            <div className="text-center py-3">
+              <p className="text-[10px] text-[#111111]/50">No opt-in donors yet. Join via the Leaders tab.</p>
             </div>
-          )}
-          {liveLedger.slice(0, 8).map((r: any) => (
-            <div key={r.id} className={'flex justify-between text-[10px] py-1.5 border-b border-[#111111]/5 last:border-0 ' + (r.isLive ? 'bg-emerald-50/50 -mx-1 px-1 rounded' : '')}>
+          ) : leaderboard.slice(0, 8).map((r, i) => (
+            <div key={`${r.display_name}-${i}`} className="flex justify-between text-[10px] py-1.5 border-b border-[#111111]/5 last:border-0">
               <div className="min-w-0">
                 <div className="text-[#111111] truncate flex items-center gap-1">
-                  {r.isLive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
-                  {r.name}
+                  {myProfile?.display_name === r.display_name && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
+                  {r.display_name}
                 </div>
-                <div className="text-[8px] text-[#111111]/40 font-mono">{r.when}</div>
+                <div className="text-[8px] text-[#111111]/40 font-mono">{r.gift_count} gift{r.gift_count !== 1 ? 's' : ''}</div>
               </div>
-              <span className="font-mono font-bold text-[#1F6B4A] shrink-0 ml-2">KES {r.amount.toLocaleString()}</span>
+              <span className="font-mono font-bold text-[#1F6B4A] shrink-0 ml-2">KES {(r.total_pence / 100).toLocaleString()}</span>
             </div>
           ))}
-        </div>
-      </div>
+        </div> </div>
     );
   };
 
