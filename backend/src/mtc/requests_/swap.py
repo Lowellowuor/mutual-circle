@@ -72,7 +72,6 @@ async def create_swap(
         "bundle_variant": bundle_variant,
         "household_size": household_size,
         "pin": pin,  # kept for migration window; removed after backfill
-        "pin_hash": pin_hash,  # preferred by collect endpoints
         "qr_payload": qr_payload,
         "tier": row["tier"],
         "status": row["status"],
