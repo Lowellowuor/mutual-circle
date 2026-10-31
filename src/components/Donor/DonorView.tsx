@@ -49,6 +49,7 @@ export const DonorView: React.FC = () => {
   const [selectedActivity, setSelectedActivity] = useState<any | null>(null);
   const [ledgerData, setLedgerData] = useState<{ total_pooled_pence: number; entry_count: number; chain_ok: boolean; broken_at: { index: number; reason: string } | null; last_entries: any[] } | null>(null);
   const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [impactDelta, setImpactDelta] = useState<{ bundles: number; utilities: number; terms: number } | null | undefined>(undefined);
 
   const finalAmount = custom ? Number(custom) : selected;
   const totalGiven = donorContributions.reduce((a, c) => a + c.amount, 0);
@@ -177,6 +178,50 @@ export const DonorView: React.FC = () => {
     { id: 'leaders', label: 'Leaders', Icon: Trophy },
   ];
 
+  useEffect(() => {
+    if (!impactStats || !donorHash) return;
+    const key = `mc-impact-` + donorHash;
+    const sessionKey = `mc-impact-session-` + donorHash;
+    try {
+      const alreadyUpdated = sessionStorage.getItem(sessionKey);
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        const snap = JSON.parse(stored);
+        setImpactDelta({
+          bundles: Math.max(0, impactStats.bundles_delivered - (snap.bundles_delivered || 0)),
+          utilities: Math.max(0, impactStats.utility_meters_paid - (snap.utility_meters_paid || 0)),
+          terms: Math.max(0, impactStats.student_terms_paid - (snap.student_terms_paid || 0)),
+        });
+      } else {
+        setImpactDelta(null);
+      }
+      if (!alreadyUpdated) {
+        localStorage.setItem(key, JSON.stringify(impactStats));
+        sessionStorage.setItem(sessionKey, '1');
+      }
+    } catch { setImpactDelta(null); }
+  }, [impactStats, donorHash]);
+
+  const handleDownloadDonations = () => {
+    if (donorContributions.length === 0) return;
+    const header = ['Date', 'Amount (KES)', 'Anonymous', 'Ledger listed'];
+    const rows = donorContributions.map(c => [
+      new Date(c.timestamp).toISOString().replace('T', ' ').slice(0, 16),
+      c.amount.toFixed(2),
+      c.isAnonymous ? 'Yes' : 'No',
+      c.optInLedger ? 'Yes' : 'No',
+    ]);
+    const csv = [header, ...rows].map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mutual-circle-donations-' + donorHash.slice(0,8) + '-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
   const renderContent = () => {
     if (screen === 'give_success') {
       return (
@@ -306,6 +351,46 @@ export const DonorView: React.FC = () => {
               </>
             )}
           </div>
+
+          {hasActivity && (
+            <div className="p-3 bg-white border border-[#111111]/10 rounded-xl space-y-2">
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-[#1F6B4A]" />
+                <div className="text-[9px] font-mono uppercase tracking-wider text-[#111111]/50">Privacy</div>
+              </div>
+              <div className="space-y-1 text-[10px] font-mono">
+                <div className="flex justify-between"><span className="text-[#111111]/50">Ledger name</span><span className="font-semibold text-[#111111]">{myProfile?.display_name || 'Anonymous'}</span></div>
+                <div className="flex justify-between"><span className="text-[#111111]/50">Public ledger</span><span className={'font-semibold ' + (myProfile?.opt_in_ledger ? 'text-emerald-700' : 'text-[#111111]/60')}>{myProfile?.opt_in_ledger ? 'Listed' : 'Not listed'}</span></div>
+                <div className="flex justify-between"><span className="text-[#111111]/50">Last gift</span><span className={'font-semibold ' + (donorContributions[0]?.isAnonymous ? 'text-emerald-700' : 'text-[#111111]')}>{donorContributions[0] ? (donorContributions[0].isAnonymous ? 'Anonymous' : 'Named') : '—'}</span></div>
+              </div>
+            </div>
+          )}
+
+          {hasActivity && impactStats && (
+            <div className="p-3 bg-white border border-[#111111]/10 rounded-xl space-y-2">
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-[#1F6B4A]" />
+                <div className="text-[9px] font-mono uppercase tracking-wider text-[#111111]/50">Since your last visit</div>
+              </div>
+              {impactDelta === null ? (
+                <div className="text-[10px] text-[#111111]/60 leading-relaxed">First visit — current totals: {impactStats.bundles_delivered} bundles delivered, {impactStats.utility_meters_paid} meters paid, {impactStats.student_terms_paid} terms funded.</div>
+              ) : impactDelta === undefined ? (
+                <div className="text-[10px] text-[#111111]/50">Loading…</div>
+              ) : (
+                <div className="space-y-1 text-[10px] font-mono">
+                  <div className="flex justify-between"><span className="text-[#111111]/50">Bundles delivered</span><span className={'font-bold ' + (impactDelta.bundles > 0 ? 'text-emerald-700' : 'text-[#111111]/40')}>{impactDelta.bundles > 0 ? '+' + impactDelta.bundles : '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-[#111111]/50">Utility meters paid</span><span className={'font-bold ' + (impactDelta.utilities > 0 ? 'text-emerald-700' : 'text-[#111111]/40')}>{impactDelta.utilities > 0 ? '+' + impactDelta.utilities : '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-[#111111]/50">Student terms paid</span><span className={'font-bold ' + (impactDelta.terms > 0 ? 'text-emerald-700' : 'text-[#111111]/40')}>{impactDelta.terms > 0 ? '+' + impactDelta.terms : '—'}</span></div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasActivity && (
+            <button onClick={handleDownloadDonations} className="w-full py-2.5 px-3 bg-[#FAF8F4] hover:bg-[#f0ede4] border border-[#111111]/10 rounded-xl text-[10px] font-mono uppercase tracking-wider text-[#111111]/60 flex items-center justify-center gap-1.5">
+              <Package className="w-3 h-3" /> Download my donations ({donorContributions.length} gift{donorContributions.length !== 1 ? 's' : ''})
+            </button>
+          )}
 
           {hasActivity && (
             <div className="grid grid-cols-3 gap-2">
