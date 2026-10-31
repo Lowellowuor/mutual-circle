@@ -89,21 +89,21 @@ export const RequesterMessages: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4">
+    <div className="px-5 py-3 space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-[#111111]">Your Messages</h1>
-          <p className="text-xs text-[#111111]/60 mt-0.5">Request outcomes, confirmed by SMS in production.</p>
+          <h1 className="font-serif text-xl font-bold text-[#111111]">Your Messages</h1>
+          <p className="text-[11px] text-[#111111]/60 mt-0.5">Request outcomes, confirmed by SMS in production.</p>
         </div>
         <button
           onClick={refresh}
-          className="text-xs text-[#1F6B4A] hover:underline flex items-center gap-1"
+          className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1"
         >
           <RotateCcw className="w-3 h-3" /> Refresh
         </button>
       </div>
 
-      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2">
+      <div className="p-2.5 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2">
         <Shield className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0 mt-0.5" />
         <p className="text-[10px] text-[#111111]/70 leading-relaxed">
           Messages are tied to your anonymous token. They never include names, addresses, or clinical details — same rules as the rest of the platform.
@@ -111,7 +111,7 @@ export const RequesterMessages: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="p-8 bg-white border border-[#111111]/15 rounded-2xl text-center">
+        <div className="p-5 bg-white border border-[#111111]/15 rounded-xl text-center">
           <div className="flex items-center justify-center gap-2 text-xs text-[#111111]/50">
             <div className="w-1.5 h-1.5 rounded-full bg-[#1F6B4A] animate-bounce" style={{ animationDelay: '0ms' }} />
             <div className="w-1.5 h-1.5 rounded-full bg-[#1F6B4A] animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -119,10 +119,10 @@ export const RequesterMessages: React.FC = () => {
           </div>
         </div>
       ) : notifications.length === 0 ? (
-        <div className="p-8 bg-white border border-[#111111]/15 rounded-2xl text-center space-y-2">
-          <MessageSquare className="w-8 h-8 text-[#111111]/20 mx-auto" />
-          <div className="text-sm font-bold text-[#111111]">No messages yet</div>
-          <p className="text-xs text-[#111111]/50 max-w-sm mx-auto">
+        <div className="p-5 bg-white border border-[#111111]/15 rounded-xl text-center space-y-2">
+          <MessageSquare className="w-6 h-6 text-[#111111]/20 mx-auto" />
+          <div className="text-xs font-bold text-[#111111]">No messages yet</div>
+          <p className="text-[11px] text-[#111111]/50">
             Make a request on the Mutual Circle tab. Updates will appear here immediately after submission.
           </p>
         </div>
@@ -131,7 +131,7 @@ export const RequesterMessages: React.FC = () => {
           {notifications.map(n => (
             <div
               key={n.id}
-              className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2"
+              className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -152,7 +152,7 @@ export const RequesterMessages: React.FC = () => {
                   {relativeTime(n.created_at)}
                 </div>
               </div>
-              <p className="text-sm text-[#111111] leading-relaxed">{n.content}</p>
+              <p className="text-xs text-[#111111] leading-relaxed">{n.content}</p>
               {n.request_id && (
                 <div className="text-[9px] font-mono text-[#111111]/40 pt-1 border-t border-[#111111]/5">
                   Request: {n.request_id.slice(0, 8)}…
