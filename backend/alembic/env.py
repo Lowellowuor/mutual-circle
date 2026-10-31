@@ -4,6 +4,9 @@ Alembic is synchronous by default. We use asyncio.run() with an async engine
 to speak to Postgres through asyncpg (matching the app's driver).
 """
 import asyncio
+import sys as _platform_sys
+if _platform_sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 import os
 import sys
 from logging.config import fileConfig
