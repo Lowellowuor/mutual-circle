@@ -79,7 +79,9 @@ function Invoke-Get {
 }
 
 $runId = [int][double]::Parse((Get-Date -UFormat %s))
-$requesterPhone = "+254700" + $runId.ToString().PadRight(6, '0').Substring(0, 6)
+$tail = ($runId % 10000).ToString().PadLeft(4, '0')
+$rand = (Get-Random -Minimum 0 -Maximum 100).ToString().PadLeft(2, '0')
+$requesterPhone = "+254700" + $tail + $rand
 $donorHash = "test-donor-" + $runId
 
 Write-Host ""
@@ -206,7 +208,7 @@ $swapRequestId = if ($swapResp.id) { $swapResp.id } else { "FAIL" }
 $swapPin = if ($swapResp.pin) { $swapResp.pin } else { "????" }
 
 $notif4 = Invoke-Get "/notifications/mine" -Headers @{ "X-Token" = $requesterToken }
-$hasSwapNotif = -not $notif4.__error -and ($notif4.notifications | Where-Object { $_.template -eq "swap_submitted" -and $_.content -match $swapPin })
+$hasSwapNotif = -not $notif4.__error -and ($notif4.notifications | Where-Object { $_.template -eq "swap_submitted" -and $_.content.Contains($swapPin) })
 Assert "B2. Notification 'swap_submitted' with PIN" ([bool]$hasSwapNotif) $notif4.__message
 
 $chuiRedemptions = Invoke-Get "/partners/me/redemptions" -Headers @{ "X-Partner-Key" = "chui-demo-key-2026" }
