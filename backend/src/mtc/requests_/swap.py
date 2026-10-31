@@ -4,6 +4,7 @@ import secrets
 from datetime import datetime, timezone
 
 import asyncpg
+import bcrypt
 
 from mtc.notifications.service import notify
 from mtc.requests_.tiers import assign_tier, initial_status
@@ -36,13 +37,15 @@ async def create_swap(
     status = initial_status(tier)
 
     pin = f"{secrets.randbelow(10000):04d}"
+    pin_hash = bcrypt.hashpw(pin.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
     qr_payload = f"MTC-LK-{locker_location[:3].upper()}-{int(datetime.now(timezone.utc).timestamp())}"
     bundle_variant = _bundle_size_for_household(household_size)
 
     metadata = {
         "bundle": bundle_category,
         "location": locker_location,
-        "pin": pin,
+        "pin": pin,  # kept for migration window; removed after backfill
+        "pin_hash": pin_hash,  # preferred by collect endpoints
         "qr": qr_payload,
         "household_size": household_size,
         "bundle_variant": bundle_variant,
@@ -68,7 +71,8 @@ async def create_swap(
         "locker_location": locker_location,
         "bundle_variant": bundle_variant,
         "household_size": household_size,
-        "pin": pin,
+        "pin": pin,  # kept for migration window; removed after backfill
+        "pin_hash": pin_hash,  # preferred by collect endpoints
         "qr_payload": qr_payload,
         "tier": row["tier"],
         "status": row["status"],
