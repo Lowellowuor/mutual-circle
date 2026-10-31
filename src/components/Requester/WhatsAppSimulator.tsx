@@ -31,6 +31,7 @@ interface WaContext {
   objectId?: string;
   amount?: number;
   pin?: string;
+  ref?: string;
   poolRef?: string;
   poolStatus?: string;
 }
@@ -200,11 +201,11 @@ export const WhatsAppSimulator: React.FC = () => {
       if (!rateCheck.ok) { await businessSay({ kind: 'text', text: rateCheck.reason || 'Daily limit reached.' }); return; }
       const result = await executeSwap(context.bundle!, location, tokenHash || undefined);
       if (result) {
-        setContext({ ...context, location, pin: result.pin });
+        setContext({ ...context, location, pin: result.pin, ref: 'REF-' + result.id.slice(0,8).toUpperCase() });
         await businessSay({
           kind: 'template',
           templateName: 'locker_reservation_v1',
-          text: 'Locker reserved. Bundle: ' + result.bundleCategory + '\nLocation: ' + location + '\nPIN: ' + result.pin + '\n\nShow this PIN at the locker terminal. Collect anytime.',
+          text: '✅ Reservation confirmed\n\nREF: REF-' + result.id.slice(0,8).toUpperCase() + '\nBundle: ' + result.bundleCategory + '\nLocation: ' + location + '\nPIN: ' + result.pin + '\n\nShow this PIN at the locker terminal.\nSave or screenshot this message for your records.',
         });
       }
     } else if (reply === 'pool') {
