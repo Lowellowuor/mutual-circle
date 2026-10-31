@@ -17,6 +17,7 @@ interface UssdContext {
   amount?: number;
   resultMessage?: string;
   householdSize?: number;
+  ref?: string;
 }
 
 const PHONE = '+254 700 123 456';
@@ -148,7 +149,7 @@ export const UssdSimulator: React.FC = () => {
           if (!rateCheck.ok) { setContext({ ...context, resultMessage: rateCheck.reason || 'Daily limit reached.' }); setScreen('swap_result'); setSessionActive(false); return; }
           const result = await executeSwap(context.bundle!, location, tokenHash || undefined);
           if (result) {
-            setContext({ ...context, location, resultMessage: result.pin });
+            setContext({ ...context, location, resultMessage: result.pin, ref: 'REF-' + result.id.slice(0,8).toUpperCase() });
             setScreen('swap_result');
             setSessionActive(false);
             log('Locker reserved: PIN ' + result.pin);
@@ -266,10 +267,12 @@ export const UssdSimulator: React.FC = () => {
           <div className="space-y-2">
             <div className="text-[#00ff88] font-bold">RESERVED!</div>
             <div className="text-white text-xs space-y-1">
-              <div>Locker: {context.location}</div>
+              <div>REF: {context.ref}</div>
               <div>Bundle: {context.bundle}</div>
+              <div>Locker: {context.location}</div>
               <div className="mt-2 text-[#00ff88] font-bold text-lg">PIN: {context.resultMessage}</div>
-              <div className="mt-3 text-white/60 text-[10px]">Enter PIN at any locker terminal.</div>
+              <div className="mt-3 text-white/60 text-[10px]">Show PIN at terminal to collect.</div>
+              <div className="text-white/60 text-[10px]">Note this reference.</div>
             </div>
           </div>
         );
