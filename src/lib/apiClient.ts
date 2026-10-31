@@ -99,6 +99,9 @@ export const listMyRequests = (token: string) =>
 export const withdrawRequest = (token: string, requestId: string) =>
   call<{ id: string; status: string }>(`/requests/${requestId}/withdraw`, { method: 'POST', headers: { 'X-Token': token } });
 
+export const collectSwap = (token: string, requestId: string, pin: string) =>
+  call<{ id: string; status: string }>(`/requests/${requestId}/collect`, { method: 'POST', headers: { 'X-Token': token }, body: JSON.stringify({ pin }) });
+
 export const listMyVouchers = (token: string) =>
   call<{ vouchers: any[] }>('/requests/vouchers/mine', { headers: { 'X-Token': token } });
 

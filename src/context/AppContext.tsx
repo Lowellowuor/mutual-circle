@@ -47,6 +47,7 @@ interface AppContextType {
   executeSwap: (category: string, location: string, tokenOverride?: string) => Promise<SwapRequest | null>;
   executePool: (category: PoolRequest['category'], objectId: string, amount: number, tokenOverride?: string) => Promise<PoolRequest | null>;
   withdrawRequest: (id: string, type: 'swap' | 'pool') => void;
+  collectRequest: (id: string, pin: string) => Promise<boolean>;
   dispatchRequest: (id: string, type?: 'swap' | 'pool') => Promise<string | null>;
   issueVoucher: (requestId: string, partnerName: string, partnerType: 'retailer' | 'hospital') => Promise<Voucher | null>;
   redeemVoucher: (pin: string, amountPence: number, partnerName: string) => Promise<{ ok: boolean; reason?: string }>;
@@ -473,6 +474,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     })().catch(() => {});
   };
 
+  const collectRequest = async (id: string, pin: string): Promise<boolean> => {
+    if (!tokenHash) return false;
+    const r = await api.collectSwap(tokenHash, id, pin);
+    if (!r || r.status !== 'collected') return false;
+    await refetchAll();
+    return true;
+  };
+
   const dispatchRequest = async (id: string, _type?: 'swap' | 'pool'): Promise<string | null> => {
     if (!sessionToken) return null;
     const r = await api.dispatchRequest(sessionToken, id);
@@ -558,7 +567,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       swapRequests, poolRequests, riskFlags, campaigns, pledges, auditLog, dedupItems,
       lockerStocks, depotCounts, donorContributions, donorHash, vouchers, voucherRedemptions, matchInterests,
       emptyQueueMode, setEmptyQueueMode,
-      executeSwap, executePool, withdrawRequest, dispatchRequest,
+      executeSwap, executePool, withdrawRequest, dispatchRequest, collectRequest,
       issueVoucher, redeemVoucher, completeOcrCheck,
       routeFlagToTier4, clearFlagAsFalsePositive, matchPledge, closeMatchInterest, expressInterest,
       addDonorContribution, addPledge, logAction,

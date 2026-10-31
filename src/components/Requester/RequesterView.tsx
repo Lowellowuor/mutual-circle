@@ -41,7 +41,7 @@ const POOL_CATS: { id: PoolCat; name: string; desc: string; Icon: any; accent: s
 ];
 
 export const RequesterView: React.FC = () => {
-  const { tokenHash, initializeSession, logout, swapRequests, poolRequests, executeSwap, executePool, withdrawRequest, expressInterest, vouchers, voucherRedemptions } = useApp();
+  const { tokenHash, initializeSession, logout, swapRequests, poolRequests, executeSwap, executePool, withdrawRequest, expressInterest, vouchers, voucherRedemptions, collectRequest } = useApp();
 
   /* ---------- INTAKE STATE ---------- */
   const [intakeStep, setIntakeStep] = useState<IntakeStep>('phone');
@@ -73,6 +73,7 @@ export const RequesterView: React.FC = () => {
   const [swapResult, setSwapResult] = useState<SwapRequest | null>(null);
   const [swapping, setSwapping] = useState(false);
   const [pinCopied, setPinCopied] = useState(false);
+  const [collectError, setCollectError] = useState<string | null>(null);
   const [swapError, setSwapError] = useState<string | null>(null);
 
   /* ---------- POOL STATE ---------- */
@@ -531,6 +532,7 @@ export const RequesterView: React.FC = () => {
           {mergedHistory.slice(0, 5).map((r: any) => {
             const isWithdrawn = r.status === 'withdrawn';
             const canWithdraw = r.type === 'swap' ? r.status === 'reserved' : (r.status === 'verified' || r.status === 'pending_check');
+            const canCollect = r.type === 'swap' && !isWithdrawn && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status);
             return (
               <div key={r.id} className={'p-2.5 rounded-lg border flex justify-between items-center ' + (isWithdrawn ? 'bg-[#FAF8F4] border-[#111111]/5 opacity-60' : 'bg-white border-[#111111]/10')}>
                 <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -539,7 +541,10 @@ export const RequesterView: React.FC = () => {
                 </div>
                 <div className="text-right shrink-0 ml-2 flex flex-col items-end gap-1">
                   <div className="text-[10px] font-mono font-bold text-[#111111]">{r.type === 'swap' ? `PIN ${r.pin}` : `KES ${r.amount?.toLocaleString()}`}</div>
-                  {canWithdraw ? (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-2.5 h-2.5" />Withdraw</button>) : (<div className={'text-[8px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
+                  {canWithdraw && (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-2.5 h-2.5" />Withdraw</button>)}
+                  {canCollect && (<button onClick={async () => { setCollectError(null); const ok = await collectRequest(r.id, r.pin); if (!ok) setCollectError('Could not confirm'); else setTimeout(() => setCollectError(null), 3000); }} className="text-[9px] text-emerald-700 hover:underline flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" />I've collected</button>)}
+                  {!canWithdraw && !canCollect && (<div className={'text-[8px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : r.status === 'collected' ? 'text-emerald-600 font-bold' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
+                  {collectError && <div className="text-[8px] text-rose-600">{collectError}</div>}
                 </div>
               </div>
             );
