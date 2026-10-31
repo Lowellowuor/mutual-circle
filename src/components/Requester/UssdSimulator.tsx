@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { generateHMAC } from '../../lib/hash';
 import { consumeRate, peekRate, MAX_DAILY_REQUESTS } from '../../services/auth';
-import { setHouseholdSize as apiSetHousehold } from '../../lib/apiClient';
+import { setHouseholdSize as apiSetHousehold, issueToken, collectByPin } from '../../lib/apiClient';
 import { Clock, ShieldCheck, Eye, EyeOff, Zap } from 'lucide-react';
 
-type UssdScreen = 'welcome' | 'main_menu' | 'household_ask' | 'household_size' | 'swap_bundle' | 'swap_location' | 'swap_result'
+type UssdScreen = 'welcome' | 'main_menu' | 'household_ask' | 'household_size' | 'swap_bundle' | 'swap_location' | 'swap_result' | 'collect_pin'
   | 'pool_category' | 'pool_object' | 'pool_amount' | 'pool_confirm' | 'pool_result'
   | 'support' | 'session_ended' | 'rate_limited';
 
@@ -61,8 +60,9 @@ export const UssdSimulator: React.FC = () => {
       return;
     }
     if (!tokenHash) {
-      const hash = await generateHMAC(PHONE);
-      setTokenHash(hash);
+      const r = await issueToken(PHONE);
+      if (r && r.token) setTokenHash(r.token);
+      else { setScreen('rate_limited'); setSessionActive(false); return; }
     }
     setSessionsUsed(s => s + 1);
     setElapsed(0);
@@ -89,6 +89,7 @@ export const UssdSimulator: React.FC = () => {
       case 'household_size': setScreen('household_ask'); break;
       case 'swap_bundle': setScreen('main_menu'); break;
       case 'swap_location': setScreen('swap_bundle'); break;
+      case 'collect_pin': setScreen('main_menu'); setContext({}); break;
       case 'pool_category': setScreen('main_menu'); break;
       case 'pool_object': setScreen('pool_category'); break;
       case 'pool_amount': setScreen('pool_object'); break;
@@ -114,6 +115,7 @@ export const UssdSimulator: React.FC = () => {
         if (val === '1') { setScreen('household_ask'); log('Chose food bundles'); }
         else if (val === '2') { setScreen('pool_category'); log('Chose Pool'); }
         else if (val === '3') { setScreen('support'); log('Chose Support'); }
+        else if (val === '4') { setScreen('collect_pin'); log('Confirm collection'); }
         break;
       case 'household_ask':
         if (val === '1') {
@@ -155,6 +157,17 @@ export const UssdSimulator: React.FC = () => {
             log('Locker reserved: PIN ' + result.pin);
           } else {
             endSession('System error. Try again.');
+          }
+        }
+        break;
+      case 'collect_pin':
+        if (val.length >= 3 && tokenHash) {
+          const res = await collectByPin(tokenHash, val);
+          if (res && res.status === 'collected') {
+            setContext({ ...context, resultMessage: '✅ Collection confirmed.\nREF: REF-' + res.id.slice(0,8).toUpperCase() });
+            log('Collected');
+          } else {
+            setContext({ ...context, resultMessage: 'Could not confirm. Check PIN and try again.' });
           }
         }
         break;
@@ -219,7 +232,7 @@ export const UssdSimulator: React.FC = () => {
           <div className="space-y-2">
             <div className="text-[#00ff88] font-bold">MAIN MENU</div>
             <div className="text-white text-xs space-y-1">
-              <div>1. Food bundles</div><div>2. Pay a bill</div><div>3. Talk to someone</div>
+              <div>1. Food bundles</div><div>2. Pay a bill</div><div>3. Talk to someone</div><div>4. Confirm collection</div>
             </div>
           </div>
         );
@@ -274,6 +287,23 @@ export const UssdSimulator: React.FC = () => {
               <div className="mt-3 text-white/60 text-[10px]">Show PIN at terminal to collect.</div>
               <div className="text-white/60 text-[10px]">Note this reference.</div>
             </div>
+          </div>
+        );
+      case 'collect_pin':
+        return (
+          <div className="space-y-2">
+            <div className="text-[#00ff88] font-bold">CONFIRM COLLECTION</div>
+            {context.resultMessage ? (
+              <>
+                <div className="text-white text-xs whitespace-pre-line">{context.resultMessage}</div>
+                <div className="mt-3 text-white/60 text-[10px]">Press 0 to return to menu</div>
+              </>
+            ) : (
+              <>
+                <div className="text-white text-xs">Enter your PIN below.</div>
+                <div className="mt-3 text-white/60 text-[10px]">Press 0 to cancel</div>
+              </>
+            )}
           </div>
         );
       case 'pool_category':
