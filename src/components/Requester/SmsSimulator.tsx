@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { generateHMAC } from '../../lib/hash';
 import { consumeRate, peekRate, MAX_DAILY_REQUESTS } from '../../services/auth';
-import { setHouseholdSize as apiSetHousehold } from '../../lib/apiClient';
+import { setHouseholdSize as apiSetHousehold, collectByPin, issueToken } from '../../lib/apiClient';
 import { Send, Signal, Wifi, Battery, Eye, EyeOff, ShieldCheck, Lock } from 'lucide-react';
 
 type SmsState = 'idle' | 'menu' | 'household_ask' | 'household_size' | 'swap_bundle' | 'swap_location' | 'swap_done' | 'pool_category' | 'pool_object' | 'pool_amount' | 'pool_confirm' | 'pool_done' | 'bench' | 'rate_limited' | 'opted_out';
@@ -64,10 +63,28 @@ export const SmsSimulator: React.FC = () => {
     if (t === 'START' && (state === 'opted_out' || state === 'idle')) { sysReply('Reply HELP for the menu.'); setState('idle'); return; }
     if (t === 'HELP' && state !== 'idle') { setState('menu'); sysReply('Main menu:\n1-Food bundles\n2-Bill payment\n3-Talk to someone\nReply 1, 2, or 3.'); return; }
 
+    // COLLECTED <pin> — confirm physical pickup, works from any state
+    const collectMatch = raw.trim().match(/^COLLECTED\s+(\d{3,6})$/i);
+    if (collectMatch && tokenHash) {
+      const pin = collectMatch[1];
+      sysReply('Checking PIN ' + pin + '...');
+      const res = await collectByPin(tokenHash, pin);
+      if (res && res.status === 'collected') {
+        sysReply('Collection confirmed. Thank you.\nREF: REF-' + res.id.slice(0,8).toUpperCase());
+        setState('idle');
+        setContext({});
+      } else if (res && res.status) {
+        sysReply('Could not confirm: ' + res.status + '.');
+      } else {
+        sysReply('Could not confirm. Check your PIN and try again.');
+      }
+      return;
+    }
+
     switch (state) {
       case 'idle': {
         if (['HELP', 'HI', 'START', 'HELLO'].includes(t)) {
-          if (!tokenHash) { const hash = await generateHMAC(PHONE); setTokenHash(hash); }
+          if (!tokenHash) { const r = await issueToken(PHONE); if (r && r.token) setTokenHash(r.token); else sysReply('System busy. Please try again.'); }
           sysReply('Main menu:\n1-Food bundles\n2-Bill payment\n3-Talk to someone\nReply 1, 2, or 3.');
           setState('menu');
         } else sysReply('Reply HELP to start.');
@@ -101,7 +118,7 @@ export const SmsSimulator: React.FC = () => {
           const rateCheck = tokenHash ? consumeRate(tokenHash, 0) : { ok: true, state: { count: 0, value: 0, lastReset: '' } };
           if (!rateCheck.ok) { sysReply(rateCheck.reason || 'Daily limit reached.'); return; }
           const result = await executeSwap(context.bundle as string, location, tokenHash || undefined);
-          if (result) { sysReply('Confirmed.\nREF: REF-' + result.id.slice(0,8).toUpperCase() + '\nBundle: ' + result.bundleCategory + '\nLocker: ' + result.lockerLocation + '\nPIN: ' + result.pin + '\n\nShow PIN at locker terminal to collect.\nSave this SMS.\nReply DONE to close.'); setState('swap_done'); }
+          if (result) { sysReply('Confirmed.\nREF: REF-' + result.id.slice(0,8).toUpperCase() + '\nBundle: ' + result.bundleCategory + '\nLocker: ' + result.lockerLocation + '\nPIN: ' + result.pin + '\n\nShow PIN at locker terminal to collect.\nSave this SMS.\n\nAfter you collect: reply COLLECTED ' + result.pin + '\nOr DONE to close.'); setState('swap_done'); }
           else sysReply('System busy. Please try again.');
         } else sysReply('Reply 1, 2, or 3.');
         break;
