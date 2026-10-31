@@ -1,15 +1,38 @@
 $root = "C:\Users\Administrator\Documents\mutual-circle"
 $backendRoot = Join-Path $root "backend"
-$baseUrl = "http://127.0.0.1:8000"
+$baseUrl = "http://127.0.0.1:8010"
 
 Write-Host "=== SETUP: kill old server, start fresh ===" -ForegroundColor Cyan
-Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object {
-    Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue
+# Aggressive kill: port listener + any python from our venv
+Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue | ForEach-Object {
+    try { Stop-Process -Id $_.OwningProcess -Force -ErrorAction Stop } catch {}
 }
-Start-Sleep -Seconds 1
+Get-Process python* -ErrorAction SilentlyContinue | Where-Object {
+    $_.Path -and $_.Path -like "*mutual-circle\backend\.venv\*"
+} | ForEach-Object {
+    try { Stop-Process -Id $_.Id -Force -ErrorAction Stop } catch {}
+}
 
+# Wait until port 8000 is truly free (up to 10s)
+$waited = 0
+while ($waited -lt 10) {
+    $listener = Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue
+    if (-not $listener) { break }
+    Start-Sleep -Seconds 1
+    $waited++
+}
+if (Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue) {
+    throw "Port 8000 still occupied after aggressive kill - aborting test"
+}
+
+# Truncate startup logs so we can see THIS run's output
+if (Test-Path "$backendRoot\.test.err") { Clear-Content "$backendRoot\.test.err" -ErrorAction SilentlyContinue }
+if (Test-Path "$backendRoot\.test.log") { Clear-Content "$backendRoot\.test.log" -ErrorAction SilentlyContinue }
+
+# PYTHONPATH is more reliable than --app-dir when spawning via Start-Process
+$env:PYTHONPATH = "$backendRoot\src"
 $proc = Start-Process -FilePath "$backendRoot\.venv\Scripts\python.exe" `
-    -ArgumentList "-m","uvicorn","mtc.main:app","--host","127.0.0.1","--port","8000","--app-dir","$backendRoot\src" `
+    -ArgumentList "-m","uvicorn","mtc.main:app","--host","127.0.0.1","--port","8010" `
     -WorkingDirectory $backendRoot -NoNewWindow -PassThru `
     -RedirectStandardOutput "$backendRoot\.test.log" `
     -RedirectStandardError "$backendRoot\.test.err"
@@ -28,13 +51,24 @@ $start = [System.Diagnostics.Stopwatch]::StartNew()
     }
 }
 
+if ($ready) {
+    # Verify THIS process is the one listening (not a stale one that survived)
+    $listener = Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($listener) {
+        $listenerExe = try { (Get-Process -Id $listener.OwningProcess -ErrorAction Stop).Path } catch { "unknown" }
+        if ($listenerExe -notlike "*mutual-circle\backend\.venv\*") {
+            Write-Host "  WARN: port 8000 owned by $listenerExe (not our venv python)" -ForegroundColor Yellow
+        }
+    }
+}
+
 if (-not $ready) {
     Write-Host "  Backend failed to become healthy in 60s" -ForegroundColor Red
     Write-Host "  --- .test.err (last 40) ---" -ForegroundColor Yellow
     Get-Content "$backendRoot\.test.err" -Tail 40 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "    $_" }
     Write-Host "  --- .test.log (last 40) ---" -ForegroundColor Yellow
     Get-Content "$backendRoot\.test.log" -Tail 40 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "    $_" }
-    Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue |
+    Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue |
         ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
     Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
     return
@@ -199,6 +233,23 @@ Assert "A23. POST /requests/collect {pin} -> 200" (-not $pinCollect.__error -and
 $pinDup = Invoke-Post "/requests/collect" -Headers @{ "X-Token" = $requesterToken } -Body ('{"pin":"' + $pinSwapPin + '"}')
 Assert "A24. Second PIN-only collect -> 409" ($pinDup.__error -and $pinDup.__status -eq 409) "Expected 409, got $($pinDup.__status) / $($pinDup.__message)"
 
+# A25: verify pin_hash is written for the fresh swap
+$mineCheck = Invoke-Get "/requests/mine" -Headers @{ "X-Token" = $requesterToken }
+$freshSwap = if (-not $mineCheck.__error) { $mineCheck.requests | Where-Object { $_.id -eq $pinSwap.id } | Select-Object -First 1 } else { $null }
+$freshMd = @{}
+if ($freshSwap -and $freshSwap.metadata) {
+    $mdRaw = $freshSwap.metadata
+    if ($mdRaw -is [string]) {
+        try { $freshMd = $mdRaw | ConvertFrom-Json } catch { $freshMd = @{} }
+    } else {
+        $freshMd = $mdRaw
+    }
+}
+$hashValue = if ($freshMd.pin_hash) { $freshMd.pin_hash } else { "" }
+$hasPinHash = ($hashValue -is [string]) -and ($hashValue.Length -gt 20) -and $hashValue.StartsWith('$2b$')
+Assert "A25. pin_hash written for fresh swap" ([bool]$hasPinHash) "Expected bcrypt hash, got type: $($freshMd.GetType().Name)"
+
+
 Write-Host ""
 Write-Host "=== FLOW B: Swap request lifecycle ===" -ForegroundColor Cyan
 $swapBody = '{"bundle_category":"Standard Pantry","locker_location":"Kibera Hub"}'
@@ -293,7 +344,7 @@ Write-Host "    Donor hash: $donorHash" -ForegroundColor Gray
 
 Write-Host ""
 Write-Host "=== Stopping test server ===" -ForegroundColor Cyan
-Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue |
+Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue |
     ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 Write-Host "  Stopped" -ForegroundColor Green
