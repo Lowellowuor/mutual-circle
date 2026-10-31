@@ -101,7 +101,7 @@ export const SmsSimulator: React.FC = () => {
           const rateCheck = tokenHash ? consumeRate(tokenHash, 0) : { ok: true, state: { count: 0, value: 0, lastReset: '' } };
           if (!rateCheck.ok) { sysReply(rateCheck.reason || 'Daily limit reached.'); return; }
           const result = await executeSwap(context.bundle as string, location, tokenHash || undefined);
-          if (result) { sysReply('Reserved!\nBundle: ' + result.bundleCategory + '\nLocker: ' + result.lockerLocation + '\nPIN: ' + result.pin + '\n\nEnter PIN at any locker terminal. Collect anytime.\n\nReply DONE to close.'); setState('swap_done'); }
+          if (result) { sysReply('Confirmed.\nREF: REF-' + result.id.slice(0,8).toUpperCase() + '\nBundle: ' + result.bundleCategory + '\nLocker: ' + result.lockerLocation + '\nPIN: ' + result.pin + '\n\nShow PIN at locker terminal to collect.\nSave this SMS.\nReply DONE to close.'); setState('swap_done'); }
           else sysReply('System busy. Please try again.');
         } else sysReply('Reply 1, 2, or 3.');
         break;
