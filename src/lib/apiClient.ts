@@ -12,25 +12,55 @@ export function setSessionExpiredHandler(handler: SessionExpiredHandler | null):
 
 let backendKnownDown = false;
 
+// --- Backend state subscription (for UI banner) ---
+type BackendStateListener = (down: boolean) => void;
+const backendStateListeners: BackendStateListener[] = [];
+
+export function subscribeBackendState(listener: BackendStateListener): () => void {
+  backendStateListeners.push(listener);
+  return () => {
+    const i = backendStateListeners.indexOf(listener);
+    if (i >= 0) backendStateListeners.splice(i, 1);
+  };
+}
+
+function notifyBackendState(down: boolean): void {
+  for (const l of backendStateListeners) {
+    try { l(down); } catch { /* swallow listener errors */ }
+  }
+}
+
 async function call<T>(path: string, init?: RequestInit): Promise<T | null> {
-  if (backendKnownDown) return null;
+  if (backendKnownDown) {
+    console.warn(`[api] Skipping ${init?.method ?? 'GET'} ${path} - backend known down`);
+    return null;
+  }
   try {
     const res = await fetch(`${BASE}${path}`, {
       ...init,
       headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
     });
     if (res.status === 401) {
-      // Token invalid — trigger re-login, not a generic failure
       if (onSessionExpired) onSessionExpired();
+      console.warn(`[api] 401 on ${init?.method ?? 'GET'} ${path} - session expired`);
       return null;
     }
     if (!res.ok) {
-      if (res.status >= 500) backendKnownDown = true;
+      const body = await res.text().catch(() => '');
+      if (res.status >= 500 && !backendKnownDown) {
+        backendKnownDown = true;
+        notifyBackendState(true);
+      }
+      console.error(`[api] ${res.status} ${init?.method ?? 'GET'} ${path}: ${body.slice(0, 300)}`);
       return null;
     }
     return (await res.json()) as T;
-  } catch {
-    backendKnownDown = true;
+  } catch (e) {
+    if (!backendKnownDown) {
+      backendKnownDown = true;
+      notifyBackendState(true);
+    }
+    console.error(`[api] Network error on ${init?.method ?? 'GET'} ${path}:`, e);
     return null;
   }
 }
@@ -40,7 +70,10 @@ export function isBackendActive(): boolean {
 }
 
 export function resetBackendProbe(): void {
-  backendKnownDown = false;
+  if (backendKnownDown) {
+    backendKnownDown = false;
+    notifyBackendState(false);
+  }
 }
 
 // --- Public ---
