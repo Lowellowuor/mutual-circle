@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { generateHMAC } from '../../lib/hash';
 import { consumeRate, peekRate, MAX_DAILY_REQUESTS } from '../../services/auth';
+import { setHouseholdSize as apiSetHousehold } from '../../lib/apiClient';
 import { Send, Check, CheckCheck, ShieldAlert, Eye, EyeOff, Clock, Phone, AlertTriangle } from 'lucide-react';
 
 type WaScreen = 'opt_in' | 'chat' | 'window_expired';
@@ -24,6 +25,7 @@ interface WaMessage {
 
 interface WaContext {
   bundle?: string;
+  householdSize?: number;
   location?: string;
   category?: 'utility' | 'school_fee' | 'hospital_invoice';
   objectId?: string;
@@ -130,8 +132,48 @@ export const WhatsAppSimulator: React.FC = () => {
   const routeReply = async (reply: string) => {
     if (reply === 'swap') {
       await businessSay({
+        kind: 'buttons',
+        text: 'Are you alone or do you have a family?',
+        buttons: [
+          { id: 'hh-alone', title: 'Just me' },
+          { id: 'hh-family', title: 'My household' },
+        ],
+      });
+    } else if (reply === 'hh-alone') {
+      setContext({ ...context, householdSize: 1 });
+      if (tokenHash) await apiSetHousehold(tokenHash, 1);
+      await businessSay({
         kind: 'list',
-        text: 'Select a bundle to reserve:',
+        text: 'Noted: Just you (Small bundle).\n\nSelect a bundle to reserve:',
+        listTitle: 'View bundles',
+        listItems: [
+          { id: 'swap-pantry', title: 'Standard Pantry', description: 'Maize flour, rice, oil, lentils' },
+          { id: 'swap-hygiene', title: 'Hygiene Kit', description: 'Soap, sanitary pads, toothpaste' },
+        ],
+      });
+    } else if (reply === 'hh-family') {
+      await businessSay({
+        kind: 'list',
+        text: 'How many people, including you?',
+        listTitle: 'Select household size',
+        listItems: [
+          { id: 'hh-small', title: '2-3 people', description: 'Standard bundle' },
+          { id: 'hh-medium', title: '4-6 people', description: 'Large bundle' },
+          { id: 'hh-large', title: '7+ people', description: 'Family bundle' },
+        ],
+      });
+    } else if (reply === 'hh-small' || reply === 'hh-medium' || reply === 'hh-large') {
+      const sizeMap: Record<string, { n: number; label: string }> = {
+        'hh-small': { n: 3, label: 'Standard (2-3)' },
+        'hh-medium': { n: 5, label: 'Large (4-6)' },
+        'hh-large': { n: 8, label: 'Family (7+)' },
+      };
+      const { n: hhSize, label: hhLabel } = sizeMap[reply];
+      setContext({ ...context, householdSize: hhSize });
+      if (tokenHash) await apiSetHousehold(tokenHash, hhSize);
+      await businessSay({
+        kind: 'list',
+        text: 'Noted: ' + hhLabel + ' bundle.\n\nSelect a bundle to reserve:',
         listTitle: 'View bundles',
         listItems: [
           { id: 'swap-pantry', title: 'Standard Pantry', description: 'Maize flour, rice, oil, lentils' },
