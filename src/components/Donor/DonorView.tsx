@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { SmsDonorSimulator } from './SmsDonorSimulator';
 import { DonorActivityModal } from './DonorActivityModal';
-import { getDonorLeaderboard, getDonorProfile, updateDonorProfile, getImpactStats, getDistribution, getPublicPartners } from '../../lib/apiClient';
+import { getDonorLeaderboard, getDonorProfile, updateDonorProfile, getImpactStats, getDistribution, getPublicPartners, getPublicLedger, downloadPublicLedgerCsv } from '../../lib/apiClient';
 import {
   HeartHandshake, ShieldCheck, Check, Home, Wallet, Package, TrendingUp,
   MapPin, Zap, ChevronRight, Clock, Eye, EyeOff, RotateCcw, Lock, Trophy, Edit2,
 } from 'lucide-react';
 
 type Tab = 'home' | 'give' | 'pledge' | 'campaigns' | 'impact' | 'leaders';
-type Screen = 'tab' | 'give_success' | 'pledge_success';
+type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger';
 
 
 
@@ -47,27 +47,25 @@ export const DonorView: React.FC = () => {
   const [dismissedClosures, setDismissedClosures] = useState<Set<string>>(new Set());
   const [publicPartners, setPublicPartners] = useState<{ id: string; name: string; type: string; region: string }[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<any | null>(null);
+  const [ledgerData, setLedgerData] = useState<{ total_pooled_pence: number; entry_count: number; chain_ok: boolean; broken_at: { index: number; reason: string } | null; last_entries: any[] } | null>(null);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
 
   const finalAmount = custom ? Number(custom) : selected;
   const totalGiven = donorContributions.reduce((a, c) => a + c.amount, 0);
 
-  const liveLedger = [
-    ...donorContributions.filter(c => c.optInLedger).map(c => ({
-      id: c.id,
-      name: myProfile?.display_name || 'You',
-      amount: c.amount,
-      when: formatRelativeTime(c.timestamp),
-      isLive: true as const,
-    })),
-    ...leaderboard.filter(l => l.display_name !== (myProfile?.display_name || 'You')).map((l, i) => ({
-      id: 'lb-' + i,
-      name: l.display_name,
-      amount: l.total_pence / 100,
-      when: l.gift_count + ' gift' + (l.gift_count === 1 ? '' : 's'),
-      isLive: false as const,
-    })),
-  ];
   const liveLedgerTotal = donorContributions.filter(c => c.optInLedger).reduce((a, c) => a + c.amount, 0);
+
+  const openLedgerModal = async () => {
+    setScreen('ledger');
+    if (ledgerData) return;
+    setLedgerLoading(true);
+    try { const r = await getPublicLedger(10); if (r) setLedgerData(r as any); } catch {}
+    setLedgerLoading(false);
+  };
+
+  const handleDownloadLedger = async () => {
+    try { await downloadPublicLedgerCsv(); } catch {}
+  };
 
   const handleGive = () => {
     if (finalAmount <= 0) return;
@@ -223,12 +221,79 @@ export const DonorView: React.FC = () => {
       );
     }
 
+    if (screen === 'ledger') {
+      return (
+        <div className="p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-serif text-lg font-bold text-[#111111]">Public ledger</h2>
+              <p className="text-[11px] text-[#111111]/50 mt-0.5">Verify the chain has not been tampered with.</p>
+            </div>
+            <button onClick={() => setScreen('tab')} className="text-[10px] text-[#111111]/60 hover:text-[#111111]">Back</button>
+          </div>
+          {ledgerLoading && (
+            <div className="p-6 text-center text-xs text-[#111111]/50">Loading ledger…</div>
+          )}
+          {ledgerData && (
+            <>
+              {ledgerData.chain_ok ? (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase font-bold text-emerald-900">
+                    <Check className="w-3.5 h-3.5" /> Chain verified
+                  </div>
+                  <div className="text-[11px] text-emerald-900/80 mt-1">{ledgerData.entry_count} entries · no tampering detected</div>
+                </div>
+              ) : (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                  <div className="text-[10px] font-mono uppercase font-bold text-rose-900">Chain broken</div>
+                  <div className="text-[11px] text-rose-900/80 mt-1">
+                    {ledgerData.broken_at ? 'At entry ' + ledgerData.broken_at.index + ': ' + ledgerData.broken_at.reason : 'Verification failed'}
+                  </div>
+                </div>
+              )}
+              <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl">
+                <div className="text-[9px] font-mono uppercase text-[#111111]/50">Total pooled</div>
+                <div className="text-lg font-mono font-bold text-[#1F6B4A]">KES {(ledgerData.total_pooled_pence / 100).toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-[9px] font-mono uppercase text-[#111111]/50 mb-1.5">Recent entries</div>
+                <div className="space-y-1.5">
+                  {ledgerData.last_entries.slice(0, 8).map((e: any) => (
+                    <div key={e.id} className="p-2.5 border border-[#111111]/10 rounded-lg flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-[9px] font-mono text-[#111111]/50">{new Date(e.created_at).toLocaleString()}</div>
+                        <div className="text-[10px] font-semibold text-[#111111] mt-0.5 truncate">{(e.category || '').replace(/_/g, ' ')}</div>
+                        <div className="text-[9px] font-mono text-[#111111]/40 mt-0.5">H: {e.entry_hash_prefix}</div>
+                      </div>
+                      <div className="text-[11px] font-mono font-bold text-[#1F6B4A] shrink-0">KES {(e.amount_pence / 100).toLocaleString()}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-lg text-[10px] text-blue-900 leading-relaxed">
+                Each entry is chained to the previous by HMAC — one change breaks the chain.
+              </div>
+            </>
+          )}
+          <div className="space-y-2 pt-2">
+            <button onClick={handleDownloadLedger} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium">Download CSV</button>
+            <button onClick={() => setScreen('tab')} className="w-full py-2.5 bg-white border border-[#111111]/15 text-[#111111]/70 rounded-xl text-sm font-medium">Back to home</button>
+          </div>
+        </div>
+      );
+    }
+
     if (tab === 'home') {
       const hasActivity = activityFeed.length > 0;
       return (
         <div className="p-5 space-y-4">
           <div className="rounded-2xl bg-gradient-to-br from-[#1F6B4A] to-[#18553a] p-5 text-white space-y-2">
-            <HeartHandshake className="w-6 h-6 text-white/80" />
+            <div className="flex items-center justify-between">
+              <HeartHandshake className="w-6 h-6 text-white/80" />
+              <button onClick={openLedgerModal} className="text-[10px] font-mono uppercase tracking-wider text-white/70 hover:text-white underline flex items-center gap-1" title="Verify public ledger">
+                <ShieldCheck className="w-3 h-3" /> Verify ledger
+              </button>
+            </div>
             {hasActivity ? (
               <>
                 <h2 className="font-serif text-xl font-bold leading-tight">Welcome back</h2>
