@@ -151,6 +151,36 @@ $kplcRedemptions = Invoke-Get "/partners/me/redemptions" -Headers @{ "X-Partner-
 $kplcSees = -not $kplcRedemptions.__error -and ($kplcRedemptions.redemptions | Where-Object { $_.id -eq $poolRequestId })
 Assert "A16. KPLC sees dispatched request" ([bool]$kplcSees) $kplcRedemptions.__message
 
+# ============================================================
+# FLOW A2: Collection confirmation
+# ============================================================
+Write-Host ""
+Write-Host "=== FLOW A2: Collection confirmation ===" -ForegroundColor Cyan
+
+# Create a swap request (has PIN, unlike pool requests)
+$collSwapBody = '{"bundle_category":"Standard Pantry","locker_location":"Kibera Hub"}'
+$collSwapResp = Invoke-Post "/requests/swap" -Headers @{ "X-Token" = $requesterToken } -Body $collSwapBody
+Assert "A17. Create swap for collection" (-not $collSwapResp.__error -and $collSwapResp.id -and $collSwapResp.pin) $collSwapResp.__message
+$collSwapId = if ($collSwapResp.id) { $collSwapResp.id } else { "FAIL" }
+$collPin = if ($collSwapResp.pin) { $collSwapResp.pin } else { "FAIL" }
+
+# Wrong PIN -> 403
+$collBad = Invoke-Post "/requests/$collSwapId/collect" -Headers @{ "X-Token" = $requesterToken } -Body '{"pin":"9999"}'
+Assert "A18. Collect wrong PIN -> 403" ($collBad.__error -and $collBad.__status -eq 403) "Expected 403, got $($collBad.__status) / $($collBad.__message)"
+
+# Correct PIN -> 200, status collected
+$collOk = Invoke-Post "/requests/$collSwapId/collect" -Headers @{ "X-Token" = $requesterToken } -Body ('{"pin":"' + $collPin + '"}')
+Assert "A19. Collect correct PIN -> collected" (-not $collOk.__error -and $collOk.status -eq "collected") "Expected collected, got $($collOk.status) / $($collOk.__message)"
+
+# Duplicate collect -> 409
+$collDup = Invoke-Post "/requests/$collSwapId/collect" -Headers @{ "X-Token" = $requesterToken } -Body ('{"pin":"' + $collPin + '"}')
+Assert "A20. Duplicate collect -> 409" ($collDup.__error -and $collDup.__status -eq 409) "Expected 409, got $($collDup.__status)"
+
+# Notification 'collected' created
+$collNotif = Invoke-Get "/notifications/mine" -Headers @{ "X-Token" = $requesterToken }
+$hasCollNotif = -not $collNotif.__error -and ($collNotif.notifications | Where-Object { $_.template -eq "collected" })
+Assert "A21. Notification 'collected' created" ([bool]$hasCollNotif) $collNotif.__message
+
 Write-Host ""
 Write-Host "=== FLOW B: Swap request lifecycle ===" -ForegroundColor Cyan
 $swapBody = '{"bundle_category":"Standard Pantry","locker_location":"Kibera Hub"}'

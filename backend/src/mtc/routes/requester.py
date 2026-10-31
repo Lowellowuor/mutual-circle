@@ -173,3 +173,67 @@ async def get_household(
         "declared": True,
         "declared_at": row["declared_at"].isoformat(),
     }
+
+# ============================================================
+# Collection confirmation (Phase 2a)
+# Requester confirms physical collection of a swap request.
+# ============================================================
+from pydantic import BaseModel as _BaseModel
+
+class CollectBody(_BaseModel):
+    pin: str
+
+@router.post("/{request_id}/collect")
+async def collect_route(
+    request_id: str,
+    body: CollectBody,
+    token: str = Depends(require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Verify ownership + PIN, mark collected, notify, return."""
+    import json as _json
+    from mtc.notifications.service import notify
+
+    req = await conn.fetchrow("SELECT * FROM requests WHERE id = $1", request_id)
+    if req is None:
+        raise HTTPException(404, "Request not found")
+
+    req_dict = dict(req)
+
+    # Ownership — token_hash column confirmed via schema
+    if req_dict["token_hash"] != token:
+        raise HTTPException(403, "Not your request")
+
+    # Only swap requests have PINs and physical collection
+    if req_dict["type"] != "swap":
+        raise HTTPException(400, "Only swap requests can be collected")
+
+    # Status: reject only terminal states (permissive — swap can be
+    # verified, pending_check, reserved, dispatched, etc.)
+    status = req_dict["status"]
+    if status == "collected":
+        raise HTTPException(409, "Already collected")
+    if status in ("withdrawn", "rejected"):
+        raise HTTPException(409, f"Cannot collect in status {status!r}")
+
+    # PIN verification — metadata.pin is JSONB, PIN stored as plaintext
+    metadata = req_dict["metadata"]
+    if isinstance(metadata, str):
+        try:
+            metadata = _json.loads(metadata)
+        except Exception:
+            metadata = {}
+    stored_pin = metadata.get("pin") if isinstance(metadata, dict) else None
+    if not stored_pin:
+        raise HTTPException(500, "No PIN recorded on this request")
+    if stored_pin != body.pin:
+        raise HTTPException(403, "Invalid PIN")
+
+    # Update + notify
+    await conn.execute(
+        "UPDATE requests SET status = 'collected', updated_at = now() WHERE id = $1",
+        request_id,
+    )
+    await notify(conn, token, request_id, "collected")
+
+    return {"id": request_id, "status": "collected"}
