@@ -70,7 +70,7 @@ export const SmsSimulator: React.FC = () => {
       sysReply('Checking PIN ' + pin + '...');
       const res = await collectByPin(tokenHash, pin);
       if (res && res.status === 'collected') {
-        sysReply('Collection confirmed. Thank you.\nREF: REF-' + res.id.slice(0,8).toUpperCase());
+        sysReply('Collection confirmed. Thank you.\nREF: REF-' + res.id.slice(0,8).toUpperCase() + '\n\nReply HELP to start again, or STOP to opt out.');
         setState('idle');
         setContext({});
       } else if (res && res.status) {
@@ -125,7 +125,9 @@ export const SmsSimulator: React.FC = () => {
       }
       case 'swap_done': {
         if (t === 'DONE') { sysReply('Session closed. Thank you.\nReply HELP to start again.'); setState('idle'); setContext({}); }
-        else sysReply('Reply DONE to close.');
+        else if (t === 'HELP') { sysReply('Main menu:\n1-Food bundles\n2-Bill payment\n3-Talk to someone\nReply 1, 2, or 3.'); setState('menu'); setContext({}); }
+        else if (t === 'STOP') { sysReply('You have opted out. Reply START to resume.'); setState('opted_out'); }
+        else sysReply('Reply DONE to close, HELP for menu, or STOP to opt out.');
         break;
       }
       case 'pool_category': {
@@ -167,7 +169,9 @@ export const SmsSimulator: React.FC = () => {
       }
       case 'pool_done': {
         if (t === 'DONE') { sysReply('Session closed. Thank you.\nReply HELP to start again.'); setState('idle'); setContext({}); }
-        else sysReply('Reply DONE to close.');
+        else if (t === 'HELP') { sysReply('Main menu:\n1-Food bundles\n2-Bill payment\n3-Talk to someone\nReply 1, 2, or 3.'); setState('menu'); setContext({}); }
+        else if (t === 'STOP') { sysReply('You have opted out. Reply START to resume.'); setState('opted_out'); }
+        else sysReply('Reply DONE to close, HELP for menu, or STOP to opt out.');
         break;
       }
       case 'household_ask': {
@@ -207,8 +211,8 @@ export const SmsSimulator: React.FC = () => {
   const quickReplies: Record<SmsState, string[]> = {
     idle: ['HELP', 'STOP'], menu: ['1', '2', '3'], household_ask: ['1', '2'], household_size: ['1', '2', '3'],
     swap_bundle: ['1', '2'], swap_location: ['1', '2', '3'],
-    swap_done: ['DONE'], pool_category: ['1', '2', '3'], pool_object: [], pool_amount: [],
-    pool_confirm: ['YES', 'NO'], pool_done: ['DONE'], bench: ['0'], rate_limited: [], opted_out: ['START'],
+    swap_done: ['DONE', 'HELP', 'STOP'], pool_category: ['1', '2', '3'], pool_object: [], pool_amount: [],
+    pool_confirm: ['YES', 'NO'], pool_done: ['DONE', 'HELP', 'STOP'], bench: ['0', 'HELP', 'STOP'], rate_limited: [], opted_out: ['START'],
   };
 
   return (
