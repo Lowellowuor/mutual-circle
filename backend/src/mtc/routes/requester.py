@@ -216,17 +216,28 @@ async def collect_route(
     if status in ("withdrawn", "rejected"):
         raise HTTPException(409, f"Cannot collect in status {status!r}")
 
-    # PIN verification — metadata.pin is JSONB, PIN stored as plaintext
+    # PIN verification — prefer pin_hash (bcrypt), fall back to pin
+    import bcrypt
     metadata = req_dict["metadata"]
     if isinstance(metadata, str):
         try:
             metadata = _json.loads(metadata)
         except Exception:
             metadata = {}
-    stored_pin = metadata.get("pin") if isinstance(metadata, dict) else None
-    if not stored_pin:
+    if not isinstance(metadata, dict):
+        raise HTTPException(500, "Metadata corrupted")
+    stored_hash = metadata.get("pin_hash")
+    stored_plain = metadata.get("pin")
+    if not stored_hash and not stored_plain:
         raise HTTPException(500, "No PIN recorded on this request")
-    if stored_pin != body.pin:
+    if stored_hash:
+        try:
+            ok = bcrypt.checkpw(body.pin.encode("utf-8"), stored_hash.encode("utf-8"))
+        except Exception:
+            raise HTTPException(500, "PIN hash corrupted")
+        if not ok:
+            raise HTTPException(403, "Invalid PIN")
+    elif stored_plain != body.pin:
         raise HTTPException(403, "Invalid PIN")
 
     # Update + notify
@@ -262,13 +273,26 @@ async def collect_by_pin_route(
         token,
     )
 
+    import bcrypt
     matching = None
     for r in rows:
         md = r["metadata"]
         if isinstance(md, str):
             try: md = _json.loads(md)
             except Exception: md = {}
-        if isinstance(md, dict) and md.get("pin") == body.pin:
+        if not isinstance(md, dict):
+            continue
+        ph = md.get("pin_hash")
+        pp = md.get("pin")
+        matched = False
+        if ph:
+            try:
+                matched = bcrypt.checkpw(body.pin.encode("utf-8"), ph.encode("utf-8"))
+            except Exception:
+                matched = False
+        elif pp:
+            matched = (pp == body.pin)
+        if matched:
             matching = r
             break
 
