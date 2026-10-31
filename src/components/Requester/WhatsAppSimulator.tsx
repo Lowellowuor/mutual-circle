@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { generateHMAC } from '../../lib/hash';
 import { consumeRate, peekRate, MAX_DAILY_REQUESTS } from '../../services/auth';
-import { setHouseholdSize as apiSetHousehold } from '../../lib/apiClient';
+import { setHouseholdSize as apiSetHousehold, issueToken, collectByPin } from '../../lib/apiClient';
 import { Send, Check, CheckCheck, ShieldAlert, Eye, EyeOff, Clock, Phone, AlertTriangle } from 'lucide-react';
 
 type WaScreen = 'opt_in' | 'chat' | 'window_expired';
@@ -91,8 +90,9 @@ export const WhatsAppSimulator: React.FC = () => {
 
   const handleOptIn = async () => {
     if (!metaAcknowledged) return;
-    const hash = await generateHMAC(PHONE);
-    setTokenHash(hash);
+    const r = await issueToken(PHONE);
+    if (r && r.token) setTokenHash(r.token);
+    else { pushMessage({ from: 'business', kind: 'text', text: 'System busy. Please try again.' }); return; }
     setOptedIn(true);
     setScreen('chat');
     setWindowRemaining(SESSION_WINDOW_SECONDS);
@@ -207,6 +207,7 @@ export const WhatsAppSimulator: React.FC = () => {
           templateName: 'locker_reservation_v1',
           text: '✅ Reservation confirmed\n\nREF: REF-' + result.id.slice(0,8).toUpperCase() + '\nBundle: ' + result.bundleCategory + '\nLocation: ' + location + '\nPIN: ' + result.pin + '\n\nShow this PIN at the locker terminal.\nSave or screenshot this message for your records.',
         });
+        await businessSay({ kind: 'buttons', text: 'After you collect, tap below to confirm:', buttons: [{ id: 'collect', title: "I've collected" }] });
       }
     } else if (reply === 'pool') {
       await businessSay({
@@ -228,6 +229,13 @@ export const WhatsAppSimulator: React.FC = () => {
         kind: 'text',
         text: 'For confidential peer support, reach out to Befrienders Kenya: 0722 178 177 (free).\n\nFor emergencies: 999.\nFor Kenya Red Cross: 1199.\n\nYou are not alone.',
       });
+    } else if (reply === 'collect') {
+      if (!context.pin || !tokenHash) { await businessSay({ kind: 'text', text: 'No active reservation found.' }); }
+      else {
+        const res = await collectByPin(tokenHash, context.pin);
+        if (res && res.status === 'collected') { await businessSay({ kind: 'template', templateName: 'collection_confirmed_v1', text: '✅ Collection confirmed\n\nREF: REF-' + res.id.slice(0,8).toUpperCase() + '\n\nThank you.' }); }
+        else { await businessSay({ kind: 'text', text: 'Could not confirm. If already collected, this is closed.' }); }
+      }
     }
   };
 
