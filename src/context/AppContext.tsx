@@ -81,8 +81,12 @@ function getOrCreateDonorHash(): string {
 }
 
 // --- Mappers (backend snake_case ? frontend camelCase) ---
+function parseMeta(v: any): any {
+  if (typeof v === 'string') { try { return JSON.parse(v); } catch { return {}; } }
+  return v || {};
+}
 function mapSwapFromBackend(r: any, tokenHash: string): SwapRequest {
-  const meta = r.metadata || {};
+  const meta = parseMeta(r.metadata);
   return {
     id: r.id,
     tokenHash,
@@ -100,7 +104,7 @@ function mapPoolFromBackend(r: any, tokenHash: string): PoolRequest {
     id: r.id,
     tokenHash,
     category: r.category,
-    hashedObjectId: r.hashed_object_id || (r.metadata && r.metadata.object_hash) || '',
+    hashedObjectId: r.hashed_object_id || parseMeta(r.metadata).object_hash || '',
     amount: (r.amount_pence || 0) / 100,
     tier: r.tier,
     status: r.status,
@@ -477,9 +481,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const collectRequest = async (id: string, pin: string): Promise<boolean> => {
     if (!tokenHash) return false;
     const r = await api.collectSwap(tokenHash, id, pin);
-    if (!r || r.status !== 'collected') return false;
+    // refresh-on-fail: always refetch so stale history auto-corrects
     await refetchAll();
-    return true;
+    return !!(r && r.status === 'collected');
   };
 
   const dispatchRequest = async (id: string, _type?: 'swap' | 'pool'): Promise<string | null> => {
