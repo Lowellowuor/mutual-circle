@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { generateHMAC } from '../../lib/hash';
 import { consumeRate, peekRate, MAX_DAILY_REQUESTS } from '../../services/auth';
+import { setHouseholdSize as apiSetHousehold } from '../../lib/apiClient';
 import { Clock, ShieldCheck, Eye, EyeOff, Zap } from 'lucide-react';
 
-type UssdScreen = 'welcome' | 'main_menu' | 'swap_bundle' | 'swap_location' | 'swap_result'
+type UssdScreen = 'welcome' | 'main_menu' | 'household_ask' | 'household_size' | 'swap_bundle' | 'swap_location' | 'swap_result'
   | 'pool_category' | 'pool_object' | 'pool_amount' | 'pool_confirm' | 'pool_result'
   | 'support' | 'session_ended' | 'rate_limited';
 
@@ -15,6 +16,7 @@ interface UssdContext {
   objectId?: string;
   amount?: number;
   resultMessage?: string;
+  householdSize?: number;
 }
 
 const PHONE = '+254 700 123 456';
@@ -82,6 +84,8 @@ export const UssdSimulator: React.FC = () => {
     setInput('');
     switch (screen) {
       case 'main_menu': setScreen('welcome'); break;
+      case 'household_ask': setScreen('main_menu'); break;
+      case 'household_size': setScreen('household_ask'); break;
       case 'swap_bundle': setScreen('main_menu'); break;
       case 'swap_location': setScreen('swap_bundle'); break;
       case 'pool_category': setScreen('main_menu'); break;
@@ -106,10 +110,30 @@ export const UssdSimulator: React.FC = () => {
         if (val === '1') { setScreen('main_menu'); log('Entered main menu'); }
         break;
       case 'main_menu':
-        if (val === '1') { setScreen('swap_bundle'); log('Chose Swap'); }
+        if (val === '1') { setScreen('household_ask'); log('Chose food bundles'); }
         else if (val === '2') { setScreen('pool_category'); log('Chose Pool'); }
         else if (val === '3') { setScreen('support'); log('Chose Support'); }
         break;
+      case 'household_ask':
+        if (val === '1') {
+          setContext({ ...context, householdSize: 1 });
+          if (tokenHash) await apiSetHousehold(tokenHash, 1);
+          setScreen('swap_bundle'); log('Just me (Small)');
+        } else if (val === '2') {
+          setScreen('household_size'); log('Family');
+        }
+        break;
+      case 'household_size': {
+        let hhSize = 0, hhLabel = '';
+        if (val === '1') { hhSize = 3; hhLabel = 'Standard'; }
+        else if (val === '2') { hhSize = 5; hhLabel = 'Large'; }
+        else if (val === '3') { hhSize = 8; hhLabel = 'Family'; }
+        else break;
+        setContext({ ...context, householdSize: hhSize });
+        if (tokenHash) await apiSetHousehold(tokenHash, hhSize);
+        setScreen('swap_bundle'); log(hhLabel + ' bundle');
+        break;
+      }
       case 'swap_bundle':
         if (val === '1' || val === '2') {
           setContext({ ...context, bundle: val === '1' ? 'Standard Pantry' : 'Hygiene Kit' });
@@ -196,6 +220,28 @@ export const UssdSimulator: React.FC = () => {
             <div className="text-white text-xs space-y-1">
               <div>1. Food bundles</div><div>2. Pay a bill</div><div>3. Talk to someone</div>
             </div>
+          </div>
+        );
+      case 'household_ask':
+        return (
+          <div className="space-y-2">
+            <div className="text-[#00ff88] font-bold">WHO IS THIS FOR?</div>
+            <div className="text-white text-xs space-y-1">
+              <div>1. Just me</div><div>2. My household</div>
+            </div>
+            <div className="mt-3 text-white/60 text-[10px]">Reply 1 or 2</div>
+          </div>
+        );
+      case 'household_size':
+        return (
+          <div className="space-y-2">
+            <div className="text-[#00ff88] font-bold">HOUSEHOLD SIZE</div>
+            <div className="text-white text-xs space-y-1">
+              <div>1. 2-3 people (Standard)</div>
+              <div>2. 4-6 people (Large)</div>
+              <div>3. 7+ people (Family)</div>
+            </div>
+            <div className="mt-3 text-white/60 text-[10px]">Reply 1, 2, or 3</div>
           </div>
         );
       case 'swap_bundle':
