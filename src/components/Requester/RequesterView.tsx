@@ -567,6 +567,7 @@ export const RequesterView: React.FC = () => {
         <div className="p-4 space-y-3">
           <div className="text-center pt-2 space-y-2"><div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-200"><CheckCircle className="w-7 h-7" /></div><div><h2 className="font-serif text-xl font-bold text-[#111111]">Locker reserved</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Collect anytime.</p></div></div>
           <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-3">
+            <div className="pb-2 border-b border-[#111111]/10 flex items-center justify-between"><span className="text-[9px] font-mono uppercase text-[#111111]/50">Reference</span><span className="font-mono text-xs font-bold text-[#111111]">{'REF-' + swapResult.id.slice(0,8).toUpperCase()}</span></div>
             <div className="flex items-start justify-between gap-2">
               <div><div className="text-[9px] font-mono uppercase text-[#111111]/50">Collection PIN</div><div className="flex items-center gap-1.5 mt-1"><span className="font-mono text-3xl font-bold tracking-widest text-[#1F6B4A]">{swapResult.pin}</span><button onClick={copyPin} aria-label="Copy PIN" className="p-1 rounded hover:bg-[#FAF8F4] text-[#111111]/50">{pinCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}</button></div></div>
               <QrPlaceholder seed={swapResult.qrPayload} />
