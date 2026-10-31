@@ -33,3 +33,9 @@ backend/.uvicorn.pid
 backend/.test.log
 backend/.test.err
 .test.*
+
+# Patch backups + one-off scripts (from PowerShell patchers)
+*.bak-*
+*.p1bak
+*.p2bak
+fix-*.ps1
