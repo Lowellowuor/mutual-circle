@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { generateHMAC } from '../../lib/hash';
 import { consumeRate, peekRate, MAX_DAILY_REQUESTS } from '../../services/auth';
+import { setHouseholdSize as apiSetHousehold } from '../../lib/apiClient';
 import { Send, Signal, Wifi, Battery, Eye, EyeOff, ShieldCheck, Lock } from 'lucide-react';
 
-type SmsState = 'idle' | 'menu' | 'swap_bundle' | 'swap_location' | 'swap_done' | 'pool_category' | 'pool_object' | 'pool_amount' | 'pool_confirm' | 'pool_done' | 'bench' | 'rate_limited' | 'opted_out';
+type SmsState = 'idle' | 'menu' | 'household_ask' | 'household_size' | 'swap_bundle' | 'swap_location' | 'swap_done' | 'pool_category' | 'pool_object' | 'pool_amount' | 'pool_confirm' | 'pool_done' | 'bench' | 'rate_limited' | 'opted_out';
 interface SmsMessage { id: string; from: 'user' | 'system'; text: string; timestamp: string; }
 
 const PHONE = '+254 700 123 456';
@@ -73,7 +74,7 @@ export const SmsSimulator: React.FC = () => {
         break;
       }
       case 'menu': {
-        if (t === '1') { sysReply('Select bundle:\n1-Standard Pantry\n2-Hygiene Kit\nReply 1 or 2.'); setState('swap_bundle'); }
+        if (t === '1') { sysReply('Are you alone or do you have a family?\n1-Just me\n2-My household\nReply 1 or 2.'); setState('household_ask'); }
         else if (t === '2') { sysReply('Select bill:\n1-Utility (KPLC/Water)\n2-School fees\n3-Hospital invoice\nReply 1, 2, or 3.'); setState('pool_category'); }
         else if (t === '3') { sysReply('For confidential peer support, call Befrienders Kenya: 0722 178 177 (free).\nFor emergencies: 999.\nReply 0 to return to menu.'); setState('bench'); }
         else sysReply('Invalid. Reply 1, 2, or 3.');
@@ -152,6 +153,31 @@ export const SmsSimulator: React.FC = () => {
         else sysReply('Reply DONE to close.');
         break;
       }
+      case 'household_ask': {
+        if (t === '1') {
+          setContext({ ...context, householdSize: 1 });
+          if (tokenHash) await apiSetHousehold(tokenHash, 1);
+          sysReply('Noted: Just you (Small bundle).\n\nSelect bundle:\n1-Standard Pantry\n2-Hygiene Kit\nReply 1 or 2.');
+          setState('swap_bundle');
+        } else if (t === '2') {
+          sysReply('How many people, including you?\n1-2-3 people (Standard)\n2-4-6 people (Large)\n3-7 or more (Family)\nReply 1, 2, or 3.');
+          setState('household_size');
+        } else sysReply('Reply 1 or 2.');
+        break;
+      }
+      case 'household_size': {
+        let hhSize = 0;
+        let hhLabel = '';
+        if (t === '1') { hhSize = 3; hhLabel = 'Standard (2-3)'; }
+        else if (t === '2') { hhSize = 5; hhLabel = 'Large (4-6)'; }
+        else if (t === '3') { hhSize = 8; hhLabel = 'Family (7+)'; }
+        else { sysReply('Reply 1, 2, or 3.'); break; }
+        setContext({ ...context, householdSize: hhSize });
+        if (tokenHash) await apiSetHousehold(tokenHash, hhSize);
+        sysReply('Noted: ' + hhLabel + ' bundle.\n\nSelect bundle:\n1-Standard Pantry\n2-Hygiene Kit\nReply 1 or 2.');
+        setState('swap_bundle');
+        break;
+      }
       case 'rate_limited': sysReply('Rate limit still active. Try again tomorrow.'); break;
       case 'opted_out': {
         if (t === 'START') { sysReply('Welcome back. Reply HELP to start.'); setState('idle'); }
@@ -162,7 +188,8 @@ export const SmsSimulator: React.FC = () => {
   };
 
   const quickReplies: Record<SmsState, string[]> = {
-    idle: ['HELP', 'STOP'], menu: ['1', '2', '3'], swap_bundle: ['1', '2'], swap_location: ['1', '2', '3'],
+    idle: ['HELP', 'STOP'], menu: ['1', '2', '3'], household_ask: ['1', '2'], household_size: ['1', '2', '3'],
+    swap_bundle: ['1', '2'], swap_location: ['1', '2', '3'],
     swap_done: ['DONE'], pool_category: ['1', '2', '3'], pool_object: [], pool_amount: [],
     pool_confirm: ['YES', 'NO'], pool_done: ['DONE'], bench: ['0'], rate_limited: [], opted_out: ['START'],
   };
