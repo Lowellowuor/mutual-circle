@@ -237,3 +237,54 @@ async def collect_route(
     await notify(conn, token, request_id, "collected")
 
     return {"id": request_id, "status": "collected"}
+
+# ============================================================
+# PIN-only collection (for SMS/USSD/WhatsApp that don't persist
+# the request_id across sessions)
+# ============================================================
+class CollectByPinBody(_BaseModel):
+    pin: str
+
+@router.post("/collect")
+async def collect_by_pin_route(
+    body: CollectByPinBody,
+    token: str = Depends(require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Confirm collection using PIN only. Finds most recent matching swap."""
+    import json as _json
+    from mtc.notifications.service import notify
+
+    rows = await conn.fetch(
+        """SELECT id, metadata, status FROM requests
+           WHERE token_hash = $1 AND type = 'swap'
+           ORDER BY created_at DESC LIMIT 30""",
+        token,
+    )
+
+    matching = None
+    for r in rows:
+        md = r["metadata"]
+        if isinstance(md, str):
+            try: md = _json.loads(md)
+            except Exception: md = {}
+        if isinstance(md, dict) and md.get("pin") == body.pin:
+            matching = r
+            break
+
+    if matching is None:
+        raise HTTPException(404, "No swap found with that PIN")
+
+    status = matching["status"]
+    if status == "collected":
+        raise HTTPException(409, "Already collected")
+    if status in ("withdrawn", "rejected"):
+        raise HTTPException(409, f"Cannot collect in status '{status}'")
+
+    await conn.execute(
+        "UPDATE requests SET status = 'collected', updated_at = now() WHERE id = $1",
+        str(matching["id"]),
+    )
+    await notify(conn, token, str(matching["id"]), "collected")
+
+    return {"id": str(matching["id"]), "status": "collected"}

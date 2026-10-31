@@ -181,6 +181,22 @@ $collNotif = Invoke-Get "/notifications/mine" -Headers @{ "X-Token" = $requester
 $hasCollNotif = -not $collNotif.__error -and ($collNotif.notifications | Where-Object { $_.template -eq "collected" })
 Assert "A21. Notification 'collected' created" ([bool]$hasCollNotif) $collNotif.__message
 
+# ============================================================
+# FLOW A3: PIN-only collection (SMS/USSD/WhatsApp)
+# ============================================================
+Write-Host ""
+Write-Host "=== FLOW A3: PIN-only collection ===" -ForegroundColor Cyan
+
+$pinSwap = Invoke-Post "/requests/swap" -Headers @{ "X-Token" = $requesterToken } -Body '{"bundle_category":"Standard Pantry","locker_location":"Kibera Hub"}'
+Assert "A22. Create swap for PIN-only collect" (-not $pinSwap.__error -and $pinSwap.id -and $pinSwap.pin) $pinSwap.__message
+$pinSwapPin = if ($pinSwap.pin) { $pinSwap.pin } else { "FAIL" }
+
+$pinCollect = Invoke-Post "/requests/collect" -Headers @{ "X-Token" = $requesterToken } -Body ('{"pin":"' + $pinSwapPin + '"}')
+Assert "A23. POST /requests/collect {pin} -> 200" (-not $pinCollect.__error -and $pinCollect.status -eq "collected") "Expected collected, got $($pinCollect.status) / $($pinCollect.__message)"
+
+$pinDup = Invoke-Post "/requests/collect" -Headers @{ "X-Token" = $requesterToken } -Body ('{"pin":"' + $pinSwapPin + '"}')
+Assert "A24. Second PIN-only collect -> 409" ($pinDup.__error -and $pinDup.__status -eq 409) "Expected 409, got $($pinDup.__status) / $($pinDup.__message)"
+
 Write-Host ""
 Write-Host "=== FLOW B: Swap request lifecycle ===" -ForegroundColor Cyan
 $swapBody = '{"bundle_category":"Standard Pantry","locker_location":"Kibera Hub"}'
