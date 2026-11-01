@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AppContext - every list is backend-sourced. No mocks.
  *
  * Demo convenience: poolRequests/swapRequests are the UNION of the requester's
@@ -135,6 +135,7 @@ function mapPledges(r: any): Pledge[] {
     locality: p.locality,
     maxValue: p.maxValue !== undefined ? p.maxValue : (p.max_value_pence ? p.max_value_pence / 100 : undefined),
     status: p.status,
+    linkedRequestId: p.linked_request_id || p.linkedRequestId || null,
     timestamp: p.timestamp || p.created_at,
   }));
 }

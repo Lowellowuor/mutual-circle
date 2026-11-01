@@ -325,6 +325,20 @@ if (-not $plMine2.__error -and $plMine2.pledges) {
 $pStatus2 = if ($settledPledge) { if ($settledPledge.status) { $settledPledge.status } else { $settledPledge.Status } } else { "NONE" }
 Assert "A33. Pledge auto-settled after collect" ($pStatus2 -eq "settled") "status=$pStatus2"
 
+# A34: verify /pledges/mine exposes linked_request_id (the field the donor UI uses to show REF)
+$plMine3 = Invoke-Get "/pledges/mine" -Headers @{ "X-Donor-Hash" = $donorHash }
+$plFinal = $null
+if (-not $plMine3.__error -and $plMine3.pledges) {
+    $plFinal = @($plMine3.pledges | Where-Object { $_.id -eq $pledgeId })[0]
+}
+$linkedId = "NONE"
+if ($plFinal) {
+    if ($plFinal.linked_request_id) { $linkedId = $plFinal.linked_request_id }
+    elseif ($plFinal.linkedRequestId) { $linkedId = $plFinal.linkedRequestId }
+}
+Assert "A34. /pledges/mine exposes linked_request_id" ($linkedId -eq $plSwapId) "expected=$plSwapId got=$linkedId"
+
+
 
 
 
