@@ -81,3 +81,27 @@ Windows leaves zombie sockets bound for hours after Stop-Process kills a listene
 Fix: Ctrl+C to stop uvicorn, never Stop-Process. If a socket is stuck, reboot is the only reliable resolution.
 
 The integration test runs on port 8010 to isolate itself from any zombie on 8000.
+
+## Phase B1 — idempotency keys (shipped)
+
+- [x] `idempotency_keys` table + `003_idempotency_keys` migration
+- [x] `POST /donations`, `POST /requests/swap`, `POST /requests/pool` honor `Idempotency-Key` header
+- [x] Cache 2xx response for 24h; return cached on retry with same key
+- [x] `check_or_claim` / `complete` / `release` helpers in `backend/src/mtc/idempotency.py`
+- [x] Frontend `apiClient.ts` generates fresh UUID per POST (`crypto.randomUUID` with fallback)
+- [x] Integration tests A26–A28 (cache hit, single row, distinct key creates row)
+
+## Phase B2 — pledge -> request linkage (shipped)
+
+- [x] `requests.pledge_id` FK column (nullable, ON DELETE SET NULL)
+- [x] `004_pledge_request_link` migration (+ widened `pledges.status` check to allow `settled`)
+- [x] `POST /fulfilment/pledges/{id}/match` accepts `{request_id}` and creates the link atomically
+- [x] Both collect routes (`/requests/{id}/collect`, `/requests/collect`) settle linked pledge on collection
+- [x] Pledge status flow: `awaiting_match` -> `matched` -> `settled`
+- [x] Frontend already renders `settled` status in pledge subtitle (no change needed)
+- [x] Integration tests A29–A33 (create, match, verify, collect, verify settled)
+
+**Not done in B2 (deferred to Phase C):**
+- REF display next to "Settled" in pledge subtitle (nice-to-have, needs `/pledges/mine` to LEFT JOIN requests)
+- Donor notification feed for `pledge_settled` (donor has no notification inbox today)
+- Partial funding tracking (one pledge funding N requests not modeled — MVP is 1:1)

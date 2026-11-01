@@ -60,10 +60,51 @@ async def get_pledges(session: dict = Depends(require_fulfilment), conn: asyncpg
     ]}
 
 
+class MatchPledgeBody(BaseModel):
+    request_id: str | None = None
+
+
 @router.post("/pledges/{pledge_id}/match")
-async def match_pledge(pledge_id: str, session: dict = Depends(require_fulfilment), conn: asyncpg.Connection = Depends(get_conn)):
-    await conn.execute("UPDATE pledges SET status = 'matched' WHERE id = $1 AND status = 'awaiting_match'", pledge_id)
-    return {"id": pledge_id, "status": "matched"}
+async def match_pledge(
+    pledge_id: str,
+    body: MatchPledgeBody | None = None,
+    session: dict = Depends(require_fulfilment),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    request_id = body.request_id if body else None
+
+    pledge = await conn.fetchrow("SELECT id, status FROM pledges WHERE id = $1", pledge_id)
+    if not pledge:
+        raise HTTPException(404, "Pledge not found")
+    if pledge["status"] != "awaiting_match":
+        raise HTTPException(409, f"Pledge in status '{pledge['status']}' cannot be matched")
+
+    if request_id:
+        request_row = await conn.fetchrow(
+            "SELECT id, pledge_id FROM requests WHERE id = $1",
+            request_id,
+        )
+        if not request_row:
+            raise HTTPException(404, "Request not found")
+        if request_row["pledge_id"]:
+            raise HTTPException(409, "Request already linked to a pledge")
+
+        async with conn.transaction():
+            await conn.execute(
+                "UPDATE requests SET pledge_id = $1, updated_at = now() WHERE id = $2",
+                pledge_id, request_id,
+            )
+            await conn.execute(
+                "UPDATE pledges SET status = 'matched' WHERE id = $1",
+                pledge_id,
+            )
+    else:
+        await conn.execute(
+            "UPDATE pledges SET status = 'matched' WHERE id = $1 AND status = 'awaiting_match'",
+            pledge_id,
+        )
+
+    return {"id": pledge_id, "status": "matched", "request_id": request_id}
 
 
 @router.get("/match-interests")

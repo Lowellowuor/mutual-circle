@@ -1,4 +1,4 @@
-﻿$root = "C:\Users\Administrator\Documents\mutual-circle"
+$root = "C:\Users\Administrator\Documents\mutual-circle"
 $backendRoot = Join-Path $root "backend"
 $baseUrl = "http://127.0.0.1:8010"
 
@@ -282,6 +282,49 @@ Start-Sleep -Milliseconds 200
 $idemMine2 = Invoke-Get "/donations/mine" -Headers @{ "X-Donor-Hash" = $idemDonorHash }
 $idemMatches2 = if ($idemMine2.__error) { @() } else { @($idemMine2.donations | Where-Object { $_.amount_pence -eq 7777 }) }
 Assert "A28. Different Idempotency-Key -> 2 rows" ($idemMatches2.Count -eq 2) "Found $($idemMatches2.Count) rows"
+
+# ============================================================
+# A29-A33: Pledge -> Request linkage + auto-settle on collect
+# ============================================================
+Write-Host ""
+Write-Host "=== PLEDGE LINKAGE ===" -ForegroundColor Cyan
+
+$plBody = '{"type":"goods","description":"Pipeline pledge ' + $runId + '","locality":"Nairobi County"}'
+$plResp = Invoke-Post "/pledges" -Headers @{ "X-Donor-Hash" = $donorHash } -Body $plBody
+Assert "A29. Create pledge" (-not $plResp.__error -and $plResp.id) $plResp.__message
+$pledgeId = if ($plResp.id) { $plResp.id } else { "FAIL" }
+
+$plSwapBody = '{"bundle_category":"Standard Pantry","locker_location":"Kibera Hub"}'
+$plSwap = Invoke-Post "/requests/swap" -Headers @{ "X-Token" = $requesterToken } -Body $plSwapBody
+$plSwapId = if ($plSwap.id) { $plSwap.id } else { "FAIL" }
+$plPin = if ($plSwap.pin) { $plSwap.pin } else { "FAIL" }
+
+$matchBody = '{"request_id":"' + $plSwapId + '"}'
+$matchResp = Invoke-Post "/fulfilment/pledges/$pledgeId/match" -Headers @{ "Authorization" = "Bearer $fulfJwt" } -Body $matchBody
+Assert "A30. Match pledge -> request" (-not $matchResp.__error -and $matchResp.status -eq "matched") $matchResp.__message
+
+Start-Sleep -Milliseconds 200
+$plMine = Invoke-Get "/pledges/mine" -Headers @{ "X-Donor-Hash" = $donorHash }
+$matchedPledge = $null
+if (-not $plMine.__error -and $plMine.pledges) {
+    $matchedPledge = @($plMine.pledges | Where-Object { $_.id -eq $pledgeId })[0]
+}
+$pStatus = if ($matchedPledge) { if ($matchedPledge.status) { $matchedPledge.status } else { $matchedPledge.Status } } else { "NONE" }
+Assert "A31. Pledge status -> matched" ($pStatus -eq "matched") "pledgeId=$pledgeId status=$pStatus"
+
+$collectBody = '{"pin":"' + $plPin + '"}'
+$collectResp = Invoke-Post "/requests/$plSwapId/collect" -Headers @{ "X-Token" = $requesterToken } -Body $collectBody
+Assert "A32. Collect linked request" (-not $collectResp.__error -and $collectResp.status -eq "collected") $collectResp.__message
+
+Start-Sleep -Milliseconds 300
+$plMine2 = Invoke-Get "/pledges/mine" -Headers @{ "X-Donor-Hash" = $donorHash }
+$settledPledge = $null
+if (-not $plMine2.__error -and $plMine2.pledges) {
+    $settledPledge = @($plMine2.pledges | Where-Object { $_.id -eq $pledgeId })[0]
+}
+$pStatus2 = if ($settledPledge) { if ($settledPledge.status) { $settledPledge.status } else { $settledPledge.Status } } else { "NONE" }
+Assert "A33. Pledge auto-settled after collect" ($pStatus2 -eq "settled") "status=$pStatus2"
+
 
 
 

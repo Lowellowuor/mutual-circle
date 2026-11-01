@@ -1,4 +1,4 @@
-"""Requester routes Ã¢â‚¬â€ token-authenticated via X-Token header."""
+﻿"""Requester routes Ã¢â‚¬â€ token-authenticated via X-Token header."""
 from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel, Field
 
@@ -269,11 +269,13 @@ async def collect_route(
     elif stored_plain != body.pin:
         raise HTTPException(403, "Invalid PIN")
 
-    # Update + notify
-    await conn.execute(
-        "UPDATE requests SET status = 'collected', updated_at = now() WHERE id = $1",
-        request_id,
-    )
+    # Update + notify (transaction ensures pledge settles atomically)
+    async with conn.transaction():
+        await conn.execute(
+            "UPDATE requests SET status = 'collected', updated_at = now() WHERE id = $1",
+            request_id,
+        )
+        await _settle_pledge_for_request(conn, request_id)
     await notify(conn, token, request_id, "collected")
 
     return {"id": request_id, "status": "collected"}
@@ -334,10 +336,25 @@ async def collect_by_pin_route(
     if status in ("withdrawn", "rejected"):
         raise HTTPException(409, f"Cannot collect in status '{status}'")
 
-    await conn.execute(
-        "UPDATE requests SET status = 'collected', updated_at = now() WHERE id = $1",
-        str(matching["id"]),
-    )
+    async with conn.transaction():
+        await conn.execute(
+            "UPDATE requests SET status = 'collected', updated_at = now() WHERE id = $1",
+            str(matching["id"]),
+        )
+        await _settle_pledge_for_request(conn, str(matching["id"]))
     await notify(conn, token, str(matching["id"]), "collected")
 
     return {"id": str(matching["id"]), "status": "collected"}
+
+
+async def _settle_pledge_for_request(conn: asyncpg.Connection, request_id: str) -> None:
+    """After a request is collected, mark its linked pledge as settled."""
+    pledge_id = await conn.fetchval(
+        "SELECT pledge_id FROM requests WHERE id = $1",
+        request_id,
+    )
+    if pledge_id:
+        await conn.execute(
+            "UPDATE pledges SET status = 'settled' WHERE id = $1 AND status = 'matched'",
+            str(pledge_id),
+        )
