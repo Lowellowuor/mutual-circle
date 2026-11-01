@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Workflow, ShieldCheck, Database, Building2, Smartphone, Users, AlertTriangle, FileText, Gavel, Layers, RefreshCw, Download, ShieldAlert } from 'lucide-react';
 import { getPublicLedger, downloadPublicLedgerCsv } from '../../lib/apiClient';
 
@@ -45,7 +45,7 @@ export const ArchitectureView: React.FC = () => {
 
   const handleDownloadLedger = async () => {
     setLedgerDownloading(true);
-    try { await downloadPublicLedgerCsv(); } catch {}
+    try { await downloadPublicLedgerCsv(); } catch (e) { console.error('[architecture] ledger CSV download failed', e); }
     setLedgerDownloading(false);
   };
 

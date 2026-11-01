@@ -415,19 +415,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const initializeSession = async (phone: string, channel: 'web' | 'sms' | 'ussd' = 'web'): Promise<string> => {
     const r = await api.issueTokenStrict(phone);
     setTokenHash(r.token);
-    try { localStorage.setItem('mtc-token', r.token); } catch {}
+    try { localStorage.setItem('mtc-token', r.token); } catch (e) { console.error('[auth] token persist failed', e); }
     return r.token;
   };
 
   const logout = () => {
     setTokenHash(null);
-    try { localStorage.removeItem('mtc-token'); } catch {}
+    try { localStorage.removeItem('mtc-token'); } catch { /* logout: silent */ }
   };
 
   const loginStaff = async (role: StaffRole, id: string, pin: string): Promise<boolean> => {
     const r = await api.staffLogin(role, id, pin);
     if (!r) return false;
-    try { sessionStorage.setItem('mtc-session-token', r.session_token); } catch {}
+    try { sessionStorage.setItem('mtc-session-token', r.session_token); } catch (e) { console.error('[auth] session persist failed', e); }
     setSessionToken(r.session_token);
     setStaffRole(role);
     setStaffId(id.toUpperCase());
@@ -499,7 +499,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!sessionToken) return null;
     const r = await api.issueVoucher(sessionToken, requestId, partnerName, partnerType);
     if (!r) return null;
-    try { localStorage.setItem('mtc-voucher-pin-' + r.voucher_id, r.pin); } catch {}
+    try { localStorage.setItem('mtc-voucher-pin-' + r.voucher_id, r.pin); } catch (e) { console.error('[voucher] PIN persist failed', e); }
     await refetchAll();
     return {
       id: r.voucher_id,

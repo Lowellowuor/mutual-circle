@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { STAFF_CREDS } from '../../services/auth';
 import { DetailModal } from './DetailModal';
@@ -522,7 +522,7 @@ export const ConsoleView: React.FC = () => {
   const handlePartnerStatement = async () => {
     if (!partnerInfo) return;
     setPartnerDownloading(true);
-    try { await downloadPartnerStatement(selectedPartner, partnerInfo.id); } catch {}
+    try { await downloadPartnerStatement(selectedPartner, partnerInfo.id); } catch (e) { console.error('[partner] statement download failed', e); }
     setPartnerDownloading(false);
   };
 

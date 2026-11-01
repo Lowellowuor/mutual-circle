@@ -1,4 +1,4 @@
-// Mock staff credentials. In production these come from an IdP.
+﻿// Mock staff credentials. In production these come from an IdP.
 export const STAFF_CREDS: Record<'enrolment' | 'fulfilment' | 'audit', { id: string; pin: string; label: string }> = {
   enrolment:  { id: 'ENROL-04', pin: '4821', label: 'Enrolment' },
   fulfilment: { id: 'FULF-08',  pin: '7355', label: 'Fulfilment' },
@@ -31,7 +31,7 @@ export function peekRate(token: string): RateState {
 }
 
 export function saveRate(token: string, r: RateState) {
-  try { localStorage.setItem(rateKey(token), JSON.stringify(r)); } catch {}
+  try { localStorage.setItem(rateKey(token), JSON.stringify(r)); } catch (e) { console.error('[rate] persist failed', e); }
 }
 
 export function consumeRate(token: string, value: number = 0): { ok: boolean; reason?: string; state: RateState } {
@@ -58,7 +58,7 @@ export function loadHistory(token: string): any[] {
 }
 
 export function saveHistory(token: string, history: any[]) {
-  try { localStorage.setItem(historyKey(token), JSON.stringify(history.slice(0, 30))); } catch {}
+  try { localStorage.setItem(historyKey(token), JSON.stringify(history.slice(0, 30))); } catch (e) { console.error('[history] persist failed', e); }
 }
 
 export function appendHistory(token: string, entry: any) {
@@ -75,5 +75,5 @@ export function loadSeen(token: string): string[] {
 }
 
 export function saveSeen(token: string, ids: string[]) {
-  try { localStorage.setItem(seenKey(token), JSON.stringify(ids)); } catch {}
+  try { localStorage.setItem(seenKey(token), JSON.stringify(ids)); } catch { /* seen-ids: silent (cosmetic) */ }
 }

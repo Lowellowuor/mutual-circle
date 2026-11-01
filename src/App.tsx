@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { AppProvider } from './context/AppContext';
 import { RequesterView } from './components/Requester/RequesterView';
 import { ConsoleView } from './components/Console/ConsoleView';
@@ -30,7 +30,7 @@ function App() {
 
   const handleReset = () => {
     if (!window.confirm('Reset the entire demo? All state (requests, vouchers, audit log, sessions) will be cleared.')) return;
-    try { localStorage.clear(); sessionStorage.clear(); } catch {}
+    try { localStorage.clear(); sessionStorage.clear(); } catch (e) { console.error('[reset] storage clear failed', e); }
     window.location.reload();
   };
 

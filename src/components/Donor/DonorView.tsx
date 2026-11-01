@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { SmsDonorSimulator } from './SmsDonorSimulator';
 import { DonorActivityModal } from './DonorActivityModal';
@@ -60,12 +60,12 @@ export const DonorView: React.FC = () => {
     setScreen('ledger');
     if (ledgerData) return;
     setLedgerLoading(true);
-    try { const r = await getPublicLedger(10); if (r) setLedgerData(r as any); } catch {}
+    try { const r = await getPublicLedger(10); if (r) setLedgerData(r as any); } catch (e) { console.error('[donor] ledger fetch failed', e); setLedgerLoading(false); }
     setLedgerLoading(false);
   };
 
   const handleDownloadLedger = async () => {
-    try { await downloadPublicLedgerCsv(); } catch {}
+    try { await downloadPublicLedgerCsv(); } catch (e) { console.error('[donor] ledger CSV download failed', e); }
   };
 
   const handleGive = () => {
