@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { AlertTriangle, RotateCcw, ArrowLeft } from 'lucide-react';
 
 interface Props { children: React.ReactNode; }
@@ -43,7 +43,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 <ArrowLeft className="w-3.5 h-3.5" /> Try again
               </button>
               <button
-                onClick={() => { try { localStorage.clear(); sessionStorage.clear(); } catch {} window.location.reload(); }}
+                onClick={() => { try { localStorage.clear(); sessionStorage.clear(); } catch (e) { console.error('[error-boundary] storage clear failed', e); } window.location.reload(); }}
                 className="flex-1 py-2.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1"
               >
                 <RotateCcw className="w-3.5 h-3.5" /> Reset & Reload

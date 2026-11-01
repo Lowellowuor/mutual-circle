@@ -384,7 +384,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSessionToken(null);
       setStaffRole(null);
       setStaffId(null);
-      try { sessionStorage.removeItem('mtc-session-token'); } catch {}
+      try { sessionStorage.removeItem('mtc-session-token'); } catch { /* session teardown: silent */ }
     });
     return () => setSessionExpiredHandler(null);
   }, []);
@@ -436,7 +436,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logoutStaff = async () => {
     if (sessionToken) await api.staffLogout(sessionToken);
-    try { sessionStorage.removeItem('mtc-session-token'); } catch {}
+    try { sessionStorage.removeItem('mtc-session-token'); } catch { /* session teardown: silent */ }
     setSessionToken(null);
     setStaffRole(null);
     setStaffId(null);
