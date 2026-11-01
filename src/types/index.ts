@@ -46,6 +46,7 @@ export interface Pledge {
   locality: string;
   status: 'awaiting_match' | 'matched' | 'settled';
   timestamp: string;
+  linkedRequestId?: string | null;
 }
 
 export interface Campaign {

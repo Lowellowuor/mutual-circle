@@ -157,7 +157,12 @@ export const DonorView: React.FC = () => {
       id: 'p-' + p.id,
       kind: 'pledge' as const,
       title: 'Pledge: ' + p.description,
-      subtitle: p.locality + ' * ' + (p.status === 'awaiting_match' ? 'Awaiting match' : p.status === 'matched' ? 'Matched' : 'Settled'),
+      subtitle: (() => {
+        const ref = (p as any).linkedRequestId || (p as any).linked_request_id;
+        const refSuffix = ref ? ' — REF-' + String(ref).slice(0,8).toUpperCase() : '';
+        const statusText = p.status === 'awaiting_match' ? 'Awaiting match' : p.status === 'matched' ? 'Matched' : 'Delivered';
+        return p.locality + ' · ' + statusText + refSuffix;
+      })(),
       timestamp: p.timestamp,
     })),
   ].sort((a, b) => {

@@ -1,4 +1,4 @@
-﻿"""Pledges — donor side of The Match."""
+"""Pledges — donor side of The Match."""
 import asyncpg
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel, Field
@@ -47,14 +47,18 @@ async def my_pledges(
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     rows = await conn.fetch(
-        "SELECT * FROM pledges WHERE donor_hash = $1 ORDER BY created_at DESC LIMIT 50",
+        """SELECT p.*, r.id AS linked_request_id
+           FROM pledges p
+           LEFT JOIN requests r ON r.pledge_id = p.id
+           WHERE p.donor_hash = $1
+           ORDER BY p.created_at DESC LIMIT 50""",
         donor_hash,
     )
     return {"pledges": [_row_to_dict(r) for r in rows]}
 
 
 def _row_to_dict(r):
-    return {
+    d = {
         "id": str(r["id"]),
         "type": r["type"],
         "description": r["description"],
@@ -63,3 +67,8 @@ def _row_to_dict(r):
         "status": r["status"],
         "created_at": r["created_at"].isoformat(),
     }
+    # linked_request_id only present when the query LEFT JOINs requests
+    if "linked_request_id" in r.keys():
+        lid = r["linked_request_id"]
+        d["linked_request_id"] = str(lid) if lid else None
+    return d
