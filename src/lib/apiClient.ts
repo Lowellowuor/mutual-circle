@@ -3,6 +3,20 @@
  */
 const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://127.0.0.1:8000';
 
+// Generate a UUID v4 for Idempotency-Key headers.
+// crypto.randomUUID is available in all modern browsers (Chrome 92+, Firefox 95+, Safari 15.4+).
+// Fallback covers older environments.
+function genIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 // Session-expired event — AppContext subscribes and clears token
 type SessionExpiredHandler = () => void;
 let onSessionExpired: SessionExpiredHandler | null = null;
@@ -84,13 +98,13 @@ export const issueToken = (phone: string) =>
 export const createSwapRequest = (token: string, bundleCategory: string, lockerLocation: string) =>
   call<{ id: string; tier: number; status: string; bundle_category: string; locker_location: string; pin: string; qr_payload: string; created_at: string }>(
     '/requests/swap',
-    { method: 'POST', headers: { 'X-Token': token }, body: JSON.stringify({ bundle_category: bundleCategory, locker_location: lockerLocation }) },
+    { method: 'POST', headers: { 'X-Token': token, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ bundle_category: bundleCategory, locker_location: lockerLocation }) },
   );
 
 export const createPoolRequest = (token: string, category: string, hashedObjectId: string, amountPence: number) =>
   call<{ id: string; tier: number; status: string; hashed_object_id: string; amount_pence: number; created_at: string }>(
     '/requests/pool',
-    { method: 'POST', headers: { 'X-Token': token }, body: JSON.stringify({ category, hashed_object_id: hashedObjectId, amount_pence: amountPence }) },
+    { method: 'POST', headers: { 'X-Token': token, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ category, hashed_object_id: hashedObjectId, amount_pence: amountPence }) },
   );
 
 export const listMyRequests = (token: string) =>
@@ -177,7 +191,7 @@ export const listCampaigns = () =>
 export const createDonation = (donorHash: string, amountPence: number, isAnonymous: boolean, optInLedger: boolean) =>
   call<{ id: string; amount_pence: number; is_anonymous: boolean; opt_in_ledger: boolean; created_at: string }>(
     '/donations',
-    { method: 'POST', headers: { 'X-Donor-Hash': donorHash }, body: JSON.stringify({ amount_pence: amountPence, is_anonymous: isAnonymous, opt_in_ledger: optInLedger }) },
+    { method: 'POST', headers: { 'X-Donor-Hash': donorHash, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ amount_pence: amountPence, is_anonymous: isAnonymous, opt_in_ledger: optInLedger }) },
   );
 
 export const listMyDonations = (donorHash: string) =>

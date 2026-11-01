@@ -1,4 +1,4 @@
-$root = "C:\Users\Administrator\Documents\mutual-circle"
+﻿$root = "C:\Users\Administrator\Documents\mutual-circle"
 $backendRoot = Join-Path $root "backend"
 $baseUrl = "http://127.0.0.1:8010"
 
@@ -248,6 +248,41 @@ if ($freshSwap -and $freshSwap.metadata) {
 $hashValue = if ($freshMd.pin_hash) { $freshMd.pin_hash } else { "" }
 $hasPinHash = ($hashValue -is [string]) -and ($hashValue.Length -gt 20) -and $hashValue.StartsWith('$2b$')
 Assert "A25. pin_hash written for fresh swap" ([bool]$hasPinHash) "Expected bcrypt hash, got type: $($freshMd.GetType().Name)"
+
+# ============================================================
+# A26-A28: Idempotency-Key support
+# ============================================================
+Write-Host ""
+Write-Host "=== IDEMPOTENCY: duplicate POST protection ===" -ForegroundColor Cyan
+
+# Create a fresh donor hash for this test (so we don't collide with C1-C5)
+$idemDonorHash = "test-idem-" + $runId
+$idemKey = [guid]::NewGuid().ToString()
+$idemDonBody = '{"amount_pence":7777,"is_anonymous":true,"opt_in_ledger":false}'
+
+$idemPost1 = Invoke-Post "/donations" -Headers @{ "X-Donor-Hash" = $idemDonorHash; "Idempotency-Key" = $idemKey } -Body $idemDonBody
+$idemPost2 = Invoke-Post "/donations" -Headers @{ "X-Donor-Hash" = $idemDonorHash; "Idempotency-Key" = $idemKey } -Body $idemDonBody
+
+Assert "A26. Same Idempotency-Key -> same response ID" (-not $idemPost1.__error -and -not $idemPost2.__error -and $idemPost1.id -and $idemPost1.id -eq $idemPost2.id) "id1=$($idemPost1.id) id2=$($idemPost2.id) err=$($idemPost1.__message)"
+
+# Verify only one row created in DB (via /donations/mine)
+Start-Sleep -Milliseconds 200
+$idemMine = Invoke-Get "/donations/mine" -Headers @{ "X-Donor-Hash" = $idemDonorHash }
+$idemCount = 0
+if (-not $idemMine.__error -and $null -ne $idemMine.donations) {
+    $idemCount = @($idemMine.donations | Where-Object { $_.amount_pence -eq 7777 }).Count
+}
+if ($null -eq $idemCount) { $idemCount = 0 }
+Assert "A27. Same Idempotency-Key -> only 1 row in DB" ($idemCount -eq 1) "Found $idemCount rows"
+
+# Different key -> two rows
+$idemKey2 = [guid]::NewGuid().ToString()
+$idemPost3 = Invoke-Post "/donations" -Headers @{ "X-Donor-Hash" = $idemDonorHash; "Idempotency-Key" = $idemKey2 } -Body $idemDonBody
+Start-Sleep -Milliseconds 200
+$idemMine2 = Invoke-Get "/donations/mine" -Headers @{ "X-Donor-Hash" = $idemDonorHash }
+$idemMatches2 = if ($idemMine2.__error) { @() } else { @($idemMine2.donations | Where-Object { $_.amount_pence -eq 7777 }) }
+Assert "A28. Different Idempotency-Key -> 2 rows" ($idemMatches2.Count -eq 2) "Found $($idemMatches2.Count) rows"
+
 
 
 Write-Host ""

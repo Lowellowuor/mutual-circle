@@ -3,6 +3,7 @@ import asyncpg
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from mtc import idempotency
 from mtc.db.main import get_conn
 
 router = APIRouter(prefix="/donations", tags=["donors"])
@@ -29,20 +30,31 @@ class ProfileBody(BaseModel):
 async def create_donation(
     body: DonateBody,
     donor_hash: str = Depends(_require_token),
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
-    row = await conn.fetchrow(
-        """INSERT INTO donor_contributions (donor_hash, amount_pence, is_anonymous, opt_in_ledger)
-           VALUES ($1, $2, $3, $4) RETURNING id, created_at""",
-        donor_hash, body.amount_pence, body.is_anonymous, body.opt_in_ledger,
-    )
-    return {
-        "id": str(row["id"]),
-        "amount_pence": body.amount_pence,
-        "is_anonymous": body.is_anonymous,
-        "opt_in_ledger": body.opt_in_ledger,
-        "created_at": row["created_at"].isoformat(),
-    }
+    cached = await idempotency.check_or_claim(conn, idempotency_key, "donation", donor_hash)
+    if cached is not None:
+        return cached
+
+    try:
+        row = await conn.fetchrow(
+            """INSERT INTO donor_contributions (donor_hash, amount_pence, is_anonymous, opt_in_ledger)
+               VALUES ($1, $2, $3, $4) RETURNING id, created_at""",
+            donor_hash, body.amount_pence, body.is_anonymous, body.opt_in_ledger,
+        )
+        response = {
+            "id": str(row["id"]),
+            "amount_pence": body.amount_pence,
+            "is_anonymous": body.is_anonymous,
+            "opt_in_ledger": body.opt_in_ledger,
+            "created_at": row["created_at"].isoformat(),
+        }
+        await idempotency.complete(conn, idempotency_key, "donation", donor_hash, response)
+        return response
+    except Exception:
+        await idempotency.release(conn, idempotency_key, "donation", donor_hash)
+        raise
 
 
 @router.get("/mine")

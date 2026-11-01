@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 import asyncpg
 
+from mtc import idempotency
 from mtc.db.main import get_conn
 from mtc.rate_limit.counter import RateLimitExceeded, consume_quota
 from mtc.requests_.lifecycle import WithdrawNotAllowed, list_requests, withdraw_request
@@ -35,42 +36,70 @@ class PoolBody(BaseModel):
 async def create_swap_route(
     body: SwapBody,
     token: str = Depends(require_token),
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
+    cached = await idempotency.check_or_claim(conn, idempotency_key, "swap", token)
+    if cached is not None:
+        return cached
+
     try:
-        await consume_quota(conn, token_hash=token, value_pence=0)
-    except RateLimitExceeded as e:
-        raise HTTPException(429, detail={"reason": e.reason, "count": e.count, "value_pence": e.value_pence})
-    hh = await conn.fetchval(
-        "SELECT household_size FROM household_declarations WHERE token_hash = $1",
-        token,
-    )
-    return await create_swap(
-        conn,
-        token_hash=token,
-        bundle_category=body.bundle_category,
-        locker_location=body.locker_location,
-        household_size=hh,
-    )
+        try:
+            await consume_quota(conn, token_hash=token, value_pence=0)
+        except RateLimitExceeded as e:
+            raise HTTPException(429, detail={"reason": e.reason, "count": e.count, "value_pence": e.value_pence})
+        hh = await conn.fetchval(
+            "SELECT household_size FROM household_declarations WHERE token_hash = $1",
+            token,
+        )
+        response = await create_swap(
+            conn,
+            token_hash=token,
+            bundle_category=body.bundle_category,
+            locker_location=body.locker_location,
+            household_size=hh,
+        )
+        await idempotency.complete(conn, idempotency_key, "swap", token, response)
+        return response
+    except HTTPException:
+        await idempotency.release(conn, idempotency_key, "swap", token)
+        raise
+    except Exception:
+        await idempotency.release(conn, idempotency_key, "swap", token)
+        raise
 
 
 @router.post("/pool")
 async def create_pool_route(
     body: PoolBody,
     token: str = Depends(require_token),
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
+    cached = await idempotency.check_or_claim(conn, idempotency_key, "pool", token)
+    if cached is not None:
+        return cached
+
     try:
-        await consume_quota(conn, token_hash=token, value_pence=body.amount_pence)
-    except RateLimitExceeded as e:
-        raise HTTPException(429, detail={"reason": e.reason, "count": e.count, "value_pence": e.value_pence})
-    return await create_pool(
-        conn,
-        token_hash=token,
-        category=body.category,
-        hashed_object_id=body.hashed_object_id,
-        amount_pence=body.amount_pence,
-    )
+        try:
+            await consume_quota(conn, token_hash=token, value_pence=body.amount_pence)
+        except RateLimitExceeded as e:
+            raise HTTPException(429, detail={"reason": e.reason, "count": e.count, "value_pence": e.value_pence})
+        response = await create_pool(
+            conn,
+            token_hash=token,
+            category=body.category,
+            hashed_object_id=body.hashed_object_id,
+            amount_pence=body.amount_pence,
+        )
+        await idempotency.complete(conn, idempotency_key, "pool", token, response)
+        return response
+    except HTTPException:
+        await idempotency.release(conn, idempotency_key, "pool", token)
+        raise
+    except Exception:
+        await idempotency.release(conn, idempotency_key, "pool", token)
+        raise
 
 
 @router.get("/mine")
