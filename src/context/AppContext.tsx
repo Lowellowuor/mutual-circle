@@ -85,153 +85,167 @@ function parseMeta(v: unknown): Record<string, unknown> {
   if (typeof v === 'string') { try { return JSON.parse(v) as Record<string, unknown>; } catch { return {}; } }
   return (v as Record<string, unknown>) || {};
 }
-function mapSwapFromBackend(r: any, tokenHash: string): SwapRequest {
-  const meta = parseMeta(r.metadata);
+function mapSwapFromBackend(r: unknown, tokenHash: string): SwapRequest {
+  const o = (r || {}) as Record<string, unknown>;
+  const meta = parseMeta(o.metadata);
   return {
-    id: r.id,
+    id: String(o.id ?? ''),
     tokenHash,
-    bundleCategory: meta.bundle || r.category || 'Standard Pantry',
-    lockerLocation: meta.location || '',
-    status: (r.status === 'verified' ? 'reserved' : r.status) as SwapRequest['status'],
-    pin: meta.pin || r.pin || '----',
-    qrPayload: meta.qr || r.qr_payload || '',
-    timestamp: r.created_at || new Date().toISOString(),
+    bundleCategory: (meta.bundle as string) || (o.category as string) || 'Standard Pantry',
+    lockerLocation: (meta.location as string) || '',
+    status: ((o.status === 'verified' ? 'reserved' : o.status) as SwapRequest['status']),
+    pin: (meta.pin as string) || (o.pin as string) || '----',
+    qrPayload: (meta.qr as string) || (o.qr_payload as string) || '',
+    timestamp: (o.created_at as string) || new Date().toISOString(),
   };
 }
 
-function mapPoolFromBackend(r: any, tokenHash: string): PoolRequest {
+function mapPoolFromBackend(r: unknown, tokenHash: string): PoolRequest {
+  const o = (r || {}) as Record<string, unknown>;
+  const meta = parseMeta(o.metadata);
   return {
-    id: r.id,
+    id: String(o.id ?? ''),
     tokenHash,
-    category: r.category,
-    hashedObjectId: r.hashed_object_id || parseMeta(r.metadata).object_hash || '',
-    amount: (r.amount_pence || 0) / 100,
-    tier: r.tier,
-    status: r.status,
-    timestamp: r.created_at || new Date().toISOString(),
+    category: (o.category as PoolRequest['category']) || 'utility',
+    hashedObjectId: (o.hashed_object_id as string) || (meta.object_hash as string) || '',
+    amount: Number(o.amount_pence ?? 0) / 100,
+    tier: Number(o.tier ?? 1) as PoolRequest['tier'],
+    status: (o.status as PoolRequest['status']) || 'pending_check',
+    timestamp: (o.created_at as string) || new Date().toISOString(),
   };
 }
 
-function mapCampaigns(r: any): Campaign[] {
-  return (r?.campaigns || []).map((c: any) => ({
-    id: c.id,
-    title: c.title,
-    cohortGoalText: c.cohortGoalText,
-    targetAmount: c.targetAmount,
-    pooledAmount: c.pooledAmount,
-    targetCount: c.targetCount,
-    coveredCount: c.coveredCount,
-    daysRemaining: c.daysRemaining,
-    isClosed: c.isClosed,
+function mapCampaigns(r: unknown): Campaign[] {
+  const obj = (r || {}) as { campaigns?: Array<Record<string, unknown>> };
+  return (obj.campaigns || []).map((c) => ({
+    id: String(c.id ?? ''),
+    title: String(c.title ?? ''),
+    cohortGoalText: String(c.cohortGoalText ?? ''),
+    targetAmount: Number(c.targetAmount ?? 0),
+    pooledAmount: Number(c.pooledAmount ?? 0),
+    targetCount: Number(c.targetCount ?? 0),
+    coveredCount: Number(c.coveredCount ?? 0),
+    daysRemaining: Number(c.daysRemaining ?? 0),
+    isClosed: Boolean(c.isClosed),
   }));
 }
 
-function mapPledges(r: any): Pledge[] {
-  return (r?.pledges || []).map((p: any) => ({
-    id: p.id,
-    donorHash: p.donorHash || p.donor_hash || '',
-    type: p.type,
-    description: p.description,
-    locality: p.locality,
-    maxValue: p.maxValue !== undefined ? p.maxValue : (p.max_value_pence ? p.max_value_pence / 100 : undefined),
-    status: p.status,
-    linkedRequestId: p.linked_request_id || p.linkedRequestId || null,
-    timestamp: p.timestamp || p.created_at,
+function mapPledges(r: unknown): Pledge[] {
+  const obj = (r || {}) as { pledges?: Array<Record<string, unknown>> };
+  return (obj.pledges || []).map((p) => ({
+    id: String(p.id ?? ''),
+    donorHash: (p.donorHash as string) || (p.donor_hash as string) || '',
+    type: (p.type as Pledge['type']) || 'goods',
+    description: String(p.description ?? ''),
+    locality: String(p.locality ?? ''),
+    maxValue: p.maxValue !== undefined ? Number(p.maxValue) : (p.max_value_pence ? Number(p.max_value_pence) / 100 : undefined),
+    status: (p.status as Pledge['status']) || 'awaiting_match',
+    linkedRequestId: (p.linked_request_id as string) || (p.linkedRequestId as string) || null,
+    timestamp: (p.timestamp as string) || (p.created_at as string) || '',
   }));
 }
 
-function mapDonations(r: any): DonorContribution[] {
-  return (r?.donations || []).map((d: any) => ({
-    id: d.id,
-    amount: (d.amount_pence || 0) / 100,
-    isAnonymous: d.is_anonymous,
-    optInLedger: d.opt_in_ledger,
-    timestamp: d.created_at,
+function mapDonations(r: unknown): DonorContribution[] {
+  const obj = (r || {}) as { donations?: Array<Record<string, unknown>> };
+  return (obj.donations || []).map((d) => ({
+    id: String(d.id ?? ''),
+    amount: Number(d.amount_pence ?? 0) / 100,
+    isAnonymous: Boolean(d.is_anonymous),
+    optInLedger: Boolean(d.opt_in_ledger),
+    timestamp: String(d.created_at ?? ''),
   }));
 }
 
-function mapVouchers(r: any): Voucher[] {
-  return (r?.vouchers || []).map((v: any) => {
-    const pin = v.pin || localStorage.getItem('mtc-voucher-pin-' + v.voucher_id) || '';
+function mapVouchers(r: unknown): Voucher[] {
+  const obj = (r || {}) as { vouchers?: Array<Record<string, unknown>> };
+  return (obj.vouchers || []).map((v) => {
+    const voucherId = String(v.voucher_id || v.id || '');
+    const pin = (v.pin as string) || localStorage.getItem('mtc-voucher-pin-' + voucherId) || '';
     return {
-      id: v.voucher_id || v.id,
-      partnerName: v.partner_name,
-      partnerType: v.partner_type,
-      description: v.description,
-      maxValue: (v.max_value_pence || 0) / 100,
-      status: v.status,
-      issuedToken: v.issued_token || '',
+      id: voucherId,
+      partnerName: String(v.partner_name ?? ''),
+      partnerType: (v.partner_type as Voucher['partnerType']) || 'retailer',
+      description: String(v.description ?? ''),
+      maxValue: Number(v.max_value_pence ?? 0) / 100,
+      status: (v.status as Voucher['status']) || 'active',
+      issuedToken: String(v.issued_token ?? ''),
       pin: pin || '****',
-      expiresAt: v.expires_at,
+      expiresAt: String(v.expires_at ?? ''),
     };
   });
 }
 
-function mapRedemptions(r: any): VoucherRedemption[] {
-  return (r?.redemptions || []).map((x: any) => ({
-    id: x.id,
-    voucherId: x.voucherId,
+function mapRedemptions(r: unknown): VoucherRedemption[] {
+  const obj = (r || {}) as { redemptions?: Array<Record<string, unknown>> };
+  return (obj.redemptions || []).map((x) => ({
+    id: String(x.id ?? ''),
+    voucherId: String(x.voucherId ?? ''),
     pin: '',
-    amount: (x.amount_pence || 0) / 100,
-    partnerName: x.partnerName,
-    timestamp: x.timestamp,
-    status: x.status,
+    amount: Number(x.amount_pence ?? 0) / 100,
+    partnerName: String(x.partnerName ?? ''),
+    timestamp: String(x.timestamp ?? ''),
+    status: (x.status as VoucherRedemption['status']) || 'success',
   }));
 }
 
-function mapFlags(r: any): RiskFlag[] {
-  return (r?.flags || []).map((f: any) => ({
-    id: f.id,
-    targetHash: f.target_hash || f.targetHash || '',
-    severity: f.severity,
-    title: f.title,
-    description: f.description,
-    status: f.status,
-    timestamp: f.created_at || f.timestamp,
-    investigationNotes: f.investigation_notes,
+function mapFlags(r: unknown): RiskFlag[] {
+  const obj = (r || {}) as { flags?: Array<Record<string, unknown>> };
+  return (obj.flags || []).map((f) => ({
+    id: String(f.id ?? ''),
+    targetHash: (f.target_hash as string) || (f.targetHash as string) || '',
+    severity: (f.severity as RiskFlag['severity']) || 'routine',
+    title: String(f.title ?? ''),
+    description: String(f.description ?? ''),
+    status: (f.status as RiskFlag['status']) || 'pending',
+    timestamp: (f.created_at as string) || (f.timestamp as string) || '',
+    investigationNotes: f.investigation_notes as string | undefined,
   }));
 }
 
-function mapAuditLog(r: any): AuditLogEntry[] {
-  return (r?.entries || []).map((e: any) => ({
-    id: e.id,
-    timestamp: e.created_at || e.timestamp,
-    actorRole: e.actor_role || e.actorRole,
-    action: e.action,
-    targetHash: e.target_hash || e.targetHash,
+function mapAuditLog(r: unknown): AuditLogEntry[] {
+  const obj = (r || {}) as { entries?: Array<Record<string, unknown>> };
+  return (obj.entries || []).map((e) => ({
+    id: String(e.id ?? ''),
+    timestamp: (e.created_at as string) || (e.timestamp as string) || '',
+    actorRole: ((e.actor_role || e.actorRole) as AuditLogEntry['actorRole']),
+    action: String(e.action ?? ''),
+    targetHash: (e.target_hash as string) || (e.targetHash as string) || '',
   }));
 }
 
-function mapMatchInterests(r: any): MatchInterest[] {
-  return (r?.interests || []).map((m: any) => ({
-    id: m.id,
-    opportunityId: m.opportunityId,
-    title: m.title,
-    tokenHash: m.tokenHash,
-    timestamp: m.timestamp,
-    status: m.status,
+function mapMatchInterests(r: unknown): MatchInterest[] {
+  const obj = (r || {}) as { interests?: Array<Record<string, unknown>> };
+  return (obj.interests || []).map((m) => ({
+    id: String(m.id ?? ''),
+    opportunityId: String(m.opportunityId ?? ''),
+    title: String(m.title ?? ''),
+    tokenHash: String(m.tokenHash ?? ''),
+    timestamp: String(m.timestamp ?? ''),
+    status: (m.status as MatchInterest['status']) || 'pending',
   }));
 }
 
-function mapDedup(r: any): DedupItem[] {
-  return (r?.items || []).map((d: any) => ({
-    id: d.id,
-    hashedObjectId: d.hashedObjectId,
-    objectType: d.objectType,
-    firstFundedBy: d.firstFundedBy,
-    firstFundedDate: d.firstFundedDate,
-    duplicateAttemptDate: d.duplicateAttemptDate,
-    status: d.status,
+function mapDedup(r: unknown): DedupItem[] {
+  const obj = (r || {}) as { items?: Array<Record<string, unknown>> };
+  return (obj.items || []).map((d) => ({
+    id: String(d.id ?? ''),
+    hashedObjectId: String(d.hashedObjectId ?? ''),
+    objectType: String(d.objectType ?? ''),
+    firstFundedBy: String(d.firstFundedBy ?? ''),
+    firstFundedDate: String(d.firstFundedDate ?? ''),
+    duplicateAttemptDate: String(d.duplicateAttemptDate ?? ''),
+    status: (d.status as DedupItem['status']) || 'under_review',
   }));
 }
 
-function mapLockerStocks(r: any): LockerStock[] {
-  return (r?.stocks || []).map((s: any) => ({
-    location: s.location,
-    bundleType: s.bundleType,
-    available: s.available,
-    capacity: s.capacity,
-    lowStockThreshold: s.lowStockThreshold,
+function mapLockerStocks(r: unknown): LockerStock[] {
+  const obj = (r || {}) as { stocks?: Array<Record<string, unknown>> };
+  return (obj.stocks || []).map((s) => ({
+    location: String(s.location ?? ''),
+    bundleType: String(s.bundleType ?? ''),
+    available: Number(s.available ?? 0),
+    capacity: Number(s.capacity ?? 0),
+    lowStockThreshold: Number(s.lowStockThreshold ?? 0),
   }));
 }
 
@@ -294,12 +308,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         api.listMyDonations(donorHash),
       ]);
       if (reqs) {
-        const mapped = (reqs.requests || []).map((x: any) =>
-          x.type === 'swap' ? null : mapPoolFromBackend(x, tokenHash)
+        const mapped = (reqs.requests || []).map((x: Record<string, unknown>) =>
+          (x.type as string) === 'swap' ? null : mapPoolFromBackend(x, tokenHash)
         ).filter(Boolean) as PoolRequest[];
         setMyRequests(mapped);
-        const swaps = (reqs.requests || []).filter((x: any) => x.type === 'swap')
-          .map((x: any) => mapSwapFromBackend(x, tokenHash));
+        const swaps = (reqs.requests || []).filter((x: Record<string, unknown>) => (x.type as string) === 'swap')
+          .map((x: Record<string, unknown>) => mapSwapFromBackend(x, tokenHash));
         setMySwaps(swaps);
       }
       if (vouchers) setMyVouchersList(mapVouchers(vouchers));
@@ -334,8 +348,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           api.listAllVouchers(sessionToken),
         ]);
         if (q) {
-          setQueuePool((q.pool || []).map((x: any) => mapPoolFromBackend(x, x.token_hash || '')));
-          setQueueSwap((q.swap || []).map((x: any) => mapSwapFromBackend(x, x.token_hash || '')));
+          setQueuePool((q.pool || []).map((x: Record<string, unknown>) => mapPoolFromBackend(x, (x.token_hash as string) || '')));
+          setQueueSwap((q.swap || []).map((x: Record<string, unknown>) => mapSwapFromBackend(x, (x.token_hash as string) || '')));
         }
         if (pledges) setStaffPledgesList(mapPledges(pledges));
         if (interests) setMatchInterests(mapMatchInterests(interests));
