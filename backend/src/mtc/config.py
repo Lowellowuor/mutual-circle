@@ -38,11 +38,5 @@ class Settings(BaseSettings):
     staff_audit_id: str = ""
     staff_audit_pin_hash: str = ""
 
-    # Feature flags
-    mock_sms: bool = True
-    mock_mpesa: bool = True
-    mock_locker: bool = True
-    mock_ocr: bool = True
-
 
 settings = Settings()
