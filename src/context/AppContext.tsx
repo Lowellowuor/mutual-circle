@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AppContext - every list is backend-sourced. No mocks.
  *
  * Demo convenience: poolRequests/swapRequests are the UNION of the requester's
@@ -81,9 +81,9 @@ function getOrCreateDonorHash(): string {
 }
 
 // --- Mappers (backend snake_case ? frontend camelCase) ---
-function parseMeta(v: any): any {
-  if (typeof v === 'string') { try { return JSON.parse(v); } catch { return {}; } }
-  return v || {};
+function parseMeta(v: unknown): Record<string, unknown> {
+  if (typeof v === 'string') { try { return JSON.parse(v) as Record<string, unknown>; } catch { return {}; } }
+  return (v as Record<string, unknown>) || {};
 }
 function mapSwapFromBackend(r: any, tokenHash: string): SwapRequest {
   const meta = parseMeta(r.metadata);
@@ -454,8 +454,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       bundleCategory: r.bundle_category || category,
       lockerLocation: r.locker_location || location,
       status: 'reserved',
-      pin: (r as any).pin || '----',
-      qrPayload: (r as any).qr_payload || '',
+      pin: ((r as Record<string, unknown>).pin as string) || '----',
+      qrPayload: ((r as Record<string, unknown>).qr_payload as string) || '',
       timestamp: r.created_at,
     };
   };
