@@ -158,7 +158,13 @@ export const ConsoleView: React.FC = () => {
     if (filter === 'swap') return false;
     return true;
   });
-  const filteredSwap = emptyQueueMode ? [] : swapRequests.filter(r => filter === 'all' || filter === 'swap' || filter === 'pending' || filter === 'dispatched');
+  const filteredSwap = emptyQueueMode ? [] : swapRequests.filter(r => {
+    if (filter === 'all' || filter === 'swap') return true;
+    if (filter === 'pool') return false;
+    if (filter === 'pending') return r.status === 'reserved';
+    if (filter === 'dispatched') return false; // swaps self-collect, never dispatched to a partner
+    return true;
+  });
   const ocrQueue = poolRequests.filter(r => r.status === 'pending_check');
   const awaitingPledges = pledges.filter(p => p.status === 'awaiting_match');
 
