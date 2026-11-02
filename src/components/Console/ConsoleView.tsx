@@ -746,6 +746,9 @@ export const ConsoleView: React.FC = () => {
 
   const pendingFlags = riskFlags.filter(f => f.status === 'pending').length;
   const totalRecords = poolRequests.length + swapRequests.length;
+  const pendingQueueCount = poolRequests.filter(r => r.status === 'pending_check' || r.status === 'verified').length
+    + swapRequests.filter(r => r.status === 'reserved').length;
+  const pendingMoreCount = riskFlags.filter(f => f.status === 'pending').length + ocrQueue.length;
 
   return (
     <div className="flex justify-center p-4">
@@ -777,9 +780,14 @@ export const ConsoleView: React.FC = () => {
                 const I = t.Icon;
                 const active = tab === t.id;
                 return (
-                  <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'more') setMoreTab('menu'); }} className={'py-2.5 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
+                  <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'more') setMoreTab('menu'); }} className={'relative py-2.5 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
                     <I className="w-4 h-4" />
                     <span className="text-[9px] font-medium">{t.l}</span>
+                    {((t.id === 'queue' && pendingQueueCount > 0) || (t.id === 'more' && pendingMoreCount > 0)) && (
+                      <span className="absolute top-0.5 right-3 min-w-[14px] h-[14px] bg-rose-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center px-1">
+                        {(t.id === 'queue' ? pendingQueueCount : pendingMoreCount) > 9 ? '9+' : (t.id === 'queue' ? pendingQueueCount : pendingMoreCount)}
+                      </span>
+                    )}
                   </button>
                 );
               })}
