@@ -107,7 +107,7 @@ export const ConsoleView: React.FC = () => {
                 <div className="w-14 h-14 bg-[#DCE8E0] border border-[#1F6B4A]/20 text-[#1F6B4A] rounded-2xl flex items-center justify-center mx-auto"><Lock className="w-7 h-7" /></div>
                 <div><h1 className="font-serif text-xl font-bold text-[#111111]">Operations Console</h1><p className="text-[9px] font-mono text-[#111111]/50 mt-1 uppercase tracking-widest">Restricted access</p></div>
                 <p className="text-[11px] text-[#111111]/60 leading-relaxed">Each role has separate credentials. No role can switch without logging out.</p>
-                <div className="text-[9px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 inline-block">Credentials auto-filled for demo</div>
+                
               </div>
               <form onSubmit={handleLogin} className="space-y-3 bg-white border border-[#111111]/15 rounded-xl p-4">
                 <div>
