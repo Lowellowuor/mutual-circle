@@ -330,7 +330,7 @@ export const DonorView: React.FC = () => {
           <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-900 leading-relaxed">Your pledge is now visible to the Operations team for matching.</div>
           <div className="space-y-2 pt-2">
             <button onClick={() => { setScreen('tab'); setPDesc(''); setPValue(''); }} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium">Pledge again</button>
-            <button onClick={() => { resetFlow(); setTab('home'); }} className="w-full py-2.5 bg-white border border-[#111111]/15 text-[#111111]/70 rounded-xl text-sm font-medium">Done</button>
+            <button onClick={() => { resetFlow(); setTab('pledge'); }} className="w-full py-2.5 bg-white border border-[#111111]/15 text-[#111111]/70 rounded-xl text-sm font-medium">View my pledges</button>
           </div>
         </div>
       );
@@ -420,6 +420,28 @@ export const DonorView: React.FC = () => {
                 <p className="text-[11px] text-white/70 leading-relaxed">Blind-pooled. No recipient profiles. No linkage.</p>
               </>
             )}
+          </div>
+
+          {/* Quick actions: Give + Pledge */}
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => goTab('give')} className="p-3 bg-white border border-[#111111]/15 rounded-xl flex items-center gap-2 hover:border-[#1F6B4A] transition-colors text-left">
+              <div className="w-8 h-8 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
+                <Wallet className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#111111]">Give cash</div>
+                <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">To blind pool</div>
+              </div>
+            </button>
+            <button onClick={() => goTab('pledge')} className="p-3 bg-white border border-[#111111]/15 rounded-xl flex items-center gap-2 hover:border-[#1F6B4A] transition-colors text-left">
+              <div className="w-8 h-8 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
+                <Package className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#111111]">Pledge</div>
+                <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">Goods or credit</div>
+              </div>
+            </button>
           </div>
 
           {hasActivity && (
