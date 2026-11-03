@@ -8,7 +8,7 @@ import {
   MapPin, Zap, ChevronRight, Clock, Eye, EyeOff, RotateCcw, Lock, Trophy, Edit2, Settings,
 } from 'lucide-react';
 
-type Tab = 'home' | 'give' | 'pledge' | 'campaigns' | 'impact' | 'leaders';
+type Tab = 'home' | 'give' | 'pledge' | 'impact' | 'leaders';
 type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger' | 'settings' | 'activity';
 
 
@@ -178,7 +178,6 @@ export const DonorView: React.FC = () => {
     { id: 'home', label: 'Home', Icon: Home },
     { id: 'give', label: 'Give', Icon: Wallet },
     { id: 'pledge', label: 'Pledge', Icon: Package },
-    { id: 'campaigns', label: 'Campaigns', Icon: TrendingUp },
     { id: 'impact', label: 'Impact', Icon: HeartHandshake },
     { id: 'leaders', label: 'Leaders', Icon: Trophy },
   ];
@@ -442,28 +441,6 @@ export const DonorView: React.FC = () => {
             )}
           </div>
 
-          {/* Quick actions: Give + Pledge */}
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => goTab('give')} className="p-3 bg-white border border-[#111111]/15 rounded-xl flex items-center gap-2 hover:border-[#1F6B4A] transition-colors text-left">
-              <div className="w-8 h-8 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
-                <Wallet className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[#111111]">Give cash</div>
-                <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">To blind pool</div>
-              </div>
-            </button>
-            <button onClick={() => goTab('pledge')} className="p-3 bg-white border border-[#111111]/15 rounded-xl flex items-center gap-2 hover:border-[#1F6B4A] transition-colors text-left">
-              <div className="w-8 h-8 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
-                <Package className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[#111111]">Pledge</div>
-                <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">Goods or credit</div>
-              </div>
-            </button>
-          </div>
-
           {hasActivity && (
             <div className="p-3 bg-white border border-[#111111]/10 rounded-xl space-y-2">
               <div className="flex items-center gap-1.5">
@@ -555,14 +532,44 @@ export const DonorView: React.FC = () => {
             </button>
           </div>
 
-          <button onClick={() => goTab('campaigns')} className="w-full p-4 bg-white border border-[#111111]/15 rounded-2xl flex items-center gap-3 hover:border-[#1F6B4A] transition-colors">
-            <TrendingUp className="w-5 h-5 text-[#1F6B4A] shrink-0" />
-            <div className="flex-1 text-left">
-              <div className="text-xs font-bold text-[#111111]">{campaigns.length} active campaigns</div>
-              <div className="text-[10px] text-[#111111]/50 mt-0.5">Cohort-level giving</div>
+          {campaigns.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-[#1F6B4A]" />
+                  <h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Active campaigns</h3>
+                </div>
+                <span className="text-[10px] font-mono text-[#111111]/50">{campaigns.length}</span>
+              </div>
+              {campaigns.map(c => {
+                const pct = Math.round((c.pooledAmount / c.targetAmount) * 100);
+                return (
+                  <div key={c.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[9px] font-mono uppercase text-[#1F6B4A] tracking-wider">Cohort</div>
+                        <h3 className="font-serif text-sm font-bold text-[#111111] leading-snug">{c.title}</h3>
+                      </div>
+                      <div className="flex items-center gap-0.5 text-[10px] font-mono text-[#111111]/50 shrink-0">
+                        <Clock className="w-3 h-3" /> {c.daysRemaining}d
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-[#111111]/60 leading-relaxed">{c.cohortGoalText}</p>
+                    <div className="space-y-1">
+                      <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#1F6B4A]" style={{ width: Math.min(100, pct) + '%' }} />
+                      </div>
+                      <div className="flex justify-between text-[9px] font-mono">
+                        <span className="font-bold text-[#1F6B4A]">{pct}%</span>
+                        <span className="text-[#111111]/50">{c.coveredCount}/{c.targetCount}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => goTab('give')} className="w-full py-2 bg-[#111111] hover:bg-black text-white rounded-lg text-[10px] font-semibold">Contribute</button>
+                  </div>
+                );
+              })}
             </div>
-            <ChevronRight className="w-4 h-4 text-[#111111]/40" />
-          </button>
+          )}
           {publicPartners.length > 0 && (
             <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2">
               <div className="flex justify-between items-center">
@@ -694,31 +701,6 @@ export const DonorView: React.FC = () => {
               );
             })}
           </div>
-        </div>
-      );
-    }
-
-    if (tab === 'campaigns') {
-      return (
-        <div className="p-5 space-y-3">
-          <div><h2 className="font-serif text-lg font-bold text-[#111111]">Campaigns</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Cohort-level targets. Never an individual.</p></div>
-          {campaigns.map(c => {
-            const pct = Math.round((c.pooledAmount / c.targetAmount) * 100);
-            return (
-              <div key={c.id} className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2.5">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex-1 min-w-0"><div className="text-[9px] font-mono uppercase text-[#1F6B4A] tracking-wider">Cohort</div><h3 className="font-serif text-sm font-bold text-[#111111] leading-snug">{c.title}</h3></div>
-                  <div className="flex items-center gap-0.5 text-[10px] font-mono text-[#111111]/50 shrink-0"><Clock className="w-3 h-3" /> {c.daysRemaining}d</div>
-                </div>
-                <p className="text-[10px] text-[#111111]/60 leading-relaxed">{c.cohortGoalText}</p>
-                <div className="space-y-1">
-                  <div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className="h-full bg-[#1F6B4A]" style={{ width: Math.min(100, pct) + '%' }} /></div>
-                  <div className="flex justify-between text-[9px] font-mono"><span className="font-bold text-[#1F6B4A]">{pct}%</span><span className="text-[#111111]/50">{c.coveredCount}/{c.targetCount}</span></div>
-                </div>
-                <button onClick={() => goTab('give')} className="w-full py-2 bg-[#111111] hover:bg-black text-white rounded-lg text-[11px] font-semibold">Contribute</button>
-              </div>
-            );
-          })}
         </div>
       );
     }
@@ -945,14 +927,14 @@ export const DonorView: React.FC = () => {
           </div>
           <div key={screen + tab} className="flex-1 overflow-y-auto animate-in fade-in duration-200">{renderContent()}</div>
           <div className="border-t border-[#111111]/10 bg-white">
-            <div className="grid grid-cols-6">
+            <div className="grid grid-cols-5">
               {TABS.map(t => {
                 const Icon = t.Icon;
                 const active = tab === t.id && screen === 'tab';
                 return (
-                  <button key={t.id} onClick={() => goTab(t.id)} className={'py-2 flex flex-col items-center gap-0.5 transition-colors ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
-                    <Icon className="w-4 h-4" />
-                    <span className="text-[8px] font-medium">{t.label}</span>
+                  <button key={t.id} onClick={() => goTab(t.id)} className={'py-2.5 flex flex-col items-center gap-1 transition-colors ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
+                    <Icon className="w-5 h-5" />
+                    <span className="text-[9px] font-medium">{t.label}</span>
                   </button>
                 );
               })}
