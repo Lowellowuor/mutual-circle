@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 type Tab = 'home' | 'give' | 'pledge' | 'campaigns' | 'impact' | 'leaders';
-type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger';
+type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger' | 'settings';
 
 
 
@@ -29,7 +29,6 @@ export const DonorView: React.FC = () => {
   const [pLocality, setPLocality] = useState('Nairobi County');
   const [pProcessing, setPProcessing] = useState(false);
     const [showServer, setShowServer] = useState(false);
-    const [showSettings, setShowSettings] = useState(false);
   const [channel, setChannel] = useState<'web' | 'sms'>('web');
 
   // TS2367 workaround: channel is narrowed to 'web' after the early-return at line 612.
@@ -229,6 +228,71 @@ export const DonorView: React.FC = () => {
     URL.revokeObjectURL(url);
   };
   const renderContent = () => {
+    if (screen === 'settings') {
+      return (
+        <div className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-serif text-lg font-bold text-[#111111]">Settings</h2>
+              <p className="text-[10px] font-mono text-[#111111]/50 mt-0.5">Account and transparency</p>
+            </div>
+            <button onClick={() => setScreen('tab')} className="text-[10px] font-mono text-[#111111]/60 hover:text-[#111111]">Back</button>
+          </div>
+
+          <button onClick={() => setScreen('ledger')} className="w-full p-3 bg-white border border-[#111111]/15 rounded-xl flex items-center justify-between hover:border-[#1F6B4A] transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-[#111111]">Verify public ledger</div>
+                <div className="text-[10px] font-mono text-[#111111]/50 mt-0.5">Chain status, recent entries, CSV download</div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#111111]/30 shrink-0" />
+          </button>
+
+          <div className="p-4 rounded-xl bg-white border border-[#111111]/15 space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-sm font-bold text-[#111111] flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View
+              </h3>
+              <button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">
+                {showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                {showServer ? 'Hide' : 'Reveal'}
+              </button>
+            </div>
+            <div className="space-y-2 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
+              <div className="flex justify-between"><span className="text-[#111111]/50">Donor hash</span><span className="text-[#1F6B4A] font-bold">{showServer ? 'donor_8f4c2e' : '******'}</span></div>
+              <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '******'}</span></div>
+              <div className="flex justify-between"><span className="text-[#111111]/50">Recipient link</span><span className="text-rose-600 font-bold">NONE</span></div>
+              <div className="flex justify-between border-t border-[#111111]/10 pt-2 mt-2"><span className="text-[#111111]/50">Session total</span><span className="text-[#111111] font-bold">KES {totalGiven.toLocaleString()}</span></div>
+              <div className="flex justify-between"><span className="text-[#111111]/50">Contributions</span><span className="text-[#111111]">{donorContributions.length}</span></div>
+              <div className="flex justify-between"><span className="text-[#111111]/50">Pledges</span><span className="text-[#111111]">{pledges.length}</span></div>
+              <div className="flex justify-between"><span className="text-[#111111]/50">In ledger</span><span className="text-[#111111]">{donorContributions.filter(c => c.optInLedger).length} / {donorContributions.length}</span></div>
+            </div>
+            {showServer && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[9px] text-rose-800 leading-relaxed mt-2"><strong>Blind-pool guarantee:</strong> no column links a donor to any disbursement. The ledger is aggregate only.</div>}
+          </div>
+
+          <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#111111]/15 space-y-1.5">
+            <h4 className="text-[11px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
+            {['Blind pooling (4.6)', 'Cohort campaigns (4.6)', 'Recognition ledger opt-in (4.6)', 'The Match - goods & service credit (4.4)', 'Coarse locality (4.4)', 'Anonymous by default', 'No recipient linkage'].map(f => (
+              <div key={f} className="flex items-center gap-1.5 text-[10px] text-[#111111]/70">
+                <div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={() => { resetFlow(); setTab('home'); setShowServer(false); setScreen('tab'); }}
+            className="w-full py-2.5 text-xs text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg bg-white flex items-center justify-center gap-1.5"
+          >
+            <RotateCcw className="w-3 h-3" /> Reset Simulator
+          </button>
+        </div>
+      );
+    }
+
     if (screen === 'give_success') {
       return (
         <div className="p-6 space-y-5">
@@ -805,7 +869,7 @@ export const DonorView: React.FC = () => {
                 <div className="text-[10px] font-mono text-[#111111]/40 mt-0.5">Blind-pooled giving</div>
               </div>
             </div>
-            <button onClick={() => setShowSettings(true)} className="text-[#111111]/40 hover:text-[#111111] p-1 rounded" aria-label="Settings" title="Settings">
+            <button onClick={() => setScreen('settings')} className="text-[#111111]/40 hover:text-[#111111] p-1 rounded" aria-label="Settings" title="Settings">
               <Settings className="w-4 h-4" />
             </button>
           </div>
@@ -831,56 +895,6 @@ export const DonorView: React.FC = () => {
         <DonorActivityModal item={selectedActivity} onClose={() => setSelectedActivity(null)} />
       )}
 
-      {showSettings && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowSettings(false)}>
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-[#111111]/10 px-5 py-3 flex items-center justify-between rounded-t-2xl">
-              <div className="flex items-center gap-2">
-                <Settings className="w-4 h-4 text-[#1F6B4A]" />
-                <h2 className="font-serif text-base font-bold text-[#111111]">Settings</h2>
-              </div>
-              <button onClick={() => setShowSettings(false)} className="text-[#111111]/40 hover:text-[#111111] text-xs">Close</button>
-            </div>
-            <div className="p-4 space-y-3">
-              <div className="p-4 rounded-xl bg-white border border-[#111111]/15 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-serif text-sm font-bold text-[#111111] flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View
-                  </h3>
-                  <button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">
-                    {showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    {showServer ? 'Hide' : 'Reveal'}
-                  </button>
-                </div>
-                <div className="space-y-2 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
-                  <div className="flex justify-between"><span className="text-[#111111]/50">Donor hash</span><span className="text-[#1F6B4A] font-bold">{showServer ? 'donor_8f4c2e' : '******'}</span></div>
-                  <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '******'}</span></div>
-                  <div className="flex justify-between"><span className="text-[#111111]/50">Recipient link</span><span className="text-rose-600 font-bold">NONE</span></div>
-                  <div className="flex justify-between border-t border-[#111111]/10 pt-2 mt-2"><span className="text-[#111111]/50">Session total</span><span className="text-[#111111] font-bold">KES {totalGiven.toLocaleString()}</span></div>
-                  <div className="flex justify-between"><span className="text-[#111111]/50">Contributions</span><span className="text-[#111111]">{donorContributions.length}</span></div>
-                  <div className="flex justify-between"><span className="text-[#111111]/50">Pledges</span><span className="text-[#111111]">{pledges.length}</span></div>
-                  <div className="flex justify-between"><span className="text-[#111111]/50">In ledger</span><span className="text-[#111111]">{donorContributions.filter(c => c.optInLedger).length} / {donorContributions.length}</span></div>
-                </div>
-                {showServer && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[9px] text-rose-800 leading-relaxed mt-2"><strong>Blind-pool guarantee:</strong> no column links a donor to any disbursement. The ledger is aggregate only.</div>}
-              </div>
-              <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#111111]/15 space-y-1.5">
-                <h4 className="text-[11px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
-                {['Blind pooling (4.6)', 'Cohort campaigns (4.6)', 'Recognition ledger opt-in (4.6)', 'The Match - goods & service credit (4.4)', 'Coarse locality (4.4)', 'Anonymous by default', 'No recipient linkage'].map(f => (
-                  <div key={f} className="flex items-center gap-1.5 text-[10px] text-[#111111]/70">
-                    <div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={() => { resetFlow(); setTab('home'); setShowServer(false); setShowSettings(false); }}
-                className="w-full py-2.5 text-xs text-[#111111]/60 hover:text-[#111111] border border-[#111111]/15 rounded-lg bg-white flex items-center justify-center gap-1.5"
-              >
-                <RotateCcw className="w-3 h-3" /> Reset Simulator
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
