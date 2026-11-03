@@ -703,12 +703,31 @@ export const ConsoleView: React.FC = () => {
         </div>
       );
     }
-    const items: Array<{ id: 'matrix' | 'tiers' | 'server' | 'spec'; Icon: any; label: string; sub: string }> = [
+    const primaryItems: Array<{ id: 'matrix' | 'tiers'; Icon: any; label: string; sub: string }> = [
       { id: 'matrix', Icon: Layers, label: 'Matrix', sub: 'Voucher by partner grid' },
       { id: 'tiers', Icon: ShieldCheck, label: 'Verification Tiers', sub: 'Tier 1-4 explainer' },
+    ];
+    const developerItems: Array<{ id: 'server' | 'spec'; Icon: any; label: string; sub: string }> = [
       { id: 'server', Icon: Activity, label: 'Server View', sub: 'Live counts + invariants' },
       { id: 'spec', Icon: CheckCircle, label: 'Spec Coverage', sub: 'R.U.T.H sections covered' },
     ];
+    const renderMoreButton = (it: { id: 'matrix' | 'tiers' | 'server' | 'spec'; Icon: any; label: string; sub: string }, dimmed = false) => {
+      const I = it.Icon;
+      return (
+        <button key={it.id} onClick={() => setMoreTab(it.id)} className="w-full p-3 bg-white border border-[#111111]/10 rounded-xl flex items-center justify-between hover:border-[#1F6B4A] transition-colors">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + (dimmed ? 'bg-[#FAF8F4] text-[#111111]/40' : 'bg-[#DCE8E0] text-[#1F6B4A]')}>
+              <I className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 text-left">
+              <div className={'text-sm font-semibold ' + (dimmed ? 'text-[#111111]/70' : 'text-[#111111]')}>{it.label}</div>
+              <div className="text-[11px] font-mono text-[#111111]/50 mt-0.5">{it.sub}</div>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[#111111]/30 shrink-0" />
+        </button>
+      );
+    };
     return (
       <div className="p-4 space-y-3">
         <div>
@@ -716,23 +735,12 @@ export const ConsoleView: React.FC = () => {
           <p className="text-[11px] font-mono text-[#111111]/50 mt-0.5">{roleLabel[staffRole as Role]} - {staffId}</p>
         </div>
         <div className="space-y-2">
-          {items.map(it => {
-            const I = it.Icon;
-            return (
-              <button key={it.id} onClick={() => setMoreTab(it.id)} className="w-full p-3 bg-white border border-[#111111]/10 rounded-xl flex items-center justify-between hover:border-[#1F6B4A] transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
-                    <I className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 text-left">
-                    <div className="text-sm font-semibold text-[#111111]">{it.label}</div>
-                    <div className="text-[11px] font-mono text-[#111111]/50 mt-0.5">{it.sub}</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#111111]/30 shrink-0" />
-              </button>
-            );
-          })}
+          {primaryItems.map(it => renderMoreButton(it, false))}
+          <div className="pt-3 pb-1 flex items-center gap-2">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/40">Developer</div>
+            <div className="flex-1 h-px bg-[#111111]/10" />
+          </div>
+          {developerItems.map(it => renderMoreButton(it, true))}
           <button
             onClick={() => { setTab('queue'); setAuditSub('flags'); setFilter('all'); setReceipt(null); setShowRaw(false); setTillResult(null); setIssueModal(null); setIssueSuccess(null); setMoreTab('menu'); }}
             className="w-full p-3 bg-white border border-[#111111]/15 rounded-xl flex items-center justify-center gap-1.5 text-[#111111]/60 hover:text-[#111111] hover:bg-[#FAF8F4] text-[12px] font-medium mt-4"
