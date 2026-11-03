@@ -324,7 +324,7 @@ export const DonorView: React.FC = () => {
           {ledger && <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-[10px] text-emerald-900 leading-relaxed"><Check className="w-3 h-3 inline mr-1" />Your contribution now appears in the Impact tab's recognition ledger.</div>}
           <div className="space-y-2 pt-2">
             <button onClick={() => { setScreen('tab'); setCustom(''); }} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium">Give again</button>
-            <button onClick={() => { resetFlow(); setTab('home'); }} className="w-full py-2.5 bg-white border border-[#111111]/15 text-[#111111]/70 rounded-xl text-sm font-medium">Done</button>
+            <button onClick={() => { resetFlow(); setTab('give'); }} className="w-full py-2.5 bg-white border border-[#111111]/15 text-[#111111]/70 rounded-xl text-sm font-medium">View my donations</button>
           </div>
         </div>
       );
@@ -657,6 +657,31 @@ export const DonorView: React.FC = () => {
             </label>
           </div>
           <button onClick={handleGive} disabled={processing || finalAmount <= 0} className="w-full py-3.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50 mt-2">{processing ? 'Processing...' : `Contribute KES ${finalAmount.toLocaleString()}`}</button>
+
+          <div className="pt-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Your donations</h3>
+              <span className="text-[10px] font-mono text-[#111111]/50">{donorContributions.length}</span>
+            </div>
+            {donorContributions.length === 0 ? (
+              <div className="p-4 bg-white border border-dashed border-[#111111]/15 rounded-xl text-center">
+                <p className="text-[10px] text-[#111111]/50">No donations yet. Give above.</p>
+              </div>
+            ) : donorContributions.slice(0, 5).map(d => (
+              <div key={d.id} className="p-3 bg-white border border-[#111111]/10 rounded-xl">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] font-semibold text-[#111111]">KES {d.amount.toLocaleString()}</div>
+                    <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">{new Date(d.timestamp).toLocaleString()}</div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {d.isAnonymous && <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#DCE8E0] text-[#1F6B4A]">Anon</span>}
+                    {d.optInLedger && <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Listed</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       );
     }

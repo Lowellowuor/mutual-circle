@@ -7,12 +7,12 @@ import {
   Home, MapPin, Check, CheckCircle, Clock, Copy, ScanLine, ArrowRight,
   AlertTriangle, FileText, Zap, GraduationCap, Building2, Droplet, Briefcase,
   X, Phone, ShieldCheck, ShieldAlert, Eye, EyeOff, RotateCcw, LogOut, Bell, AlertCircle, Trash2,
-  MessageSquare, ArrowLeft,
+  MessageSquare, ArrowLeft, Settings,
 } from 'lucide-react';
 import { SwapRequest, PoolRequest } from '../../types';
 import { RequesterMessages } from './Messages';
 
-type Tab = 'home' | 'swap' | 'pool' | 'match' | 'bench' | 'messages';
+type Tab = 'home' | 'swap' | 'pool' | 'match' | 'bench' | 'messages' | 'settings';
 type SwapStep = 'bundle' | 'location' | 'success';
 type PoolStep = 'category' | 'details' | 'success';
 type PoolCat = 'utility' | 'school_fee' | 'hospital_invoice';
@@ -747,6 +747,7 @@ export const RequesterView: React.FC = () => {
     if (tab === 'pool') return renderPool();
     if (tab === 'match') return renderMatch();
     if (tab === 'messages') return <RequesterMessages />;
+    if (tab === 'settings') return renderSettings();
     return renderBench();
   };
 
@@ -885,13 +886,58 @@ export const RequesterView: React.FC = () => {
   if (householdStep) {
     return renderHouseholdStep();
   }
+  const renderSettings = () => (
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-serif text-lg font-bold text-[#111111]">Settings</h2>
+          <p className="text-[10px] font-mono text-[#111111]/50 mt-0.5">Account and privacy</p>
+        </div>
+        <button onClick={() => setTab('home')} className="text-[10px] font-mono text-[#111111]/60 hover:text-[#111111]">Back</button>
+      </div>
+
+      <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View
+          </h3>
+          <button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">
+            {showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+            {showServer ? 'Hide' : 'Reveal'}
+          </button>
+        </div>
+        <div className="space-y-1.5 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
+          <div className="flex justify-between"><span className="text-[#111111]/50">Token (HMAC)</span><span className="text-[#1F6B4A] font-bold truncate ml-2">{tokenHash}</span></div>
+          <div className="flex justify-between"><span className="text-[#111111]/50">Raw phone</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '******'}</span></div>
+          <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">NONE</span></div>
+          <div className="flex justify-between border-t border-[#111111]/10 pt-1.5 mt-1.5"><span className="text-[#111111]/50">Rate (per token)</span><span className="text-[#111111]">{rate.count} / {MAX_REQUESTS}</span></div>
+          <div className="flex justify-between"><span className="text-[#111111]/50">Value (per token)</span><span className="text-[#111111]">KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>
+          <div className="flex justify-between"><span className="text-[#111111]/50">Persisted history</span><span className="text-[#111111]">{mergedHistory.length} records</span></div>
+        </div>
+        {showServer && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[9px] text-rose-800 leading-relaxed mt-2"><strong>Invariant:</strong> phone number is hashed on verification and immediately discarded. Rate limits and history are keyed to the HMAC token, not the session.</div>}
+      </div>
+
+      <div className="p-4 bg-[#FAF8F4] border border-[#111111]/15 rounded-xl space-y-1.5">
+        <h4 className="text-[10px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
+        {['HMAC token (4.1)', 'Simulated OTP verification', 'Per-token rate limits (4.1)', 'Persistent history','Withdraw flow', 'The Swap (4.2)', 'The Pool (4.3)', 'Hospital ban on clinical data (4.5)', 'Tier 2/3 escalation (4.8)','The Match + decline (4.4)', 'The Bench referral (4.9)'].map(f => (
+          <div key={f} className="flex items-center gap-1.5 text-[10px] text-[#111111]/70"><div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}</div>
+        ))}
+      </div>
+
+      <button onClick={() => { setTab('home'); setShowServer(false); logout(); setIntakeStep('phone'); setPhone(''); setOtpInput(''); setGeneratedOtp(''); setOtpAttempts(0); setResendCooldown(0); }} className="w-full py-2.5 text-xs text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg bg-white flex items-center justify-center gap-1.5">
+        <RotateCcw className="w-3 h-3" /> Reset session
+      </button>
+    </div>
+  );
+
+
   const TABS: { id: Tab; label: string; Icon: typeof Home }[] = [
     { id: 'home', label: 'Home', Icon: Home }, { id: 'swap', label: 'Swap', Icon: Package }, { id: 'pool', label: 'Pool', Icon: CreditCard }, { id: 'match', label: 'Match', Icon: Users }, { id: 'bench', label: 'Bench', Icon: MessageCircle },
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
-      <div className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
+    <div className="flex justify-center p-4">
+      <div className="w-full max-w-[420px] bg-[#1a1a1a] rounded-[2.5rem] p-3 shadow-2xl border-[10px] border-black shrink-0">
         <div className="bg-[#FAF8F4] rounded-[2rem] overflow-hidden flex flex-col h-[640px]">
           <div className="px-5 pt-3 pb-1 flex items-center justify-between text-[10px] font-medium text-[#111111]/60"><span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span><span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded uppercase font-bold">Anonymous</span></div>
           <div className="px-5 pb-2 border-b border-[#111111]/10 flex items-center justify-between"><div className="flex items-center gap-2"><div className="w-8 h-8 bg-[#1F6B4A] rounded-xl flex items-center justify-center"><HeartHandshake className="w-4 h-4 text-white" /></div><div><div className="text-xs font-bold text-[#111111] leading-tight">Mutual Circle</div><div className="text-[9px] text-[#111111]/40 font-mono truncate max-w-[150px]">{tokenHash}</div></div></div><div className="flex items-center gap-1">
@@ -901,6 +947,7 @@ export const RequesterView: React.FC = () => {
           <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] bg-rose-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center px-0.5">{unreadCount > 9 ? '9+' : unreadCount}</span>
         )}
       </button>
+      <button onClick={() => setTab('settings')} className={'relative p-1 rounded ' + (tab === 'settings' ? 'text-[#1F6B4A]' : 'text-[#111111]/40 hover:text-[#1F6B4A]')} aria-label="Settings" title="Settings"><Settings className="w-4 h-4" /></button>
       <button onClick={logout} className="text-[#111111]/40 hover:text-rose-600 p-1 rounded" aria-label="End session" title="End session"><LogOut className="w-4 h-4" /></button>
     </div></div>
           <div key={tab} className="flex-1 overflow-y-auto animate-in fade-in duration-200">{renderContent()}</div>
@@ -908,27 +955,6 @@ export const RequesterView: React.FC = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-sm space-y-3">
-        <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
-          <div className="flex items-center justify-between"><h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View</h3><button onClick={() => setShowServer(!showServer)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">{showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}{showServer ? 'Hide' : 'Reveal'}</button></div>
-          <div className="space-y-1.5 pt-2 border-t border-[#111111]/10 font-mono text-[10px]">
-            <div className="flex justify-between"><span className="text-[#111111]/50">Token (HMAC)</span><span className="text-[#1F6B4A] font-bold truncate ml-2">{tokenHash}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Raw phone</span><span className="text-rose-600 font-bold">{showServer ? 'NOT STORED' : '******'}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Name</span><span className="text-rose-600 font-bold">NONE</span></div>
-            <div className="flex justify-between border-t border-[#111111]/10 pt-1.5 mt-1.5"><span className="text-[#111111]/50">Rate (per token)</span><span className="text-[#111111]">{rate.count} / {MAX_REQUESTS}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Value (per token)</span><span className="text-[#111111]">KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Persisted history</span><span className="text-[#111111]">{mergedHistory.length} records</span></div>
-          </div>
-          {showServer && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[9px] text-rose-800 leading-relaxed mt-2"><strong>Invariant:</strong> phone number is hashed on verification and immediately discarded. Rate limits and history are keyed to the HMAC token, not the session.</div>}
-        </div>
-
-        <div className="p-4 bg-[#FAF8F4] border border-[#111111]/15 rounded-xl space-y-1.5">
-          <h4 className="text-[10px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
-          {['HMAC token (4.1)', 'Simulated OTP verification', 'Per-token rate limits (4.1)', 'Persistent history', 'Withdraw flow', 'The Swap (4.2)', 'The Pool (4.3)', 'Hospital ban on clinical data (4.5)', 'Tier 2/3 escalation (4.8)', 'The Match + decline (4.4)', 'The Bench referral (4.9)'].map(f => (<div key={f} className="flex items-center gap-1.5 text-[10px] text-[#111111]/70"><div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}</div>))}
-        </div>
-
-        <button onClick={() => { goTab('home'); setShowServer(false); logout(); setIntakeStep('phone'); setPhone(''); setOtpInput(''); setGeneratedOtp(''); setOtpAttempts(0); setResendCooldown(0); }} className="w-full py-2 text-xs text-[#111111]/60 hover:text-rose-600 border border-[#111111]/15 rounded-lg bg-white flex items-center justify-center gap-1.5"><RotateCcw className="w-3 h-3" /> Reset session</button>
-      </div>
     </div>
   );
 };
