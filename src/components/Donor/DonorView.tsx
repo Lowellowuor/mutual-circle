@@ -427,8 +427,12 @@ export const DonorView: React.FC = () => {
             </div>
             {hasActivity ? (
               <>
-                <h2 className="font-serif text-xl font-bold leading-tight">Welcome back</h2>
-                <p className="text-[11px] text-white/70 leading-relaxed">You have given KES {totalGivenKes.toLocaleString()} across {donorContributions.length} gift{donorContributions.length !== 1 ? 's' : ''}. Thank you.</p>
+                <h2 className="font-serif text-xl font-bold leading-tight">KES {totalGivenKes.toLocaleString()} pooled</h2>
+                <p className="text-[11px] text-white/70 leading-relaxed">
+                  {impactStats
+                    ? impactStats.bundles_delivered + ' bundles delivered \u00b7 ' + impactStats.utility_meters_paid + ' bills paid \u00b7 ' + impactStats.student_terms_paid + ' school terms funded. You are one of the donors behind these.'
+                    : 'Across ' + donorContributions.length + ' gift' + (donorContributions.length !== 1 ? 's' : '') + '. Blind-pooled. No recipient link.'}
+                </p>
               </>
             ) : (
               <>
