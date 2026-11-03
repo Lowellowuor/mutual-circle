@@ -624,6 +624,34 @@ export const DonorView: React.FC = () => {
           {pType === 'service_credit' && (<div className="space-y-1.5"><label className="text-[10px] font-mono uppercase text-[#111111]/50">Max value (KES)</label><input type="number" value={pValue} onChange={e => setPValue(e.target.value)} placeholder="5000" className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none" /></div>)}
           <div className="space-y-1.5"><label className="text-[10px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> Locality</label><select value={pLocality} onChange={e => setPLocality(e.target.value)} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none">{['Nairobi County', 'Mombasa County', 'Kisumu County', 'Nakuru County'].map(c => <option key={c}>{c}</option>)}</select></div>
           <button onClick={handlePledge} disabled={pProcessing || !pDesc} className="w-full py-3.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50 mt-2">{pProcessing ? 'Submitting...' : 'Submit Pledge'}</button>
+
+          <div className="pt-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Your Pledges</h3>
+              <span className="text-[10px] font-mono text-[#111111]/50">{pledges.length}</span>
+            </div>
+            {pledges.length === 0 ? (
+              <div className="p-4 bg-white border border-dashed border-[#111111]/15 rounded-xl text-center">
+                <p className="text-[10px] text-[#111111]/50">No pledges yet. Submit one above.</p>
+              </div>
+            ) : pledges.map(p => {
+              const statusLabel = p.status === 'awaiting_match' ? 'Awaiting match' : p.status === 'matched' ? 'Matched' : 'Delivered';
+              const statusClass = p.status === 'awaiting_match' ? 'bg-amber-50 text-amber-800 border-amber-200' : p.status === 'matched' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200';
+              const ref = p.linkedRequestId ? 'REF-' + String(p.linkedRequestId).slice(0, 8).toUpperCase() : null;
+              return (
+                <div key={p.id} className="p-3 bg-white border border-[#111111]/10 rounded-xl space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[11px] font-semibold text-[#111111] truncate">{p.description}</div>
+                      <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">{p.locality} · {p.type === 'goods' ? 'Goods' : 'Service credit'}</div>
+                    </div>
+                    <span className={'text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 ' + statusClass}>{statusLabel}</span>
+                  </div>
+                  {ref && <div className="text-[9px] font-mono text-[#1F6B4A] pt-1 border-t border-[#111111]/5">Linked to {ref}</div>}
+                </div>
+              );
+            })}
+          </div>
         </div>
       );
     }
