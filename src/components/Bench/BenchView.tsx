@@ -52,7 +52,7 @@ export const BenchView: React.FC = () => {
 
   const renderLanding = () => (
     <div className="p-5 space-y-4">
-      <div className="rounded-2xl bg-gradient-to-br from-purple-600 to-purple-800 p-5 text-white space-y-2">
+      <div className="rounded-2xl bg-gradient-to-br from-[#1F6B4A] to-[#18553a] p-5 text-white space-y-2">
         <MessageCircle className="w-6 h-6 text-white/80" />
         <h2 className="font-serif text-xl font-bold leading-tight">A quiet place<br />to be heard.</h2>
         <p className="text-[11px] text-white/70 leading-relaxed">Anonymous peer support. No records. No judgement.</p>
@@ -80,7 +80,7 @@ export const BenchView: React.FC = () => {
       </div>
       <button
         onClick={() => setEntered(true)}
-        className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium mt-2"
+        className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium mt-2"
       >
         Start session
       </button>
@@ -118,7 +118,7 @@ export const BenchView: React.FC = () => {
         )}
         {chat.map((m, i) => (
           <div key={i} className="flex justify-end">
-            <div className="max-w-[82%] px-3 py-2 text-[11px] leading-relaxed bg-purple-600 text-white rounded-xl rounded-tr-sm">
+            <div className="max-w-[82%] px-3 py-2 text-[11px] leading-relaxed bg-[#1F6B4A] text-white rounded-xl rounded-tr-sm">
               {m.text}
             </div>
           </div>
@@ -134,7 +134,7 @@ export const BenchView: React.FC = () => {
         <button
           type="submit"
           disabled={!message.trim()}
-          className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center disabled:opacity-40"
+          className="w-8 h-8 bg-[#1F6B4A] text-white rounded-lg flex items-center justify-center disabled:opacity-40"
         >
           <Send className="w-3.5 h-3.5" />
         </button>
@@ -235,13 +235,13 @@ export const BenchView: React.FC = () => {
         <div className="bg-[#FAF8F4] rounded-[2rem] overflow-hidden flex flex-col h-[620px]">
           <div className="px-5 pt-3 pb-1 flex items-center justify-between text-[10px] font-medium text-[#111111]/60">
             <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            <span className="text-[8px] font-mono bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded uppercase font-bold">
+            <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded uppercase font-bold">
               {sessionId}
             </span>
           </div>
           <div className="px-5 pb-3 border-b border-[#111111]/10 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#1F6B4A] rounded-xl flex items-center justify-center">
                 <MessageCircle className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -249,7 +249,7 @@ export const BenchView: React.FC = () => {
                 <div className="text-[9px] text-[#111111]/40 font-mono">Confidential support</div>
               </div>
             </div>
-            <Lock className="w-3.5 h-3.5 text-purple-600" />
+            <Lock className="w-3.5 h-3.5 text-[#1F6B4A]" />
           </div>
           <div className="flex-1 overflow-hidden">
             <div className="h-full overflow-y-auto">{renderContent()}</div>
