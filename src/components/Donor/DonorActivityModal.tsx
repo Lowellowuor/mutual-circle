@@ -4,18 +4,14 @@ import { X, Check, Wallet, Package, ShieldCheck } from 'lucide-react';
 interface DonorActivityModalProps {
   item: any;
   onClose: () => void;
+  inline?: boolean;
 }
 
-export const DonorActivityModal: React.FC<DonorActivityModalProps> = ({ item, onClose }) => {
+export const DonorActivityModal: React.FC<DonorActivityModalProps> = ({ item, onClose, inline = false }) => {
   const isDonation = item.kind === 'donation';
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+  const card = (
       <div
         className="bg-white rounded-2xl max-w-md w-full shadow-2xl"
-        onClick={e => e.stopPropagation()}
       >
         <div className="px-5 py-3 border-b border-[#111111]/10 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-2">
@@ -95,6 +91,18 @@ export const DonorActivityModal: React.FC<DonorActivityModalProps> = ({ item, on
           </div>
         </div>
       </div>
+  );
+
+  if (inline) {
+    return <div className="p-4">{card}</div>;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {card}
     </div>
   );
 };

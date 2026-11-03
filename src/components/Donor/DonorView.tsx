@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 type Tab = 'home' | 'give' | 'pledge' | 'campaigns' | 'impact' | 'leaders';
-type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger' | 'settings';
+type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger' | 'settings' | 'activity';
 
 
 
@@ -227,7 +227,23 @@ export const DonorView: React.FC = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+  // When an activity item is selected (from Home feed), route into a full screen
+  useEffect(() => {
+    if (selectedActivity) {
+      setScreen('activity');
+    }
+  }, [selectedActivity]);
+
   const renderContent = () => {
+    if (screen === 'activity' && selectedActivity) {
+      return (
+        <DonorActivityModal
+          item={selectedActivity}
+          onClose={() => { setScreen('tab'); setSelectedActivity(null); }}
+          inline={true}
+        />
+      );
+    }
     if (screen === 'settings') {
       return (
         <div className="p-4 space-y-3">
@@ -941,9 +957,7 @@ export const DonorView: React.FC = () => {
         </div>
       </div>
 
-      {selectedActivity && (
-        <DonorActivityModal item={selectedActivity} onClose={() => setSelectedActivity(null)} />
-      )}
+
 
     </div>
   );
