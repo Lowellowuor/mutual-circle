@@ -2,8 +2,11 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from mtc.config import settings
 from mtc.db.main import close_pool, get_pool, health_check
@@ -47,6 +50,38 @@ app = FastAPI(
     description="Anonymized resource-sharing network - R.U.T.H prototype backend",
     lifespan=lifespan,
 )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Normalize every HTTPException into {ok: false, reason, status}.
+
+    Every ``raise HTTPException(...)`` in the codebase now returns a
+    consistent JSON envelope instead of FastAPI's default ``{"detail": ...}``.
+    HTTP status codes preserved so clients can still branch on 4xx/5xx.
+    """
+    reason = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"ok": False, "reason": reason, "status": exc.status_code},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Same envelope for FastAPI's automatic 422 validation errors.
+
+    FastAPI's default is ``{"detail": [{"loc": [...], "msg": "...", "type": "..."}]}``.
+    We surface a human-readable ``reason`` (first error's msg) plus the full
+    ``errors`` array for clients that want to render field-specific feedback.
+    """
+    errors = exc.errors()
+    first = errors[0] if errors else {"msg": "Validation failed"}
+    reason = first.get("msg", "Validation failed")
+    return JSONResponse(
+        status_code=422,
+        content={"ok": False, "reason": reason, "status": 422, "errors": errors},
+    )
+
 
 app.add_middleware(
     CORSMiddleware,
