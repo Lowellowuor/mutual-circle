@@ -476,7 +476,7 @@ export const RequesterView: React.FC = () => {
           </div>
         </div>
         <div className="w-full max-w-sm space-y-3">
-          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+          <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
             <h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> How it works</h3>
             <div className="space-y-1.5 text-[10px] text-[#111111]/70">
               {[
@@ -527,7 +527,7 @@ export const RequesterView: React.FC = () => {
         </div>
       )}
 
-      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+      <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
         <div className="flex justify-between items-center"><div className="text-[11px] font-mono uppercase text-[#111111]/50">Session allowance</div><div className="text-[11px] font-mono text-[#111111]/50">{MAX_REQUESTS - rate.count} left</div></div>
         <div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={(rate.count / MAX_REQUESTS > 0.8 ? 'bg-rose-500 ' : 'bg-[#1F6B4A] ') + 'h-full transition-all'} style={{ width: (rate.count / MAX_REQUESTS) * 100 + '%' }} /></div>
         <div className="flex justify-between text-[11px] font-mono text-[#111111]/50"><span>{rate.count}/{MAX_REQUESTS} requests</span><span>KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>
@@ -591,7 +591,7 @@ export const RequesterView: React.FC = () => {
       )}
 
       {mergedHistory.length > 0 && (
-        <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+        <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
           <div className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Session summary</div>
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center"><div className="font-mono text-xl font-bold text-[#111111]">{sessionStats.total}</div><div className="text-[10px] font-mono uppercase text-[#111111]/50">Requests</div></div>
@@ -609,7 +609,7 @@ export const RequesterView: React.FC = () => {
       return (
         <div className="p-4 space-y-3">
           <div className="text-center pt-2 space-y-2"><div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-200"><CheckCircle className="w-7 h-7" /></div><div><h2 className="font-serif text-xl font-bold text-[#111111]">Locker reserved</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Collect anytime.</p></div></div>
-          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-3">
+          <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-3">
             <div className="pb-2 border-b border-[#111111]/10 flex items-center justify-between"><span className="text-[9px] font-mono uppercase text-[#111111]/50">Reference</span><span className="font-mono text-xs font-bold text-[#111111]">{'REF-' + swapResult.id.slice(0,8).toUpperCase()}</span></div>
             <div className="flex items-start justify-between gap-2">
               <div><div className="text-[9px] font-mono uppercase text-[#111111]/50">Collection PIN</div><div className="flex items-center gap-1.5 mt-1"><span className="font-mono text-3xl font-bold tracking-widest text-[#1F6B4A]">{swapResult.pin}</span><button onClick={copyPin} aria-label="Copy PIN" className="p-1 rounded hover:bg-[#FAF8F4] text-[#111111]/50">{pinCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}</button></div></div>
@@ -620,7 +620,7 @@ export const RequesterView: React.FC = () => {
               <div className="flex justify-between"><span className="text-[#111111]/50">Locker</span><span className="font-semibold text-[#111111]">{swapResult.lockerLocation}</span></div>
             </div>
           </div>
-          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl">
+          <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl">
             <div className="text-[9px] font-mono uppercase text-[#111111]/50 mb-3">What happens next</div>
             <StatusTimeline steps={[
               { key: 'reserved', label: 'Reserved', time: (swapResult as any).timestamp, state: 'done' },
@@ -669,13 +669,13 @@ export const RequesterView: React.FC = () => {
       return (
         <div className="p-4 space-y-3">
           <div className="text-center pt-2 space-y-2"><div className={'w-14 h-14 rounded-full flex items-center justify-center mx-auto border-2 ' + (poolResult.status === 'pending_check' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-blue-50 text-blue-600 border-blue-200')}><CheckCircle className="w-7 h-7" /></div><div><h2 className="font-serif text-xl font-bold text-[#111111]">{poolResult.status === 'pending_check' ? 'Under review' : 'Request queued'}</h2><p className="text-[11px] text-[#111111]/50 mt-0.5 max-w-[240px] mx-auto">{poolResult.status === 'pending_check' ? 'OCR verification required before dispatch.' : 'Queued for the payment partner.'}</p></div></div>
-          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-1.5 text-[10px]">
+          <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-1.5 text-[10px]">
             <div className="flex justify-between"><span className="text-[#111111]/50">Category</span><span className="font-semibold text-[#111111]">{cat?.name}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Ref</span><span className="font-mono font-bold text-[#1F6B4A]">{poolResult.hashedObjectId}</span></div>
             <div className="flex justify-between items-baseline"><span className="text-[#111111]/50">Amount</span><span className="font-mono font-bold text-[#111111]"><span className="text-[9px] text-[#111111]/60 mr-0.5">KES</span><span className="text-sm tabular-nums">{poolResult.amount.toLocaleString()}</span></span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Status</span><span className={'font-mono uppercase text-[9px] px-1.5 py-0.5 rounded ' + (poolResult.status === 'pending_check' ? 'bg-amber-50 text-amber-800' : 'bg-blue-50 text-blue-800')}>{poolResult.status.replace(/_/g, ' ')}</span></div>
           </div>
-          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl">
+          <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl">
             <div className="text-[9px] font-mono uppercase text-[#111111]/50 mb-3">What happens next</div>
             <StatusTimeline steps={[
               { key: 'submitted', label: 'Submitted', time: (poolResult as any).timestamp, state: 'done' },
@@ -731,9 +731,9 @@ export const RequesterView: React.FC = () => {
         {matchSent && <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" /><div><p className="text-[10px] font-bold text-emerald-900">Interest sent</p><p className="text-[9px] text-emerald-900/70 mt-0.5">Provider will contact within 48h.</p></div></div>}
         <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-1.5"><ShieldAlert className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" /><p className="text-[9px] text-amber-900 leading-relaxed">Requires opt-in disclosure. Your token history is never shared.</p></div>
         <div className="space-y-2">
-          {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/15 rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
+          {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/5 shadow-sm rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
           {visible.map(opp => { const I = opp.Icon; const sent = matchSent === opp.id; return (
-            <div key={opp.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+            <div key={opp.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
               <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} * {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-3.5 h-3.5" /></button></div>
               <p className="text-[10px] text-[#111111]/70 leading-relaxed">{opp.desc}</p>
               {sent ? (<div className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1 rounded text-center">Interest sent</div>) : (<button onClick={() => { setSelectedOpp(opp); setMatchConfirmed(false); }} className="w-full py-1.5 bg-[#FAF8F4] border border-[#111111]/10 rounded text-[10px] font-medium text-[#1F6B4A] flex items-center justify-center gap-1">Express interest <ArrowRight className="w-2.5 h-2.5" /></button>)}
@@ -758,7 +758,7 @@ export const RequesterView: React.FC = () => {
     <div className="p-4 space-y-3">
       <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Bench</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Separate system. Confidential.</p></div>
       <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[10px] font-bold text-purple-900"><ShieldCheck className="w-3.5 h-3.5" /> Isolated from your account</div><p className="text-[10px] text-purple-900/70 leading-relaxed">No shared identifiers with Swap/Pool.</p></div>
-      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Reach out directly</div>{helplines.map(h => (<div key={h.id} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0"><div><div className="text-[10px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div><div className="text-sm font-bold font-mono text-[#111111]">{h.number}</div><div className="text-[9px] text-[#111111]/50">{h.sub}</div></div><Phone className="w-4 h-4 text-purple-600" /></div>))}</div>
+      <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Reach out directly</div>{helplines.map(h => (<div key={h.id} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0"><div><div className="text-[10px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div><div className="text-sm font-bold font-mono text-[#111111]">{h.number}</div><div className="text-[9px] text-[#111111]/50">{h.sub}</div></div><Phone className="w-4 h-4 text-purple-600" /></div>))}</div>
     </div>
   );
 
@@ -879,7 +879,7 @@ export const RequesterView: React.FC = () => {
       </div>
 
       <div className="w-full max-w-sm space-y-3">
-        <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+        <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
           <h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#1F6B4A]" />
             Why we ask
@@ -917,7 +917,7 @@ export const RequesterView: React.FC = () => {
         <button onClick={() => setTab('home')} className="text-[10px] font-mono text-[#111111]/60 hover:text-[#111111]">Back</button>
       </div>
 
-      <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+      <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View
