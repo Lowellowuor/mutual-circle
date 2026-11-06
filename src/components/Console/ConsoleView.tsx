@@ -788,9 +788,9 @@ export const ConsoleView: React.FC = () => {
                 const I = t.Icon;
                 const active = tab === t.id;
                 return (
-                  <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'more') setMoreTab('menu'); }} className={'relative py-2.5 flex flex-col items-center gap-0.5 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
-                    <I className="w-4 h-4" />
-                    <span className="text-[10px] font-medium">{t.l}</span>
+                  <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'more') setMoreTab('menu'); }} className={'relative py-2.5 flex flex-col items-center gap-1 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
+                    <div className={'px-3 py-1 rounded-full transition-colors ' + (active ? 'bg-[#DCE8E0]' : '')}><I className="w-4 h-4" /></div>
+                    <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{t.l}</span>
                     {((t.id === 'queue' && pendingQueueCount > 0) || (t.id === 'more' && pendingMoreCount > 0)) && (
                       <span className="absolute top-0.5 right-3 min-w-[14px] h-[14px] bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                         {(t.id === 'queue' ? pendingQueueCount : pendingMoreCount) > 9 ? '9+' : (t.id === 'queue' ? pendingQueueCount : pendingMoreCount)}

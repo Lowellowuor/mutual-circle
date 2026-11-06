@@ -958,8 +958,8 @@ export const DonorView: React.FC = () => {
                 const active = tab === t.id && screen === 'tab';
                 return (
                   <button key={t.id} onClick={() => goTab(t.id)} className={'py-2.5 flex flex-col items-center gap-1 transition-colors ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
-                    <Icon className="w-5 h-5" />
-                    <span className="text-[9px] font-medium">{t.label}</span>
+                    <div className={'px-3 py-1 rounded-full transition-colors ' + (active ? 'bg-[#DCE8E0]' : '')}><Icon className="w-5 h-5" /></div>
+                    <span className={`text-[9px] ${active ? 'font-semibold' : 'font-medium'}`}>{t.label}</span>
                   </button>
                 );
               })}
