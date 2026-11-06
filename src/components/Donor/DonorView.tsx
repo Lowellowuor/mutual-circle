@@ -428,7 +428,7 @@ export const DonorView: React.FC = () => {
             {hasActivity ? (
               <>
                 <h2 className="font-bold leading-tight flex items-baseline gap-1.5 flex-wrap"><span className="text-[11px] font-mono text-[#111111]/50">KES</span><span className="text-2xl font-serif tabular-nums text-[#111111]">{totalGivenKes.toLocaleString()}</span><span className="text-sm font-serif text-[#111111]/60 font-normal">pooled</span></h2>
-                <p className="text-[11px] text-white/70 leading-relaxed">
+                <p className="text-[13px] text-white/70 leading-relaxed">
                   {impactStats
                     ? impactStats.bundles_delivered + ' bundles delivered \u00b7 ' + impactStats.utility_meters_paid + ' bills paid \u00b7 ' + impactStats.student_terms_paid + ' school terms funded. You are one of the donors behind these.'
                     : 'Across ' + donorContributions.length + ' gift' + (donorContributions.length !== 1 ? 's' : '') + '. Blind-pooled. No recipient link.'}
@@ -437,7 +437,7 @@ export const DonorView: React.FC = () => {
             ) : (
               <>
                 <h2 className="font-serif text-xl font-bold leading-tight">Fund a need.<br />Stay anonymous.</h2>
-                <p className="text-[11px] text-white/70 leading-relaxed">Blind-pooled. No recipient profiles. No linkage.</p>
+                <p className="text-[13px] text-white/70 leading-relaxed">Blind-pooled. No recipient profiles. No linkage.</p>
               </>
             )}
           </div>
@@ -446,7 +446,7 @@ export const DonorView: React.FC = () => {
             <div className="p-3 bg-white border border-[#111111]/10 rounded-xl space-y-2">
               <div className="flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-[#1F6B4A]" />
-                <div className="text-[9px] font-mono uppercase tracking-wider text-[#111111]/50">Privacy</div>
+                <div className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Privacy</div>
               </div>
               <div className="space-y-1 text-[10px] font-mono">
                 <div className="flex justify-between"><span className="text-[#111111]/50">Ledger name</span><span className="font-semibold text-[#111111]">{myProfile?.display_name || 'Anonymous'}</span></div>
@@ -460,12 +460,12 @@ export const DonorView: React.FC = () => {
             <div className="p-3 bg-white border border-[#111111]/10 rounded-xl space-y-2">
               <div className="flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-[#1F6B4A]" />
-                <div className="text-[9px] font-mono uppercase tracking-wider text-[#111111]/50">Since your last visit</div>
+                <div className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Since your last visit</div>
               </div>
               {impactDelta === null ? (
-                <div className="text-[10px] text-[#111111]/60 leading-relaxed">First visit — current totals: {impactStats.bundles_delivered} bundles delivered, {impactStats.utility_meters_paid} meters paid, {impactStats.student_terms_paid} terms funded.</div>
+                <div className="text-[12px] text-[#111111]/60 leading-relaxed">First visit — current totals: {impactStats.bundles_delivered} bundles delivered, {impactStats.utility_meters_paid} meters paid, {impactStats.student_terms_paid} terms funded.</div>
               ) : impactDelta === undefined ? (
-                <div className="text-[10px] text-[#111111]/50">Loading…</div>
+                <div className="text-[11px] text-[#111111]/50">Loading…</div>
               ) : (
                 <div className="space-y-1 text-[10px] font-mono">
                   <div className="flex justify-between"><span className="text-[#111111]/50">Bundles delivered</span><span className={'font-bold ' + (impactDelta.bundles > 0 ? 'text-emerald-700' : 'text-[#111111]/40')}>{impactDelta.bundles > 0 ? '+' + impactDelta.bundles : '—'}</span></div>
@@ -485,15 +485,15 @@ export const DonorView: React.FC = () => {
           {hasActivity && (
             <div className="grid grid-cols-3 gap-2">
               <div className="p-3 bg-white border border-[#111111]/15 rounded-xl">
-                <div className="text-[9px] font-mono uppercase text-[#111111]/50 tracking-wider">Total given</div>
+                <div className="text-[11px] font-mono uppercase text-[#111111]/50 tracking-wider">Total given</div>
                 <div className="font-mono text-sm font-bold text-[#1F6B4A] mt-0.5">KES {totalGivenKes.toLocaleString()}</div>
               </div>
               <div className="p-3 bg-white border border-[#111111]/15 rounded-xl">
-                <div className="text-[9px] font-mono uppercase text-[#111111]/50 tracking-wider">Gifts</div>
+                <div className="text-[11px] font-mono uppercase text-[#111111]/50 tracking-wider">Gifts</div>
                 <div className="font-mono text-sm font-bold text-[#111111] mt-0.5">{donorContributions.length}</div>
               </div>
               <div className="p-3 bg-white border border-[#111111]/15 rounded-xl">
-                <div className="text-[9px] font-mono uppercase text-[#111111]/50 tracking-wider">Pledges</div>
+                <div className="text-[11px] font-mono uppercase text-[#111111]/50 tracking-wider">Pledges</div>
                 <div className="font-mono text-sm font-bold text-amber-700 mt-0.5">{pledges.length}</div>
               </div>
             </div>
@@ -504,7 +504,7 @@ export const DonorView: React.FC = () => {
               {activeClosures.map(c => (
                 <div key={c.id} className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="text-[10px] font-bold text-emerald-900 flex items-center gap-1"><Check className="w-3 h-3" /> Campaign closed</div>
+                    <div className="text-[12px] font-bold text-emerald-900 flex items-center gap-1"><Check className="w-3 h-3" /> Campaign closed</div>
                     <button
                       onClick={() => {
                         const next = new Set(dismissedClosures);
@@ -514,7 +514,7 @@ export const DonorView: React.FC = () => {
                       className="text-emerald-700 hover:text-emerald-900 text-[10px]"
                     >Dismiss</button>
                   </div>
-                  <p className="text-[10px] text-emerald-900/70 leading-relaxed"><strong>{c.title}</strong> * {c.coveredCount}/{c.targetCount} covered. Thank you.</p>
+                  <p className="text-[12px] text-emerald-900/70 leading-relaxed"><strong>{c.title}</strong> * {c.coveredCount}/{c.targetCount} covered. Thank you.</p>
                 </div>
               ))}
             </div>
@@ -523,13 +523,13 @@ export const DonorView: React.FC = () => {
           <div className="grid grid-cols-2 gap-2.5">
             <button onClick={() => goTab('give')} className="p-4 bg-white border border-[#111111]/15 rounded-2xl text-left hover:border-[#1F6B4A] transition-colors">
               <Wallet className="w-5 h-5 text-[#1F6B4A] mb-2" />
-              <div className="text-xs font-bold text-[#111111]">Give Cash</div>
-              <div className="text-[10px] text-[#111111]/50 mt-0.5">Blind pool</div>
+              <div className="text-[13px] font-bold text-[#111111]">Give Cash</div>
+              <div className="text-[12px] text-[#111111]/50 mt-0.5">Blind pool</div>
             </button>
             <button onClick={() => goTab('pledge')} className="p-4 bg-white border border-[#111111]/15 rounded-2xl text-left hover:border-[#1F6B4A] transition-colors">
               <Package className="w-5 h-5 text-amber-600 mb-2" />
-              <div className="text-xs font-bold text-[#111111]">Pledge</div>
-              <div className="text-[10px] text-[#111111]/50 mt-0.5">Goods or credit</div>
+              <div className="text-[13px] font-bold text-[#111111]">Pledge</div>
+              <div className="text-[12px] text-[#111111]/50 mt-0.5">Goods or credit</div>
             </button>
           </div>
 
@@ -538,9 +538,9 @@ export const DonorView: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <TrendingUp className="w-3.5 h-3.5 text-[#1F6B4A]" />
-                  <h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Active campaigns</h3>
+                  <h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Active campaigns</h3>
                 </div>
-                <span className="text-[10px] font-mono text-[#111111]/50">{campaigns.length}</span>
+                <span className="text-[11px] font-mono text-[#111111]/50">{campaigns.length}</span>
               </div>
               {campaigns.map(c => {
                 const pct = Math.round((c.pooledAmount / c.targetAmount) * 100);
@@ -548,19 +548,19 @@ export const DonorView: React.FC = () => {
                   <div key={c.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="text-[9px] font-mono uppercase text-[#1F6B4A] tracking-wider">Cohort</div>
-                        <h3 className="font-serif text-sm font-bold text-[#111111] leading-snug">{c.title}</h3>
+                        <div className="text-[11px] font-mono uppercase text-[#1F6B4A] tracking-wider">Cohort</div>
+                        <h3 className="font-serif text-base font-bold text-[#111111] leading-snug">{c.title}</h3>
                       </div>
-                      <div className="flex items-center gap-0.5 text-[10px] font-mono text-[#111111]/50 shrink-0">
+                      <div className="flex items-center gap-0.5 text-[11px] font-mono text-[#111111]/50 shrink-0">
                         <Clock className="w-3 h-3" /> {c.daysRemaining}d
                       </div>
                     </div>
-                    <p className="text-[10px] text-[#111111]/60 leading-relaxed">{c.cohortGoalText}</p>
+                    <p className="text-[12px] text-[#111111]/60 leading-relaxed">{c.cohortGoalText}</p>
                     <div className="space-y-1">
                       <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
                         <div className="h-full bg-[#1F6B4A]" style={{ width: Math.min(100, pct) + '%' }} />
                       </div>
-                      <div className="flex justify-between text-[9px] font-mono">
+                      <div className="flex justify-between text-[11px] font-mono">
                         <span className="font-bold text-[#1F6B4A]">{pct}%</span>
                         <span className="text-[#111111]/50">{c.coveredCount}/{c.targetCount}</span>
                       </div>
@@ -574,8 +574,8 @@ export const DonorView: React.FC = () => {
           {publicPartners.length > 0 && (
             <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2">
               <div className="flex justify-between items-center">
-                <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Who we work with</h3>
-                <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Verified</span>
+                <h3 className="text-[11px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Who we work with</h3>
+                <span className="text-[10px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Verified</span>
               </div>
               <div className="space-y-1.5">
                 {publicPartners.map(p => (
@@ -585,15 +585,15 @@ export const DonorView: React.FC = () => {
                         {p.id.slice(0, 2)}
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-semibold text-[#111111] truncate">{p.name}</div>
-                        <div className="text-[9px] font-mono text-[#111111]/50 truncate">{p.region}</div>
+                        <div className="text-[13px] font-semibold text-[#111111] truncate">{p.name}</div>
+                        <div className="text-[11px] font-mono text-[#111111]/50 truncate">{p.region}</div>
                       </div>
                     </div>
-                    <span className="text-[8px] font-mono uppercase text-[#111111]/40 shrink-0">{p.type}</span>
+                    <span className="text-[10px] font-mono uppercase text-[#111111]/40 shrink-0">{p.type}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-[9px] text-[#111111]/50 leading-relaxed pt-1 border-t border-[#111111]/10">
+              <p className="text-[11px] text-[#111111]/50 leading-relaxed pt-1 border-t border-[#111111]/10">
                 We never share your contribution with these partners. They receive pooled settlement, never your identity or a specific recipient's.
               </p>
             </div>
@@ -601,8 +601,8 @@ export const DonorView: React.FC = () => {
 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Your activity</h3>
-              {hasActivity && <span className="text-[10px] font-mono text-[#111111]/50">{activityFeed.length}</span>}
+              <h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Your activity</h3>
+              {hasActivity && <span className="text-[11px] font-mono text-[#111111]/50">{activityFeed.length}</span>}
             </div>
             {hasActivity ? (
               activityFeed.slice(0, 10).map(item => (
@@ -611,22 +611,22 @@ export const DonorView: React.FC = () => {
                     {item.kind === 'donation' ? <Wallet className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-[#111111] truncate">{item.title}</div>
-                    <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">{item.subtitle}</div>
+                    <div className="text-[13px] font-semibold text-[#111111] truncate">{item.title}</div>
+                    <div className="text-[11px] font-mono text-[#111111]/50 mt-0.5">{item.subtitle}</div>
                   </div>
                   <div className="text-right shrink-0">
                     {item.amountKes !== undefined && (
-                      <div className="text-[11px] font-mono font-bold text-[#1F6B4A]">KES {item.amountKes.toLocaleString()}</div>
+                      <div className="text-[13px] font-mono font-bold text-[#1F6B4A]">KES {item.amountKes.toLocaleString()}</div>
                     )}
-                    <div className="text-[8px] font-mono text-[#111111]/40 mt-0.5">{formatRelativeTime(item.timestamp)}</div>
+                    <div className="text-[10px] font-mono text-[#111111]/40 mt-0.5">{formatRelativeTime(item.timestamp)}</div>
                   </div>
                 </div>
               ))
             ) : (
               <div className="p-6 bg-white border border-dashed border-[#111111]/20 rounded-xl text-center">
                 <HeartHandshake className="w-6 h-6 text-[#111111]/20 mx-auto mb-2" />
-                <div className="text-xs font-bold text-[#111111]">No activity yet</div>
-                <p className="text-[10px] text-[#111111]/50 mt-1 leading-relaxed">Your gifts, pledges, and campaign closures will appear here.</p>
+                <div className="text-[13px] font-bold text-[#111111]">No activity yet</div>
+                <p className="text-[12px] text-[#111111]/50 mt-1 leading-relaxed">Your gifts, pledges, and campaign closures will appear here.</p>
                 <button onClick={() => goTab('give')} className="mt-3 px-4 py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold">Give your first gift</button>
               </div>
             )}
