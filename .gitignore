@@ -39,3 +39,6 @@ backend/.test.err
 *.p1bak
 *.p2bak
 fix-*.ps1
+
+# Temp commit message file (avoid accidental commit)
+commit-msg.txt
