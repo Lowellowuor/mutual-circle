@@ -503,7 +503,7 @@ export const RequesterView: React.FC = () => {
      ============================================================ */
   const renderHome = () => (
     <div className="p-4 space-y-4">
-      <div className="rounded-2xl bg-gradient-to-br from-[#1F6B4A] to-[#18553a] p-4 text-white space-y-1"><HeartHandshake className="w-5 h-5 text-white/80" /><h2 className="font-serif text-lg font-bold leading-tight">Welcome back</h2><p className="text-[10px] text-white/70 font-mono truncate">Token: {tokenHash}</p></div>
+      <div className="rounded-2xl bg-gradient-to-br from-[#1F6B4A] to-[#18553a] p-4 text-white space-y-1"><HeartHandshake className="w-5 h-5 text-white/80" /><h2 className="font-serif text-xl font-bold leading-tight">Welcome back</h2><p className="text-[10px] text-white/70 font-mono truncate">Token: {tokenHash}</p></div>
 
       {unseenRedemptions.length > 0 && (
         <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5">
@@ -549,7 +549,7 @@ export const RequesterView: React.FC = () => {
             <div key={v.id} className={'p-2.5 rounded-lg border ' + (v.status === 'active' ? 'bg-purple-50 border-purple-200' : 'bg-[#FAF8F4] border-[#111111]/10 opacity-60')}>
               <div className="flex justify-between items-start">
                 <div className="min-w-0 flex-1"><div className="text-[13px] font-semibold text-[#111111] truncate">{v.partnerName}</div><div className="text-[11px] font-mono text-[#111111]/50">{v.description}</div></div>
-                <span className={'text-[8px] font-mono uppercase px-1.5 py-0.5 rounded ' + (v.status === 'active' ? 'bg-purple-200 text-purple-900' : 'bg-black/5 text-[#111111]/50')}>{v.status}</span>
+                <span className={'text-[10px] font-mono uppercase px-1.5 py-0.5 rounded ' + (v.status === 'active' ? 'bg-purple-200 text-purple-900' : 'bg-black/5 text-[#111111]/50')}>{v.status}</span>
               </div>
               <div className="flex items-center justify-between mt-1.5">
                 <div className="text-[13px] font-mono font-bold text-[#111111]">PIN <span className="text-purple-700">{v.pin}</span></div>
@@ -581,8 +581,8 @@ export const RequesterView: React.FC = () => {
                   <div className="text-[13px] font-mono font-bold text-[#111111]">{r.type === 'swap' ? `PIN ${r.pin}` : `KES ${r.amount?.toLocaleString()}`}</div>
                   {canWithdraw && (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-2.5 h-2.5" />Withdraw</button>)}
                   {canCollect && (<button onClick={async () => { setCollectError(null); if (!resolvedPin) { setCollectError('PIN unavailable — refresh page'); setTimeout(() => setCollectError(null), 4000); return; } const ok = await collectRequest(r.id, resolvedPin); if (!ok) { setCollectError('Unable to confirm — state refreshed'); setTimeout(() => setCollectError(null), 4000); } else { setTimeout(() => setCollectError(null), 3000); } }} className="text-[9px] text-emerald-700 hover:underline flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" />I've collected</button>)}
-                  {!canWithdraw && !canCollect && (<div className={'text-[8px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : r.status === 'collected' ? 'text-emerald-600 font-bold' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
-                  {collectError && <div className="text-[8px] text-rose-600">{collectError}</div>}
+                  {!canWithdraw && !canCollect && (<div className={'text-[10px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : r.status === 'collected' ? 'text-emerald-600 font-bold' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
+                  {collectError && <div className="text-[11px] text-rose-600">{collectError}</div>}
                 </div>
               </div>
             );
@@ -594,9 +594,9 @@ export const RequesterView: React.FC = () => {
         <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
           <div className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Session summary</div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="text-center"><div className="font-mono text-lg font-bold text-[#111111]">{sessionStats.total}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Requests</div></div>
-            <div className="text-center border-l border-r border-[#111111]/10"><div className="font-mono text-lg font-bold text-emerald-700">{sessionStats.dispatched}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Dispatched</div></div>
-            <div className="text-center"><div className="font-mono text-lg font-bold text-amber-700">{sessionStats.pending}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Pending</div></div>
+            <div className="text-center"><div className="font-mono text-xl font-bold text-[#111111]">{sessionStats.total}</div><div className="text-[10px] font-mono uppercase text-[#111111]/50">Requests</div></div>
+            <div className="text-center border-l border-r border-[#111111]/10"><div className="font-mono text-xl font-bold text-emerald-700">{sessionStats.dispatched}</div><div className="text-[10px] font-mono uppercase text-[#111111]/50">Dispatched</div></div>
+            <div className="text-center"><div className="font-mono text-xl font-bold text-amber-700">{sessionStats.pending}</div><div className="text-[10px] font-mono uppercase text-[#111111]/50">Pending</div></div>
           </div>
           <div className="text-[11px] font-mono text-[#111111]/50 text-center pt-1 border-t border-[#111111]/10">KES {sessionStats.totalValue.toLocaleString()} requested this session</div>
         </div>
