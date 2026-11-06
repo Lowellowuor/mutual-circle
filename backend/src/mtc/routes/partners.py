@@ -10,10 +10,14 @@ import csv
 import io
 
 import asyncpg
+import logging
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from mtc.db.main import get_conn
+
+logger = logging.getLogger(__name__)
+
 
 router = APIRouter(prefix="/partners", tags=["partners"])
 
@@ -193,8 +197,11 @@ async def confirm_request(
                 )
                 if prow and prow.get("name"):
                     partner_name = prow["name"]
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning(
+                    "[partners.confirm_request] partner name lookup failed for partner_id=%s: %s",
+                    partner["id"], exc,
+                )
             from mtc.notifications.service import notify
             await notify(
                 conn, req["token_hash"], request_id, "pool_fulfilled",

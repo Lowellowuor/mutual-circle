@@ -491,7 +491,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     (async () => {
       await api.withdrawRequest(tokenHash, id);
       await refetchAll();
-    })().catch(() => {});
+    })().catch((e) => { console.error('[withdraw-request]', e); });
   };
 
   const collectRequest = async (id: string, pin: string): Promise<boolean> => {
