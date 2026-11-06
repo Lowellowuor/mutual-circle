@@ -110,7 +110,7 @@ export const ConsoleView: React.FC = () => {
                 <p className="text-[12px] text-[#111111]/60 leading-relaxed">Each role has separate credentials. No role can switch without logging out.</p>
                 
               </div>
-              <form onSubmit={handleLogin} className="space-y-3 bg-white border border-[#111111]/15 rounded-xl p-4">
+              <form onSubmit={handleLogin} className="space-y-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl p-4">
                 <div>
                   <label className="text-[10px] font-mono uppercase text-[#111111]/50">Role</label>
                   <div className="grid grid-cols-3 gap-1 mt-1.5">
@@ -128,7 +128,7 @@ export const ConsoleView: React.FC = () => {
           </div>
         </div>
         <div className="w-full max-w-sm space-y-3">
-          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+          <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
             <h3 className="text-sm font-bold text-[#111111] flex items-center gap-1.5"><KeyRound className="w-4 h-4 text-[#1F6B4A]" /> Demo Credentials</h3>
             <p className="text-[11px] text-[#111111]/60 leading-relaxed">For demonstration. Production uses SSO / MFA.</p>
             <div className="space-y-1.5 pt-2 border-t border-[#111111]/10">
@@ -197,11 +197,11 @@ export const ConsoleView: React.FC = () => {
     <div className="p-4 space-y-4">
       <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl"><div className="font-bold text-blue-900 flex items-center gap-1 text-[12px]"><ShieldAlert className="w-3.5 h-3.5" /> No payment access</div><p className="text-[11px] text-blue-900/80 mt-1 leading-relaxed">Enrolment monitors intake velocity only. Zero request details visible.</p></div>
       <div className="grid grid-cols-2 gap-2">
-        <div className="p-3 bg-white border border-[#111111]/15 rounded-xl"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Tokens Today</div><div className="font-mono text-xl font-bold text-[#1F6B4A] mt-1">384</div></div>
-        <div className="p-3 bg-white border border-[#111111]/15 rounded-xl"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Rate-Limit Hits</div><div className="font-mono text-xl font-bold text-amber-700 mt-1">42</div></div>
+        <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Tokens Today</div><div className="font-mono text-xl font-bold text-[#1F6B4A] mt-1">384</div></div>
+        <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Rate-Limit Hits</div><div className="font-mono text-xl font-bold text-amber-700 mt-1">42</div></div>
       </div>
-      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-1"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Active Salt</div><div className="font-mono text-sm font-bold text-[#111111]">SHA256-WK43</div><div className="text-[10px] text-[#111111]/40 font-mono">Rotates Mon 00:01 EAT</div></div>
-      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2"><div className="text-[11px] font-semibold uppercase text-[#111111]">Channels Today</div>{[{ l: 'Web', p: 54, c: 'bg-[#1F6B4A]' }, { l: 'SMS', p: 31, c: 'bg-blue-600' }, { l: 'USSD', p: 15, c: 'bg-amber-600' }].map(r => (<div key={r.l} className="space-y-1"><div className="flex justify-between text-[11px] font-mono"><span>{r.l}</span><span className="font-bold">{r.p}%</span></div><div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={'h-full ' + r.c} style={{ width: r.p + '%' }} /></div></div>))}</div>
+      <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-1"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Active Salt</div><div className="font-mono text-sm font-bold text-[#111111]">SHA256-WK43</div><div className="text-[10px] text-[#111111]/40 font-mono">Rotates Mon 00:01 EAT</div></div>
+      <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2"><div className="text-[11px] font-semibold uppercase text-[#111111]">Channels Today</div>{[{ l: 'Web', p: 54, c: 'bg-[#1F6B4A]' }, { l: 'SMS', p: 31, c: 'bg-blue-600' }, { l: 'USSD', p: 15, c: 'bg-amber-600' }].map(r => (<div key={r.l} className="space-y-1"><div className="flex justify-between text-[11px] font-mono"><span>{r.l}</span><span className="font-bold">{r.p}%</span></div><div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={'h-full ' + r.c} style={{ width: r.p + '%' }} /></div></div>))}</div>
       <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2"><Users className="w-3.5 h-3.5 text-[#111111]/40 shrink-0 mt-0.5" /><span className="text-[11px] text-[#111111]/60">Can refer to The Bench, but cannot see request content.</span></div>
     </div>
   );
@@ -268,7 +268,7 @@ export const ConsoleView: React.FC = () => {
       )}
 
       {filteredPool.length === 0 && filteredSwap.length === 0 ? (
-        <div className="p-8 bg-white border border-[#111111]/15 rounded-2xl text-center space-y-2"><Activity className="w-6 h-6 text-[#111111]/20 mx-auto" /><p className="text-xs font-bold text-[#111111]">Queue empty</p></div>
+        <div className="p-8 bg-white border border-[#111111]/5 shadow-sm rounded-2xl text-center space-y-2"><Activity className="w-6 h-6 text-[#111111]/20 mx-auto" /><p className="text-xs font-bold text-[#111111]">Queue empty</p></div>
       ) : (
         <div className="space-y-2">
           {filteredPool.map(r => {
@@ -278,7 +278,7 @@ export const ConsoleView: React.FC = () => {
             const isWithdrawn = r.status === 'withdrawn';
             const isSent = r.status === 'submitted_to_partner';
             return (
-              <div key={r.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+              <div key={r.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
                 <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-[#111111]/50">{r.id}</span><span className="text-[10px] font-mono bg-black/5 px-1.5 py-0.5 rounded">T{r.tier}</span></div>
                 <div><div className="font-bold text-[12px] text-[#111111] uppercase">{r.category.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#1F6B4A]">{r.hashedObjectId}</div></div>
                 <div className="flex items-center justify-between">
@@ -303,7 +303,7 @@ export const ConsoleView: React.FC = () => {
             );
           })}
           {filteredSwap.map(r => (
-            <div key={r.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2 opacity-90">
+            <div key={r.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2 opacity-90">
               <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-[#111111]/50">{r.id}</span><span className="text-[10px] font-mono bg-black/5 px-1.5 py-0.5 rounded">SWAP</span></div>
               <div><div className="font-bold text-[12px] text-[#111111]">{r.bundleCategory}</div><div className="text-[11px] font-mono text-[#111111]/60">{r.lockerLocation}</div></div>
               <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-[#111111]/50">Free</span><span className={'px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ' + (r.status === 'withdrawn' ? 'bg-[#FAF8F4] text-[#111111]/40' : 'bg-emerald-50 text-emerald-800')}>{r.status}</span></div>
@@ -327,7 +327,7 @@ export const ConsoleView: React.FC = () => {
       {auditSub === 'flags' && (
         <div className="space-y-2">
           {riskFlags.length === 0 ? (
-            <div className="p-8 bg-white border border-[#111111]/15 rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs text-[#111111]/60">No active flags</p></div>
+            <div className="p-8 bg-white border border-[#111111]/5 shadow-sm rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs text-[#111111]/60">No active flags</p></div>
           ) : riskFlags.map(flag => (
             <div key={flag.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedDetail({ type: 'flag', item: flag })}>
               <div className="flex items-start justify-between gap-1">
@@ -351,7 +351,7 @@ export const ConsoleView: React.FC = () => {
       {auditSub === 'ocr' && (
         <div className="space-y-2">
           {ocrQueue.length === 0 ? (
-            <div className="p-8 bg-white border border-[#111111]/15 rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs font-bold text-[#111111]">No pending OCR</p></div>
+            <div className="p-8 bg-white border border-[#111111]/5 shadow-sm rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs font-bold text-[#111111]">No pending OCR</p></div>
           ) : ocrQueue.map(r => (
             <div key={r.id} className="p-3 bg-white border border-amber-200 rounded-xl space-y-2">
               <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-[#111111]/50">{r.id}</span><span className="text-[10px] font-mono bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold">T3 * OCR</span></div>
@@ -365,7 +365,7 @@ export const ConsoleView: React.FC = () => {
       )}
 
       {auditSub === 'fp' && (
-        <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+        <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
           <div className="text-[12px] font-bold text-[#111111]">False-Positive Clearance</div>
           <p className="text-[11px] text-[#111111]/60 leading-relaxed">Shared-meter compounds trigger false clustering flags.</p>
           <textarea rows={3} value={fpNote} onChange={e => setFpNote(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/20 rounded-lg p-2 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-[#1F6B4A]" />
@@ -377,7 +377,7 @@ export const ConsoleView: React.FC = () => {
         <div className="space-y-2">
           <div className="p-2 bg-[#FAF8F4] border border-[#111111]/10 rounded-lg text-[11px] text-[#111111]/60 flex items-center gap-1"><Layers className="w-3 h-3" /> Cross-funder dedup.</div>
           {dedupItems.map(item => (
-            <div key={item.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-1.5">
+            <div key={item.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-1.5">
               <div className="flex justify-between items-start"><span className="font-mono font-bold text-[11px] text-[#1F6B4A]">{item.hashedObjectId}</span><span className={'px-1.5 py-0.5 rounded text-[10px] uppercase font-mono ' + (item.status === 'blocked' ? 'bg-rose-50 text-rose-800' : 'bg-amber-50 text-amber-800')}>{item.status.replace('_', ' ')}</span></div>
               <div className="text-[11px] text-[#111111]/70">{item.objectType}</div>
               <div className="text-[10px] font-mono text-[#111111]/50">First: {item.firstFundedBy} * {item.firstFundedDate}</div>
@@ -407,7 +407,7 @@ export const ConsoleView: React.FC = () => {
       <div className="grid grid-cols-2 gap-2">
         {[{ Icon: Package, l: 'Received', v: depotCounts.receivedUnits, c: 'text-[#111111]' }, { Icon: Check, l: 'Checked', v: depotCounts.qualityCheckedUnits, c: 'text-[#1F6B4A]' }, { Icon: Layers, l: 'Packed', v: depotCounts.packedBundles, c: 'text-[#111111]' }, { Icon: Truck, l: 'Loaded', v: depotCounts.loadedLockerUnits, c: 'text-emerald-700' }].map(row => {
           const I = row.Icon;
-          return (<div key={row.l} className="p-3 bg-white border border-[#111111]/15 rounded-xl"><div className="flex items-center gap-1 text-[11px] uppercase font-mono text-[#111111]/50"><I className="w-2.5 h-2.5" />{row.l}</div><div className={'font-mono text-xl font-bold mt-1 ' + row.c}>{row.v}</div></div>);
+          return (<div key={row.l} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><div className="flex items-center gap-1 text-[11px] uppercase font-mono text-[#111111]/50"><I className="w-2.5 h-2.5" />{row.l}</div><div className={'font-mono text-xl font-bold mt-1 ' + row.c}>{row.v}</div></div>);
         })}
       </div>
       <div className="space-y-1.5">
@@ -431,7 +431,7 @@ export const ConsoleView: React.FC = () => {
     <div className="p-4 space-y-3">
       <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Store className="w-3.5 h-3.5" /> Partner Till</div><p className="text-[11px] text-[#111111]/60 mt-1">R.U.T.H 4.5 - voucher redemption.</p></div>
 
-      <form onSubmit={handleRedeem} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+      <form onSubmit={handleRedeem} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
         <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
         <div className="grid grid-cols-2 gap-2">
           <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">PIN</label><input value={tillPin} onChange={e => setTillPin(e.target.value)} placeholder="4 digits" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
@@ -489,8 +489,8 @@ export const ConsoleView: React.FC = () => {
 
   const renderMatrix = () => (
     <div className="p-4 space-y-3">
-      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl"><h3 className="text-[12px] font-bold text-[#111111]">Separation of Duties</h3><p className="text-[11px] text-[#111111]/60 mt-1">No role holds both identity and payment authority.</p></div>
-      <div className="p-3 bg-white border border-[#111111]/15 rounded-xl overflow-x-auto">
+      <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><h3 className="text-[12px] font-bold text-[#111111]">Separation of Duties</h3><p className="text-[11px] text-[#111111]/60 mt-1">No role holds both identity and payment authority.</p></div>
+      <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl overflow-x-auto">
         <table className="w-full text-left text-[10px]">
           <thead className="text-[#111111]/50 uppercase font-mono"><tr><th className="pb-2">Role</th><th className="pb-2 text-center">Id</th><th className="pb-2 text-center">Pay</th><th className="pb-2 text-center">Flag</th><th className="pb-2 text-center">Log</th></tr></thead>
           <tbody className="divide-y divide-[#111111]/5">
@@ -507,7 +507,7 @@ export const ConsoleView: React.FC = () => {
   const renderTiers = () => (
     <div className="p-4 space-y-2">
       {[{ n: 1, tag: 'Low', title: 'Self-declared', desc: 'Standard bundles. 7-day rate limit + 5% sample.' }, { n: 2, tag: 'Object', title: 'Institutional check', desc: 'Utility/school/hospital < KES 5,000.' }, { n: 3, tag: 'High', title: 'OCR check', desc: 'Amount > KES 5,000. Automated bill photo.' }, { n: 4, tag: 'Anomaly', title: 'Independent panel', desc: 'Flagged anomalies. Off-system review.' }].map(row => (
-        <div key={row.n} className="p-3 bg-white border border-[#111111]/15 rounded-xl">
+        <div key={row.n} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl">
           <div className="flex justify-between items-center"><span className="font-bold text-[#1F6B4A] font-mono text-[12px]">Tier {row.n}</span><span className="text-[10px] font-mono bg-black/5 px-1.5 py-0.5 rounded uppercase">{row.tag}</span></div>
           <div className="font-semibold text-[12px] text-[#111111] mt-1">{row.title}</div>
           <p className="text-[11px] text-[#111111]/60 mt-0.5 leading-relaxed">{row.desc}</p>
@@ -566,7 +566,7 @@ export const ConsoleView: React.FC = () => {
         <SkeletonList count={2} />
       ) : partnerInfo ? (
         <>
-          <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-1">
+          <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-1">
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-[#1F6B4A]" />
               <div className="text-[12px] font-bold text-[#111111] leading-tight">{partnerInfo.name}</div>
@@ -666,7 +666,7 @@ export const ConsoleView: React.FC = () => {
             <ChevronRight className="w-3 h-3 rotate-180" /> Back
           </button>
           <div className="p-4">
-            <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-2">
+            <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="font-serif text-base font-bold text-[#111111] flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#1F6B4A]" /> Server View</h3>
                 <button onClick={() => setShowRaw(!showRaw)} className="text-[11px] text-[#1F6B4A] hover:underline flex items-center gap-1">{showRaw ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}{showRaw ? 'Hide' : 'Reveal'}</button>
