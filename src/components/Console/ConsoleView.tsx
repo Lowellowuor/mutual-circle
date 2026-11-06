@@ -8,6 +8,7 @@ import {
   LogIn, LogOut, Store, KeyRound, Lock, Building2, RefreshCw, Zap, ChevronRight,
 } from 'lucide-react';
 import { SkeletonList } from '../Shared/Skeleton';
+import { useToast } from '../Shared/Toast';
 import { getPartnerMe, getPartnerRedemptions, confirmPartnerRequest, downloadPartnerStatement } from '../../lib/apiClient';
 
 type Role = 'enrolment' | 'fulfilment' | 'audit';
@@ -23,6 +24,8 @@ export const ConsoleView: React.FC = () => {
     dispatchRequest, routeFlagToTier4, clearFlagAsFalsePositive, completeOcrCheck, matchPledge, redeemVoucher,
     emptyQueueMode, setEmptyQueueMode,
   } = useApp();
+
+  const { push } = useToast();
 
   const [loginRole, setLoginRole] = useState<Role>('fulfilment');
   const [loginId, setLoginId] = useState(STAFF_CREDS[loginRole].id);
@@ -229,7 +232,7 @@ export const ConsoleView: React.FC = () => {
           {awaitingPledges.map(p => (
             <div key={p.id} className="p-2 bg-white border border-[#111111]/10 rounded-lg flex justify-between items-start gap-2">
               <div className="min-w-0 flex-1"><div className="text-[11px] font-semibold text-[#111111] truncate">{p.description}</div><div className="text-[11px] font-mono text-[#111111]/50">{p.locality} * {p.type === 'service_credit' ? 'credit' : 'goods'}</div></div>
-              <button onClick={() => matchPledge(p.id)} className="px-2 py-1 bg-amber-700 text-white rounded text-[10px] font-semibold whitespace-nowrap">Match</button>
+              <button onClick={async () => { const r = await matchPledge(p.id); push(r.ok ? { kind: 'success', message: 'Pledge matched' } : { kind: 'error', message: r.reason ?? 'Match failed' }); }} className="px-2 py-1 bg-amber-700 text-white rounded text-[10px] font-semibold whitespace-nowrap">Match</button>
             </div>
           ))}
         </div>
@@ -254,12 +257,12 @@ export const ConsoleView: React.FC = () => {
               </div>
               {m.status === 'pending' && (
                 <div className="flex gap-1 mt-1.5">
-                  <button onClick={() => closeMatchInterest(m.id, 'contacted')} className="flex-1 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded text-[10px] font-semibold">Mark contacted</button>
-                  <button onClick={() => closeMatchInterest(m.id, 'closed')} className="flex-1 py-1 bg-white border border-[#111111]/20 rounded text-[10px] font-medium">Close</button>
+                  <button onClick={async () => { const r = await closeMatchInterest(m.id, 'contacted'); push(r.ok ? { kind: 'success', message: 'Marked as contacted' } : { kind: 'error', message: r.reason ?? 'Update failed' }); }} className="flex-1 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded text-[10px] font-semibold">Mark contacted</button>
+                  <button onClick={async () => { const r = await closeMatchInterest(m.id, 'closed'); push(r.ok ? { kind: 'success', message: 'Case closed' } : { kind: 'error', message: r.reason ?? 'Update failed' }); }} className="flex-1 py-1 bg-white border border-[#111111]/20 rounded text-[10px] font-medium">Close</button>
                 </div>
               )}
               {m.status === 'contacted' && (
-                <button onClick={() => closeMatchInterest(m.id, 'closed')} className="w-full mt-1.5 py-1 bg-white border border-[#111111]/20 rounded text-[10px] font-medium">Close case</button>
+                <button onClick={async () => { const r = await closeMatchInterest(m.id, 'closed'); push(r.ok ? { kind: 'success', message: 'Case closed' } : { kind: 'error', message: r.reason ?? 'Update failed' }); }} className="w-full mt-1.5 py-1 bg-white border border-[#111111]/20 rounded text-[10px] font-medium">Close case</button>
               )}
             </div>
           ))}
@@ -337,7 +340,7 @@ export const ConsoleView: React.FC = () => {
               <div><div className="font-bold text-[12px] text-[#111111] leading-tight">{flag.title}</div><p className="text-[11px] text-[#111111]/60 mt-0.5 leading-relaxed">{flag.description}</p></div>
               <div className="text-[10px] font-mono bg-[#FAF8F4] px-2 py-1 rounded">Target: <strong className="text-[#1F6B4A]">{flag.targetHash}</strong></div>
               {flag.status === 'pending' ? (
-                <div className="flex gap-1"><button onClick={() => clearFlagAsFalsePositive(flag.id, fpNote)} className="flex-1 py-1.5 bg-white border border-[#111111]/20 rounded-lg text-[10px] font-medium">Clear FP</button><button onClick={() => routeFlagToTier4(flag.id)} className="flex-1 py-1.5 bg-amber-800 text-white rounded-lg text-[10px] font-medium">? Tier 4</button></div>
+                <div className="flex gap-1"><button onClick={async () => { const r = await clearFlagAsFalsePositive(flag.id, fpNote); push(r.ok ? { kind: 'success', message: 'Flag cleared' } : { kind: 'error', message: r.reason ?? 'Clear failed' }); }} className="flex-1 py-1.5 bg-white border border-[#111111]/20 rounded-lg text-[10px] font-medium">Clear FP</button><button onClick={async () => { const r = await routeFlagToTier4(flag.id); push(r.ok ? { kind: 'success', message: 'Routed to Tier 4' } : { kind: 'error', message: r.reason ?? 'Route failed' }); }} className="flex-1 py-1.5 bg-amber-800 text-white rounded-lg text-[10px] font-medium">? Tier 4</button></div>
               ) : flag.status === 'routed_tier4' ? (
                 <div className="py-1.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-[10px] font-mono text-center">Routed to Tier 4</div>
               ) : (
@@ -358,7 +361,7 @@ export const ConsoleView: React.FC = () => {
               <div><div className="font-bold text-[12px] text-[#111111] uppercase">{r.category.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#1F6B4A]">{r.hashedObjectId}</div></div>
               <div className="flex items-center justify-between"><span className="font-mono font-bold text-[#111111]"><span className="text-[9px] text-[#111111]/50 mr-0.5">KES</span><span className="text-sm tabular-nums">{r.amount.toLocaleString()}</span></span><span className="text-[10px] font-mono text-[#111111]/50">{r.timestamp}</span></div>
               <div className="p-2 bg-amber-50 border border-amber-200 rounded text-[10px] text-amber-900 leading-relaxed">Awaiting bill photo OCR verification. <strong>SLA:</strong> 4 business hours. Escalates to Tier 4 if unresolved.</div>
-              <button onClick={() => completeOcrCheck(r.id)} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1"><Check className="w-3 h-3" /> Complete OCR & Verify</button>
+              <button onClick={async () => { const r = await completeOcrCheck(r.id); push(r.ok ? { kind: 'success', message: 'OCR verified' } : { kind: 'error', message: r.reason ?? 'Verification failed' }); }} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1"><Check className="w-3 h-3" /> Complete OCR & Verify</button>
             </div>
           ))}
         </div>
