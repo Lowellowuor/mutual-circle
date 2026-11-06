@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { AppProvider } from './context/AppContext';
 import { RequesterView } from './components/Requester/RequesterView';
 import { ConsoleView } from './components/Console/ConsoleView';
@@ -10,6 +10,7 @@ import { UssdSimulator } from './components/Requester/UssdSimulator';
 import { WhatsAppSimulator } from './components/Requester/WhatsAppSimulator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BackendBanner } from './components/Shared/BackendBanner';
+import { ToastProvider } from './components/Shared/Toast';
 import { LayoutDashboard, User, HeartHandshake, Workflow, MessageCircle, Smartphone, PhoneCall, MessageSquare, RotateCcw , Heart , Bell  , Building2 } from 'lucide-react';
 
 type View = 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'console' | 'donor' | 'architecture' | 'bench';
@@ -37,6 +38,7 @@ function App() {
   return (
     <ErrorBoundary>
       <AppProvider>
+        <ToastProvider>
         <div className="min-h-screen bg-[#F6F4EE] pb-12">
           <BackendBanner />
           <div className="bg-[#111111] text-white p-3 flex flex-wrap justify-center gap-2 sticky top-0 z-50 shadow-md">
@@ -96,6 +98,7 @@ function App() {
             {currentView === 'bench' && <BenchView />}
           </div>
         </div>
+        </ToastProvider>
       </AppProvider>
     </ErrorBoundary>
   );
