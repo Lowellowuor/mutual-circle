@@ -712,7 +712,8 @@ export const DonorView: React.FC = () => {
             ) : pledges.map(p => {
               const statusLabel = p.status === 'awaiting_match' ? 'Awaiting match' : p.status === 'matched' ? 'Matched' : 'Delivered';
               const statusClass = p.status === 'awaiting_match' ? 'bg-amber-50 text-amber-800 border-amber-200' : p.status === 'matched' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200';
-              const ref = p.linkedRequestId ? 'REF-' + String(p.linkedRequestId).slice(0, 8).toUpperCase() : null;
+              const linkedReqId = (p as any).linked_request_id || (p as any).linkedRequestId;
+              const ref = linkedReqId ? 'REF-' + String(linkedReqId).slice(0, 8).toUpperCase() : null;
               return (
                 <div key={p.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-1.5">
                   <div className="flex items-start justify-between gap-2">
@@ -722,7 +723,15 @@ export const DonorView: React.FC = () => {
                     </div>
                     <span className={'text-[10px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 ' + statusClass}>{statusLabel}</span>
                   </div>
-                  {ref && <div className="text-[11px] font-mono text-[#1F6B4A] pt-1 border-t border-[#111111]/5">Linked to {ref}</div>}
+                  {ref && p.status === 'settled' && (
+                  <div className="text-[11px] text-emerald-900 pt-1.5 border-t border-emerald-200 flex items-start gap-1.5">
+                    <span className="text-emerald-700 font-bold shrink-0">\u2713</span>
+                    <span>Delivered to <strong>{ref}</strong> \u2014 thank you.</span>
+                  </div>
+                )}
+                {ref && p.status !== 'settled' && (
+                  <div className="text-[11px] font-mono text-[#1F6B4A] pt-1 border-t border-[#111111]/5">Linked to {ref}</div>
+                )}
                 </div>
               );
             })}
