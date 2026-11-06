@@ -20,6 +20,7 @@ TEMPLATES = {
     "dispatched":      "Mutual Circle: Payment sent to the institution. Ref: {ref}. Confirmation within 2 hours.",
     "withdrawn":       "Mutual Circle: Request withdrawn. Ref: {ref}.",
     "collected":       "Mutual Circle: Bundle collected. Thank you.",
+    "pool_collected":  "Mutual Circle: Your bill was paid at {partner}. Ref: {ref}. Thank you.",
 }
 
 

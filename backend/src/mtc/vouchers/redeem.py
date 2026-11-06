@@ -81,6 +81,24 @@ async def redeem_voucher(
             "INSERT INTO voucher_redemptions (voucher_id, partner_name, amount_pence, status) VALUES ($1, $2, $3, 'success')",
             matched["id"], partner_name, amount_pence,
         )
+    # Transition the linked request to 'collected' (voucher redemption = delivery)
+    if matched["request_id"]:
+        from mtc.notifications.service import notify
+        await conn.execute(
+            """UPDATE requests SET status = 'collected', updated_at = now()
+               WHERE id = $1 AND status IN ('voucher_issued', 'verified', 'pending_check')""",
+            matched["request_id"],
+        )
+        await notify(
+            conn,
+            matched["token_hash"],
+            str(matched["request_id"]),
+            "pool_collected",
+            {
+                "partner": partner_name,
+                "ref": "REF-" + str(matched["request_id"])[:8].upper(),
+            },
+        )
         await append_audit(
             conn, actor_role="system", actor_id=None,
             action=f"Voucher redeemed at {partner_name} (KES {amount_pence // 100:,})",
