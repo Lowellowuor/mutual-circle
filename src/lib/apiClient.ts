@@ -334,6 +334,12 @@ export const markNotificationRead = (token: string, notificationId: string) =>
     headers: { 'X-Token': token },
   });
 
+export const markAllNotificationsRead = (token: string) =>
+  call<{ ok: boolean; marked: number }>('/notifications/read-all', {
+    method: 'PATCH',
+    headers: { 'X-Token': token },
+  });
+
 // --- Public ledger (Gap 2) ---
 export const getPublicLedger = (limit = 20) =>
   call<{

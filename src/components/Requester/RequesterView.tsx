@@ -176,7 +176,7 @@ export const RequesterView: React.FC = () => {
     fetchCount();
     const t = setInterval(fetchCount, 30000);
     return () => { cancelled = true; clearInterval(t); };
-  }, [tokenHash]);
+  }, [tokenHash, tab]);
 
   /* ---------- OTP HANDLERS ---------- */
   useEffect(() => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { getNotifications } from '../../lib/apiClient';
+import { getNotifications, markAllNotificationsRead } from '../../lib/apiClient';
 import { MessageSquare, Shield, Check, Clock, RotateCcw, Bell } from 'lucide-react';
 
 interface Notification {
@@ -11,6 +11,7 @@ interface Notification {
   status: string;
   created_at: string;
   sent_at: string | null;
+  read_at: string | null;
 }
 
 const TEMPLATE_ICONS: Record<string, string> = {
@@ -55,8 +56,19 @@ export const RequesterMessages: React.FC = () => {
     (async () => {
       const r = await getNotifications(tokenHash);
       if (!cancelled) {
-        setNotifications(r?.notifications || []);
+        const list = r?.notifications || [];
+        setNotifications(list);
         setLoading(false);
+
+        // Auto-mark all unread as read — user opened Messages tab
+        const hasUnread = list.some((n: Notification) => !n.read_at);
+        if (hasUnread) {
+          const now = new Date().toISOString();
+          setNotifications(list.map((n: Notification) =>
+            n.read_at ? n : { ...n, read_at: now }
+          ));
+          markAllNotificationsRead(tokenHash).catch(() => {});
+        }
       }
     })();
     return () => { cancelled = true; };
@@ -135,8 +147,11 @@ export const RequesterMessages: React.FC = () => {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
+                  <div className="relative w-7 h-7 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5" />
+                    {!n.read_at && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-rose-500 border border-white" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <div className="text-[10px] font-mono uppercase text-[#1F6B4A] tracking-wider">

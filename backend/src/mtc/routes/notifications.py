@@ -50,10 +50,28 @@ async def unread_count(
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     count = await conn.fetchval(
-        "SELECT COUNT(*) FROM notifications WHERE token_hash = $1 AND sent_at IS NULL",
+        "SELECT COUNT(*) FROM notifications WHERE token_hash = $1 AND read_at IS NULL",
         token,
     )
     return {"unread_count": int(count or 0)}
+
+
+@router.patch("/read-all")
+async def mark_all_read(
+    token: str = Depends(_require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Mark every unread notification for this token as read.
+
+    Idempotent — re-marking returns marked: 0.
+    """
+    result = await conn.execute(
+        "UPDATE notifications SET read_at = now() "
+        "WHERE token_hash = $1 AND read_at IS NULL",
+        token,
+    )
+    n = int(result.split()[-1]) if result else 0
+    return {"ok": True, "marked": n}
 
 
 @router.patch("/{notification_id}/read")
