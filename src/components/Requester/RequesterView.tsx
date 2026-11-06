@@ -9,6 +9,7 @@ import {
   X, Phone, ShieldCheck, ShieldAlert, Eye, EyeOff, RotateCcw, LogOut, Bell, AlertCircle, Trash2,
   MessageSquare, ArrowLeft, Settings,
 } from 'lucide-react';
+import { StatusTimeline } from './StatusTimeline';
 import { SwapRequest, PoolRequest } from '../../types';
 import { RequesterMessages } from './Messages';
 
@@ -614,6 +615,14 @@ export const RequesterView: React.FC = () => {
               <div className="flex justify-between"><span className="text-[#111111]/50">Bundle</span><span className="font-semibold text-[#111111]">{swapResult.bundleCategory}</span></div>
               <div className="flex justify-between"><span className="text-[#111111]/50">Locker</span><span className="font-semibold text-[#111111]">{swapResult.lockerLocation}</span></div>
             </div>
+          </div>
+          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl">
+            <div className="text-[9px] font-mono uppercase text-[#111111]/50 mb-3">What happens next</div>
+            <StatusTimeline steps={[
+              { key: 'reserved', label: 'Reserved', time: (swapResult as any).timestamp, state: 'done' },
+              { key: 'ready', label: 'Ready for pickup', time: 'Now', state: 'current' },
+              { key: 'collected', label: 'Collected', state: 'pending' },
+            ]} />
           </div>
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[9px] uppercase font-bold text-blue-900"><ScanLine className="w-3 h-3" /> How to collect</div><ol className="text-[10px] text-blue-900/80 leading-relaxed list-decimal pl-4 space-y-0.5"><li>Go to {swapResult.lockerLocation}</li><li>Enter PIN at the terminal</li><li>Take your bundle</li></ol></div>
           <button onClick={() => goTab('home')} className="w-full py-2.5 bg-[#111111] hover:bg-black text-white rounded-xl text-xs font-medium">Done</button>
