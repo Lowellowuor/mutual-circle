@@ -370,7 +370,7 @@ export const DonorView: React.FC = () => {
               {ledgerData.chain_ok ? (
                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
                   <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase font-bold text-emerald-900">
-                    <Check className="w-3.5 h-3.5" /> Chain verified
+                    <Check className="w-3 h-3" /> Chain verified
                   </div>
                   <div className="text-[11px] text-emerald-900/80 mt-1">{ledgerData.entry_count} entries · no tampering detected</div>
                 </div>
@@ -445,7 +445,7 @@ export const DonorView: React.FC = () => {
           {hasActivity && (
             <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
               <div className="flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-[#1F6B4A]" />
+                <Lock className="w-4 h-4 text-[#1F6B4A]" />
                 <div className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Privacy</div>
               </div>
               <div className="space-y-1 text-[10px] font-mono">
@@ -459,7 +459,7 @@ export const DonorView: React.FC = () => {
           {hasActivity && impactStats && (
             <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
               <div className="flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-[#1F6B4A]" />
+                <TrendingUp className="w-4 h-4 text-[#1F6B4A]" />
                 <div className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Since your last visit</div>
               </div>
               {impactDelta === null ? (
@@ -537,7 +537,7 @@ export const DonorView: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-[#1F6B4A]" />
+                  <TrendingUp className="w-4 h-4 text-[#1F6B4A]" />
                   <h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Active campaigns</h3>
                 </div>
                 <span className="text-[11px] font-mono text-[#111111]/50">{campaigns.length}</span>
@@ -608,7 +608,7 @@ export const DonorView: React.FC = () => {
               activityFeed.slice(0, 10).map(item => (
                 <div key={item.id} className="p-3 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedActivity(item)}>
                   <div className={'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ' + (item.kind === 'donation' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700')}>
-                    {item.kind === 'donation' ? <Wallet className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
+                    {item.kind === 'donation' ? <Wallet className="w-4 h-4" /> : <Package className="w-4 h-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-semibold text-[#111111] truncate">{item.title}</div>
@@ -697,7 +697,7 @@ export const DonorView: React.FC = () => {
           </div>
           <div className="space-y-1.5"><label className="text-[11px] font-mono uppercase text-[#111111]/50">Description</label><input value={pDesc} onChange={e => setPDesc(e.target.value)} placeholder={pType === 'service_credit' ? 'Bill up to KES 5,000' : 'e.g. 50kg maize'} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none" /></div>
           {pType === 'service_credit' && (<div className="space-y-1.5"><label className="text-[11px] font-mono uppercase text-[#111111]/50">Max value (KES)</label><input type="number" value={pValue} onChange={e => setPValue(e.target.value)} placeholder="5000" className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none" /></div>)}
-          <div className="space-y-1.5"><label className="text-[11px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> Locality</label><select value={pLocality} onChange={e => setPLocality(e.target.value)} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none">{['Nairobi County', 'Mombasa County', 'Kisumu County', 'Nakuru County'].map(c => <option key={c}>{c}</option>)}</select></div>
+          <div className="space-y-1.5"><label className="text-[11px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><MapPin className="w-3 h-3" /> Locality</label><select value={pLocality} onChange={e => setPLocality(e.target.value)} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none">{['Nairobi County', 'Mombasa County', 'Kisumu County', 'Nakuru County'].map(c => <option key={c}>{c}</option>)}</select></div>
           <button onClick={handlePledge} disabled={pProcessing || !pDesc} className="w-full py-3.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50 mt-2">{pProcessing ? 'Submitting...' : 'Submit Pledge'}</button>
 
           <div className="pt-3 space-y-2">

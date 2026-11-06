@@ -116,7 +116,7 @@ export const RequesterMessages: React.FC = () => {
       </div>
 
       <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2">
-        <Shield className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0 mt-0.5" />
+        <Shield className="w-3 h-3 text-[#1F6B4A] shrink-0 mt-0.5" />
         <p className="text-[10px] text-[#111111]/70 leading-relaxed">
           Messages are tied to your anonymous token. They never include names, addresses, or clinical details — same rules as the rest of the platform.
         </p>
@@ -148,7 +148,7 @@ export const RequesterMessages: React.FC = () => {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="relative w-7 h-7 rounded-lg bg-[#DCE8E0] text-[#1F6B4A] flex items-center justify-center shrink-0">
-                    <Check className="w-3.5 h-3.5" />
+                    <Check className="w-4 h-4" />
                     {!n.read_at && (
                       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-rose-500 border border-white" />
                     )}

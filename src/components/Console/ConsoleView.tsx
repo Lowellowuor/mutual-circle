@@ -126,7 +126,7 @@ export const ConsoleView: React.FC = () => {
                 <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">Staff ID</label><input value={loginId} onChange={e => setLoginId(e.target.value)} placeholder="Auto-filled" autoFocus className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono text-[#111111] mt-1 focus:border-[#1F6B4A] outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0" /></div>
                 <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">PIN</label><input type="password" value={loginPin} onChange={e => setLoginPin(e.target.value)} placeholder="Auto-filled" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono text-[#111111] tracking-widest mt-1 focus:border-[#1F6B4A] outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0" /></div>
                 {loginError && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[11px] text-rose-800">{loginError}</div>}
-                <button type="submit" disabled={!loginId || !loginPin} className="w-full py-2.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-xs font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5"><LogIn className="w-3.5 h-3.5" /> Log in</button>
+                <button type="submit" disabled={!loginId || !loginPin} className="w-full py-2.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-xs font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5"><LogIn className="w-4 h-4" /> Log in</button>
               </form>
             </div>
           </div>
@@ -199,14 +199,14 @@ export const ConsoleView: React.FC = () => {
   /* ---------- ROLE VIEWS ---------- */
   const renderEnrolment = () => (
     <div className="p-4 space-y-4">
-      <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl"><div className="font-bold text-blue-900 flex items-center gap-1 text-[12px]"><ShieldAlert className="w-3.5 h-3.5" /> No payment access</div><p className="text-[11px] text-blue-900/80 mt-1 leading-relaxed">Enrolment monitors intake velocity only. Zero request details visible.</p></div>
+      <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl"><div className="font-bold text-blue-900 flex items-center gap-1 text-[12px]"><ShieldAlert className="w-4 h-4" /> No payment access</div><p className="text-[11px] text-blue-900/80 mt-1 leading-relaxed">Enrolment monitors intake velocity only. Zero request details visible.</p></div>
       <div className="grid grid-cols-2 gap-2">
         <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Tokens Today</div><div className="font-mono text-xl font-bold text-[#1F6B4A] mt-1">384</div></div>
         <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Rate-Limit Hits</div><div className="font-mono text-xl font-bold text-amber-700 mt-1">42</div></div>
       </div>
       <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-1"><div className="text-[10px] font-mono uppercase text-[#111111]/50">Active Salt</div><div className="font-mono text-sm font-bold text-[#111111]">SHA256-WK43</div><div className="text-[10px] text-[#111111]/40 font-mono">Rotates Mon 00:01 EAT</div></div>
       <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2"><div className="text-[11px] font-semibold uppercase text-[#111111]">Channels Today</div>{[{ l: 'Web', p: 54, c: 'bg-[#1F6B4A]' }, { l: 'SMS', p: 31, c: 'bg-blue-600' }, { l: 'USSD', p: 15, c: 'bg-amber-600' }].map(r => (<div key={r.l} className="space-y-1"><div className="flex justify-between text-[11px] font-mono"><span>{r.l}</span><span className="font-bold">{r.p}%</span></div><div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={'h-full ' + r.c} style={{ width: r.p + '%' }} /></div></div>))}</div>
-      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2"><Users className="w-3.5 h-3.5 text-[#111111]/40 shrink-0 mt-0.5" /><span className="text-[11px] text-[#111111]/60">Can refer to The Bench, but cannot see request content.</span></div>
+      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2"><Users className="w-4 h-4 text-[#111111]/40 shrink-0 mt-0.5" /><span className="text-[11px] text-[#111111]/60">Can refer to The Bench, but cannot see request content.</span></div>
     </div>
   );
 
@@ -223,7 +223,7 @@ export const ConsoleView: React.FC = () => {
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2">
           <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0"><div className="text-[11px] font-bold text-emerald-900">Dispatched</div><div className="text-[11px] font-mono text-emerald-900/80 truncate">{receipt}</div></div>
-          <button onClick={() => setReceipt(null)} className="text-emerald-700 shrink-0" aria-label="Dismiss"><X className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setReceipt(null)} className="text-emerald-700 shrink-0" aria-label="Dismiss"><X className="w-3 h-3" /></button>
         </div>
       )}
 
@@ -328,7 +328,7 @@ export const ConsoleView: React.FC = () => {
         {([{ id: 'flags' as const, l: 'Flags ' + riskFlags.filter(f => f.status === 'pending').length }, { id: 'ocr' as const, l: 'OCR ' + ocrQueue.length }, { id: 'fp' as const, l: 'FP' }, { id: 'dedup' as const, l: 'Dedup' }, { id: 'log' as const, l: 'Log ' + auditLog.length }]).map(s => (
           <button key={s.id} onClick={() => setAuditSub(s.id)} className={'px-2.5 py-1 rounded-md text-[11px] whitespace-nowrap font-medium ' + (auditSub === s.id ? 'bg-[#1F6B4A] text-white' : 'bg-black/5 text-[#111111]/70')}>{s.l}</button>
         ))}
-        <button onClick={() => setExportModal(true)} className="ml-auto px-2 py-1 rounded-md text-[10px] font-mono bg-[#111111] text-white whitespace-nowrap shrink-0 flex items-center gap-1"><Download className="w-2.5 h-2.5" />Export</button>
+        <button onClick={() => setExportModal(true)} className="ml-auto px-2 py-1 rounded-md text-[10px] font-mono bg-[#111111] text-white whitespace-nowrap shrink-0 flex items-center gap-1"><Download className="w-3 h-3" />Export</button>
       </div>
 
       {auditSub === 'flags' && (
@@ -348,7 +348,7 @@ export const ConsoleView: React.FC = () => {
               ) : flag.status === 'routed_tier4' ? (
                 <div className="py-1.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-[10px] font-mono text-center">Routed to Tier 4</div>
               ) : (
-                <div className="py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[10px] font-mono flex items-center justify-center gap-1"><CheckCircle className="w-2.5 h-2.5" /> Cleared</div>
+                <div className="py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[10px] font-mono flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> Cleared</div>
               )}
             </div>
           ))}
@@ -410,11 +410,11 @@ export const ConsoleView: React.FC = () => {
 
   const renderDepot = () => (
     <div className="p-4 space-y-3">
-      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Boxes className="w-3.5 h-3.5" /> Depot Pipeline</div><p className="text-[11px] text-[#111111]/60 mt-1">Bulk ? inspected ? packed ? loaded.</p></div>
+      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Boxes className="w-4 h-4" /> Depot Pipeline</div><p className="text-[11px] text-[#111111]/60 mt-1">Bulk ? inspected ? packed ? loaded.</p></div>
       <div className="grid grid-cols-2 gap-2">
         {[{ Icon: Package, l: 'Received', v: depotCounts.receivedUnits, c: 'text-[#111111]' }, { Icon: Check, l: 'Checked', v: depotCounts.qualityCheckedUnits, c: 'text-[#1F6B4A]' }, { Icon: Layers, l: 'Packed', v: depotCounts.packedBundles, c: 'text-[#111111]' }, { Icon: Truck, l: 'Loaded', v: depotCounts.loadedLockerUnits, c: 'text-emerald-700' }].map(row => {
           const I = row.Icon;
-          return (<div key={row.l} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><div className="flex items-center gap-1 text-[11px] uppercase font-mono text-[#111111]/50"><I className="w-2.5 h-2.5" />{row.l}</div><div className={'font-mono text-xl font-bold mt-1 ' + row.c}>{row.v}</div></div>);
+          return (<div key={row.l} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><div className="flex items-center gap-1 text-[11px] uppercase font-mono text-[#111111]/50"><I className="w-3 h-3" />{row.l}</div><div className={'font-mono text-xl font-bold mt-1 ' + row.c}>{row.v}</div></div>);
         })}
       </div>
       <div className="space-y-1.5">
@@ -436,7 +436,7 @@ export const ConsoleView: React.FC = () => {
 
   const renderTill = () => (
     <div className="p-4 space-y-3">
-      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Store className="w-3.5 h-3.5" /> Partner Till</div><p className="text-[11px] text-[#111111]/60 mt-1">R.U.T.H 4.5 - voucher redemption.</p></div>
+      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Store className="w-4 h-4" /> Partner Till</div><p className="text-[11px] text-[#111111]/60 mt-1">R.U.T.H 4.5 - voucher redemption.</p></div>
 
       <form onSubmit={handleRedeem} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
         <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
@@ -562,7 +562,7 @@ export const ConsoleView: React.FC = () => {
               onClick={() => setSelectedPartner(p.key)}
               className={'p-2 rounded-lg border-2 text-center transition-all ' + (active ? 'bg-[#1F6B4A] text-white border-[#1F6B4A]' : 'bg-white border-[#111111]/15 text-[#111111] hover:border-[#111111]/30')}
             >
-              <Icon className="w-3.5 h-3.5 mx-auto mb-0.5" />
+              <Icon className="w-3 h-3 mx-auto mb-0.5" />
               <div className="text-[11px] font-bold">{p.label}</div>
             </button>
           );
@@ -617,7 +617,7 @@ export const ConsoleView: React.FC = () => {
                   </div>
                   {r.confirmed ? (
                     <div className="text-[11px] font-mono text-emerald-700 flex items-center gap-1">
-                      <Check className="w-2.5 h-2.5" /> Confirmed
+                      <Check className="w-3 h-3" /> Confirmed
                     </div>
                   ) : (
                     <button
@@ -625,7 +625,7 @@ export const ConsoleView: React.FC = () => {
                       disabled={confirmingPartner === r.id}
                       className="w-full py-1 bg-[#1F6B4A] text-white rounded text-[11px] font-semibold flex items-center justify-center gap-1 disabled:opacity-40"
                     >
-                      <Check className="w-2.5 h-2.5" /> {confirmingPartner === r.id ? 'Confirming...' : 'Confirm delivery'}
+                      <Check className="w-3 h-3" /> {confirmingPartner === r.id ? 'Confirming...' : 'Confirm delivery'}
                     </button>
                   )}
                 </div>

@@ -406,7 +406,7 @@ export const RequesterView: React.FC = () => {
           )}
           <button type="submit" disabled={!phone} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50">Send verification code</button>
         </form>
-        <div className="p-3 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2"><Shield className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0 mt-0.5" /><p className="text-[10px] text-[#111111]/60 leading-relaxed">Phone is hashed immediately after verification. Staff see only a token.</p></div>
+        <div className="p-3 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2"><Shield className="w-3 h-3 text-[#1F6B4A] shrink-0 mt-0.5" /><p className="text-[10px] text-[#111111]/60 leading-relaxed">Phone is hashed immediately after verification. Staff see only a token.</p></div>
       </>
     );
 
@@ -456,7 +456,7 @@ export const RequesterView: React.FC = () => {
         </div>
 
         <button type="button" onClick={handleBackToPhone} className="w-full text-center text-[10px] text-[#111111]/40 hover:text-[#111111] flex items-center justify-center gap-1">
-          <ArrowLeft className="w-2.5 h-2.5" /> Use a different number
+          <ArrowLeft className="w-3 h-3" /> Use a different number
         </button>
       </>
     );
@@ -508,8 +508,8 @@ export const RequesterView: React.FC = () => {
       {unseenRedemptions.length > 0 && (
         <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-[12px] font-bold text-purple-900"><CheckCircle className="w-3.5 h-3.5" /> {unseenRedemptions.length} {unseenRedemptions.length === 1 ? 'voucher was' : 'vouchers were'} redeemed</div>
-            <button onClick={dismissRedemptions} aria-label="Dismiss" className="text-purple-700 hover:text-purple-900"><X className="w-3.5 h-3.5" /></button>
+            <div className="flex items-center gap-1.5 text-[12px] font-bold text-purple-900"><CheckCircle className="w-4 h-4" /> {unseenRedemptions.length} {unseenRedemptions.length === 1 ? 'voucher was' : 'vouchers were'} redeemed</div>
+            <button onClick={dismissRedemptions} aria-label="Dismiss" className="text-purple-700 hover:text-purple-900"><X className="w-3 h-3" /></button>
           </div>
           {unseenRedemptions.slice(0, 2).map(({ redemption, voucher }) => (
             <div key={redemption.id} className="text-[13px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> * KES {redemption.amount.toLocaleString()} * {redemption.timestamp}</div>
@@ -520,8 +520,8 @@ export const RequesterView: React.FC = () => {
       {unseen.length > 0 && (
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1.5">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-900"><CheckCircle className="w-3.5 h-3.5" /> {unseen.length} {unseen.length === 1 ? 'request was' : 'requests were'} dispatched</div>
-            <button onClick={dismissUnseen} aria-label="Dismiss" className="text-emerald-700 hover:text-emerald-900"><X className="w-3.5 h-3.5" /></button>
+            <div className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-900"><CheckCircle className="w-4 h-4" /> {unseen.length} {unseen.length === 1 ? 'request was' : 'requests were'} dispatched</div>
+            <button onClick={dismissUnseen} aria-label="Dismiss" className="text-emerald-700 hover:text-emerald-900"><X className="w-3 h-3" /></button>
           </div>
           <p className="text-[13px] text-emerald-900/70 leading-relaxed">Funds have been sent to the institution. Confirmation SMS within 2 hours.</p>
         </div>
@@ -574,13 +574,13 @@ export const RequesterView: React.FC = () => {
             return (
               <div key={r.id} className={'p-3 rounded-lg border flex justify-between items-center ' + (isWithdrawn ? 'bg-[#FAF8F4] border-[#111111]/5 opacity-60' : 'bg-white border-[#111111]/10')}>
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {r.type === 'swap' ? <Package className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0" /> : <CreditCard className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
+                  {r.type === 'swap' ? <Package className="w-4 h-4 text-[#1F6B4A] shrink-0" /> : <CreditCard className="w-4 h-4 text-blue-600 shrink-0" />}
                   <div className="min-w-0 flex-1"><div className={'text-[13px] font-semibold truncate ' + (isWithdrawn ? 'text-[#111111]/40 line-through' : 'text-[#111111]')}>{r.type === 'swap' ? r.bundleCategory : r.category?.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#111111]/50 truncate">{r.type === 'swap' ? r.lockerLocation : r.hashedObjectId}</div></div>
                 </div>
                 <div className="text-right shrink-0 ml-2 flex flex-col items-end gap-1">
                   <div className="text-[13px] font-mono font-bold text-[#111111]">{r.type === 'swap' ? `PIN ${r.pin}` : `KES ${r.amount?.toLocaleString()}`}</div>
-                  {canWithdraw && (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-2.5 h-2.5" />Withdraw</button>)}
-                  {canCollect && (<button onClick={async () => { setCollectError(null); if (!resolvedPin) { setCollectError('PIN unavailable — refresh page'); setTimeout(() => setCollectError(null), 4000); return; } const ok = await collectRequest(r.id, resolvedPin); if (!ok) { setCollectError('Unable to confirm — state refreshed'); setTimeout(() => setCollectError(null), 4000); } else { setTimeout(() => setCollectError(null), 3000); } }} className="text-[9px] text-emerald-700 hover:underline flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" />I've collected</button>)}
+                  {canWithdraw && (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-3 h-3" />Withdraw</button>)}
+                  {canCollect && (<button onClick={async () => { setCollectError(null); if (!resolvedPin) { setCollectError('PIN unavailable — refresh page'); setTimeout(() => setCollectError(null), 4000); return; } const ok = await collectRequest(r.id, resolvedPin); if (!ok) { setCollectError('Unable to confirm — state refreshed'); setTimeout(() => setCollectError(null), 4000); } else { setTimeout(() => setCollectError(null), 3000); } }} className="text-[9px] text-emerald-700 hover:underline flex items-center gap-0.5"><CheckCircle className="w-3 h-3" />I've collected</button>)}
                   {!canWithdraw && !canCollect && (<div className={'text-[10px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : r.status === 'collected' ? 'text-emerald-600 font-bold' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
                   {collectError && <div className="text-[11px] text-rose-600">{collectError}</div>}
                 </div>
@@ -612,7 +612,7 @@ export const RequesterView: React.FC = () => {
           <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-3">
             <div className="pb-2 border-b border-[#111111]/10 flex items-center justify-between"><span className="text-[9px] font-mono uppercase text-[#111111]/50">Reference</span><span className="font-mono text-xs font-bold text-[#111111]">{'REF-' + swapResult.id.slice(0,8).toUpperCase()}</span></div>
             <div className="flex items-start justify-between gap-2">
-              <div><div className="text-[9px] font-mono uppercase text-[#111111]/50">Collection PIN</div><div className="flex items-center gap-1.5 mt-1"><span className="font-mono text-3xl font-bold tracking-widest text-[#1F6B4A]">{swapResult.pin}</span><button onClick={copyPin} aria-label="Copy PIN" className="p-1 rounded hover:bg-[#FAF8F4] text-[#111111]/50">{pinCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}</button></div></div>
+              <div><div className="text-[9px] font-mono uppercase text-[#111111]/50">Collection PIN</div><div className="flex items-center gap-1.5 mt-1"><span className="font-mono text-3xl font-bold tracking-widest text-[#1F6B4A]">{swapResult.pin}</span><button onClick={copyPin} aria-label="Copy PIN" className="p-1 rounded hover:bg-[#FAF8F4] text-[#111111]/50">{pinCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}</button></div></div>
               <QrPlaceholder seed={swapResult.qrPayload} />
             </div>
             <div className="pt-2 border-t border-[#111111]/10 space-y-1 text-[10px]">
@@ -642,7 +642,7 @@ export const RequesterView: React.FC = () => {
           {(['bundle', 'location'] as SwapStep[]).map((s, i) => {
             const active = swapStep === s || (s === 'bundle' && swapStep !== 'bundle');
             const done = s === 'bundle' && swapStep === 'location';
-            return (<React.Fragment key={s}><div className={'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ' + (active ? 'bg-[#1F6B4A] text-white' : 'bg-[#111111]/10 text-[#111111]/40')}>{done ? <Check className="w-2.5 h-2.5" /> : i + 1}</div>{i < 1 && <div className={'flex-1 h-0.5 ' + (done ? 'bg-[#1F6B4A]' : 'bg-[#111111]/10')} />}</React.Fragment>);
+            return (<React.Fragment key={s}><div className={'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ' + (active ? 'bg-[#1F6B4A] text-white' : 'bg-[#111111]/10 text-[#111111]/40')}>{done ? <Check className="w-3 h-3" /> : i + 1}</div>{i < 1 && <div className={'flex-1 h-0.5 ' + (done ? 'bg-[#1F6B4A]' : 'bg-[#111111]/10')} />}</React.Fragment>);
           })}
         </div>
         {swapStep === 'bundle' && (
@@ -696,7 +696,7 @@ export const RequesterView: React.FC = () => {
           {(['category', 'details'] as PoolStep[]).map((s, i) => {
             const active = poolStep === s || (s === 'category' && poolStep !== 'category');
             const done = s === 'category' && poolStep === 'details';
-            return (<React.Fragment key={s}><div className={'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ' + (active ? 'bg-blue-600 text-white' : 'bg-[#111111]/10 text-[#111111]/40')}>{done ? <Check className="w-2.5 h-2.5" /> : i + 1}</div>{i < 1 && <div className={'flex-1 h-0.5 ' + (done ? 'bg-blue-600' : 'bg-[#111111]/10')} />}</React.Fragment>);
+            return (<React.Fragment key={s}><div className={'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ' + (active ? 'bg-blue-600 text-white' : 'bg-[#111111]/10 text-[#111111]/40')}>{done ? <Check className="w-3 h-3" /> : i + 1}</div>{i < 1 && <div className={'flex-1 h-0.5 ' + (done ? 'bg-blue-600' : 'bg-[#111111]/10')} />}</React.Fragment>);
           })}
         </div>
         {poolStep === 'category' && (
@@ -712,8 +712,8 @@ export const RequesterView: React.FC = () => {
           return (
             <div className="space-y-3">
               <p className="text-[12px] font-semibold uppercase tracking-wider text-[#111111]">2. Bill details</p>
-              <div className="space-y-1"><label className="text-[11px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><FileText className="w-2.5 h-2.5" /> {cat.objLabel}</label><input type="text" value={poolObject} onChange={e => { setPoolObject(e.target.value); setPoolError(null); }} placeholder={cat.placeholder} className={'w-full bg-white border rounded-lg px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-blue-600 outline-none ' + (objectError ? 'border-rose-300' : 'border-[#111111]/15')} />{objectError && <div className="text-[9px] text-rose-600 flex items-center gap-1"><AlertCircle className="w-2.5 h-2.5" />{objectError}</div>}{!objectError && objectValid && <div className="text-[9px] text-emerald-700 flex items-center gap-1"><Check className="w-2.5 h-2.5" />Valid format</div>}</div>
-              <div className="space-y-1"><label className="text-[11px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={poolAmount} onChange={e => { setPoolAmount(e.target.value); setPoolError(null); }} placeholder="e.g. 3500" className="w-full bg-white border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-blue-600 outline-none" />{numAmount > 0 && numAmount > valueRemaining && <div className="text-[9px] text-rose-600 flex items-center gap-1"><AlertCircle className="w-2.5 h-2.5" />Exceeds session allowance (KES {valueRemaining.toLocaleString()} left)</div>}</div>
+              <div className="space-y-1"><label className="text-[11px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><FileText className="w-3 h-3" /> {cat.objLabel}</label><input type="text" value={poolObject} onChange={e => { setPoolObject(e.target.value); setPoolError(null); }} placeholder={cat.placeholder} className={'w-full bg-white border rounded-lg px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-blue-600 outline-none ' + (objectError ? 'border-rose-300' : 'border-[#111111]/15')} />{objectError && <div className="text-[9px] text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{objectError}</div>}{!objectError && objectValid && <div className="text-[9px] text-emerald-700 flex items-center gap-1"><Check className="w-3 h-3" />Valid format</div>}</div>
+              <div className="space-y-1"><label className="text-[11px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={poolAmount} onChange={e => { setPoolAmount(e.target.value); setPoolError(null); }} placeholder="e.g. 3500" className="w-full bg-white border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-blue-600 outline-none" />{numAmount > 0 && numAmount > valueRemaining && <div className="text-[9px] text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Exceeds session allowance (KES {valueRemaining.toLocaleString()} left)</div>}</div>
               {willEscalate && <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-1.5"><AlertTriangle className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" /><p className="text-[11px] text-amber-900 leading-relaxed">Over KES 5,000 triggers <strong>Tier 3 OCR</strong>.</p></div>}
               <div className="flex gap-2 pt-1"><button onClick={() => setPoolStep('category')} className="flex-1 py-2.5 bg-white border border-[#111111]/20 text-[#111111] rounded-xl text-xs font-medium">Back</button><button onClick={handleSubmitPool} disabled={!objectValid || !numAmount || pooling || rateLimited || numAmount > valueRemaining} className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-medium disabled:opacity-40">{pooling ? 'Submitting...' : 'Submit'}</button></div>
             </div>
@@ -728,15 +728,15 @@ export const RequesterView: React.FC = () => {
     return (
       <div className="p-4 space-y-3">
         <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Match</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Opportunities. Opt-in only.</p></div>
-        {matchSent && <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" /><div><p className="text-[10px] font-bold text-emerald-900">Interest sent</p><p className="text-[9px] text-emerald-900/70 mt-0.5">Provider will contact within 48h.</p></div></div>}
+        {matchSent && <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-1.5"><CheckCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" /><div><p className="text-[10px] font-bold text-emerald-900">Interest sent</p><p className="text-[9px] text-emerald-900/70 mt-0.5">Provider will contact within 48h.</p></div></div>}
         <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-1.5"><ShieldAlert className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" /><p className="text-[9px] text-amber-900 leading-relaxed">Requires opt-in disclosure. Your token history is never shared.</p></div>
         <div className="space-y-2">
           {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/5 shadow-sm rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
           {visible.map(opp => { const I = opp.Icon; const sent = matchSent === opp.id; return (
             <div key={opp.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
-              <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} * {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-3.5 h-3.5" /></button></div>
+              <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} * {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-4 h-4" /></button></div>
               <p className="text-[10px] text-[#111111]/70 leading-relaxed">{opp.desc}</p>
-              {sent ? (<div className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1 rounded text-center">Interest sent</div>) : (<button onClick={() => { setSelectedOpp(opp); setMatchConfirmed(false); }} className="w-full py-1.5 bg-[#FAF8F4] border border-[#111111]/10 rounded text-[10px] font-medium text-[#1F6B4A] flex items-center justify-center gap-1">Express interest <ArrowRight className="w-2.5 h-2.5" /></button>)}
+              {sent ? (<div className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1 rounded text-center">Interest sent</div>) : (<button onClick={() => { setSelectedOpp(opp); setMatchConfirmed(false); }} className="w-full py-1.5 bg-[#FAF8F4] border border-[#111111]/10 rounded text-[10px] font-medium text-[#1F6B4A] flex items-center justify-center gap-1">Express interest <ArrowRight className="w-3 h-3" /></button>)}
             </div>
           );})}
         </div>
@@ -757,7 +757,7 @@ export const RequesterView: React.FC = () => {
   const renderBench = () => (
     <div className="p-4 space-y-3">
       <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Bench</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Separate system. Confidential.</p></div>
-      <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[10px] font-bold text-purple-900"><ShieldCheck className="w-3.5 h-3.5" /> Isolated from your account</div><p className="text-[10px] text-purple-900/70 leading-relaxed">No shared identifiers with Swap/Pool.</p></div>
+      <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[10px] font-bold text-purple-900"><ShieldCheck className="w-3 h-3" /> Isolated from your account</div><p className="text-[10px] text-purple-900/70 leading-relaxed">No shared identifiers with Swap/Pool.</p></div>
       <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Reach out directly</div>{helplines.map(h => (<div key={h.id} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0"><div><div className="text-[10px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div><div className="text-sm font-bold font-mono text-[#111111]">{h.number}</div><div className="text-[9px] text-[#111111]/50">{h.sub}</div></div><Phone className="w-4 h-4 text-purple-600" /></div>))}</div>
     </div>
   );
