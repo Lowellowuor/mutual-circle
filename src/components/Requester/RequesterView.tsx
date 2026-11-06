@@ -672,7 +672,7 @@ export const RequesterView: React.FC = () => {
           <div className="p-4 bg-white border border-[#111111]/15 rounded-xl space-y-1.5 text-[10px]">
             <div className="flex justify-between"><span className="text-[#111111]/50">Category</span><span className="font-semibold text-[#111111]">{cat?.name}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Ref</span><span className="font-mono font-bold text-[#1F6B4A]">{poolResult.hashedObjectId}</span></div>
-            <div className="flex justify-between"><span className="text-[#111111]/50">Amount</span><span className="font-mono font-bold text-[#111111]">KES {poolResult.amount.toLocaleString()}</span></div>
+            <div className="flex justify-between items-baseline"><span className="text-[#111111]/50">Amount</span><span className="font-mono font-bold text-[#111111]"><span className="text-[9px] text-[#111111]/60 mr-0.5">KES</span><span className="text-sm tabular-nums">{poolResult.amount.toLocaleString()}</span></span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Status</span><span className={'font-mono uppercase text-[9px] px-1.5 py-0.5 rounded ' + (poolResult.status === 'pending_check' ? 'bg-amber-50 text-amber-800' : 'bg-blue-50 text-blue-800')}>{poolResult.status.replace(/_/g, ' ')}</span></div>
           </div>
           <div className="p-4 bg-white border border-[#111111]/15 rounded-xl">

@@ -282,7 +282,7 @@ export const ConsoleView: React.FC = () => {
                 <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-[#111111]/50">{r.id}</span><span className="text-[10px] font-mono bg-black/5 px-1.5 py-0.5 rounded">T{r.tier}</span></div>
                 <div><div className="font-bold text-[12px] text-[#111111] uppercase">{r.category.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#1F6B4A]">{r.hashedObjectId}</div></div>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-xs text-[#111111]">KES {r.amount.toLocaleString()}</span>
+                  <span className="font-mono font-bold text-[#111111]"><span className="text-[9px] text-[#111111]/50 mr-0.5">KES</span><span className="text-sm tabular-nums">{r.amount.toLocaleString()}</span></span>
                   <span className={'px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ' + (isSent ? 'bg-emerald-50 text-emerald-800' : isPending ? 'bg-amber-50 text-amber-800' : isWithdrawn ? 'bg-[#FAF8F4] text-[#111111]/40' : isVoucher ? 'bg-purple-50 text-purple-800' : 'bg-blue-50 text-blue-800')}>{r.status.replace(/_/g, ' ')}</span>
                 </div>
                 {canAct ? (
@@ -356,7 +356,7 @@ export const ConsoleView: React.FC = () => {
             <div key={r.id} className="p-3 bg-white border border-amber-200 rounded-xl space-y-2">
               <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-[#111111]/50">{r.id}</span><span className="text-[10px] font-mono bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold">T3 * OCR</span></div>
               <div><div className="font-bold text-[12px] text-[#111111] uppercase">{r.category.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#1F6B4A]">{r.hashedObjectId}</div></div>
-              <div className="flex items-center justify-between"><span className="font-mono font-bold text-xs text-[#111111]">KES {r.amount.toLocaleString()}</span><span className="text-[10px] font-mono text-[#111111]/50">{r.timestamp}</span></div>
+              <div className="flex items-center justify-between"><span className="font-mono font-bold text-[#111111]"><span className="text-[9px] text-[#111111]/50 mr-0.5">KES</span><span className="text-sm tabular-nums">{r.amount.toLocaleString()}</span></span><span className="text-[10px] font-mono text-[#111111]/50">{r.timestamp}</span></div>
               <div className="p-2 bg-amber-50 border border-amber-200 rounded text-[10px] text-amber-900 leading-relaxed">Awaiting bill photo OCR verification. <strong>SLA:</strong> 4 business hours. Escalates to Tier 4 if unresolved.</div>
               <button onClick={() => completeOcrCheck(r.id)} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1"><Check className="w-3 h-3" /> Complete OCR & Verify</button>
             </div>
