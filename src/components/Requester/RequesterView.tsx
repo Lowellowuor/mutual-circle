@@ -10,6 +10,7 @@ import {
   MessageSquare, ArrowLeft, Settings,
 } from 'lucide-react';
 import { StatusTimeline } from './StatusTimeline';
+import { useToast } from '../Shared/Toast';
 import { SwapRequest, PoolRequest } from '../../types';
 import { RequesterMessages } from './Messages';
 
@@ -66,6 +67,9 @@ export const RequesterView: React.FC = () => {
   const [rate, setRate] = useState({ count: 0, value: 0 });
   const [history, setHistory] = useState<any[]>([]);
   const [seen, setSeen] = useState<string[]>([]);
+
+  /* ---------- TOAST ---------- */
+  const { push } = useToast();
 
   /* ---------- SWAP STATE ---------- */
   const [swapStep, setSwapStep] = useState<SwapStep>('bundle');
@@ -298,14 +302,14 @@ export const RequesterView: React.FC = () => {
     setSwapping(true); setSwapError(null);
     try {
       const rateCheck = tokenHash ? consumeRate(tokenHash, 0) : { ok: true };
-      if (!rateCheck.ok) { setSwapError((rateCheck as any).reason || 'Daily limit reached.'); setSwapping(false); return; }
+      if (!rateCheck.ok) { const msg = (rateCheck as any).reason || 'Daily limit reached.'; setSwapError(msg); push({ kind: 'error', message: msg }); setSwapping(false); return; }
       const res = await executeSwap(swapBundle, swapLocation);
-      if (!res) { setSwapError('Could not reach the locker partner. Please retry.'); setSwapping(false); return; }
-      setSwapResult(res); setSwapStep('success');
+      if (!res) { setSwapError('Could not reach the locker partner. Please retry.'); push({ kind: 'error', message: 'Locker partner unreachable — try again' }); setSwapping(false); return; }
+      setSwapResult(res); setSwapStep('success'); push({ kind: 'success', message: 'Locker reserved' });
       const next = peekRate(tokenHash!);
       setRate({ count: next.count, value: next.value });
       if (tokenHash) setHistory(loadHistory(tokenHash));
-    } catch { setSwapError('Unexpected error. Try again.'); }
+    } catch { setSwapError('Unexpected error. Try again.'); push({ kind: 'error', message: 'Swap failed — try again' }); }
     setSwapping(false);
   };
 
@@ -315,14 +319,14 @@ export const RequesterView: React.FC = () => {
     setPooling(true); setPoolError(null);
     try {
       const rateCheck = tokenHash ? consumeRate(tokenHash, numAmount) : { ok: true };
-      if (!rateCheck.ok) { setPoolError((rateCheck as any).reason || 'Daily limit reached.'); setPooling(false); return; }
+      if (!rateCheck.ok) { const msg = (rateCheck as any).reason || 'Daily limit reached.'; setPoolError(msg); push({ kind: 'error', message: msg }); setPooling(false); return; }
       const res = await executePool(poolCat, poolObject, numAmount);
-      if (!res) { setPoolError('Object not found in institutional records. Check the number and try again.'); setPooling(false); return; }
-      setPoolResult(res); setPoolStep('success');
+      if (!res) { setPoolError('Object not found in institutional records. Check the number and try again.'); push({ kind: 'error', message: 'Object not found in records' }); setPooling(false); return; }
+      setPoolResult(res); setPoolStep('success'); push({ kind: 'success', message: res.status === 'pending_check' ? 'Submitted for review' : 'Request queued' });
       const next = peekRate(tokenHash!);
       setRate({ count: next.count, value: next.value });
       if (tokenHash) setHistory(loadHistory(tokenHash));
-    } catch { setPoolError('Unexpected error. Try again.'); }
+    } catch { setPoolError('Unexpected error. Try again.'); push({ kind: 'error', message: 'Submit failed — try again' }); }
     setPooling(false);
   };
 
