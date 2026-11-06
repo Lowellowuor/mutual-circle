@@ -1,7 +1,9 @@
 """Application configuration.
 
-Loads from .env at the backend root. All secrets required; no defaults for
-anything security-relevant.
+Loads from .env at the backend root. Secrets default to empty strings for
+local development convenience. Production startup fails if any required
+secret is missing or shorter than 32 characters -- see
+`mtc.main._validate_secrets` for the exact set of validated keys.
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

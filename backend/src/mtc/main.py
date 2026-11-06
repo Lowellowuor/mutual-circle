@@ -32,9 +32,51 @@ logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
 
 
+_REQUIRED_SECRETS = ("JWT_SECRET", "LEDGER_HMAC_KEY", "TOKEN_HMAC_KEY_CURRENT")
+
+
+def _validate_secrets() -> None:
+    """Fail-fast on missing or weak secrets in production.
+
+    Development keeps working with empty values -- safe locally, and
+    useful for testing without real credentials. Production refuses to
+    start if any security-critical secret is empty or shorter than 32
+    characters. An empty JWT_SECRET in production means forgeable staff
+    tokens; an empty TOKEN_HMAC_KEY_CURRENT means requester tokens are
+    computable from a phone number; an empty LEDGER_HMAC_KEY means the
+    tamper-evident ledger is not tamper-evident.
+    """
+    values = {
+        "JWT_SECRET": settings.jwt_secret,
+        "LEDGER_HMAC_KEY": settings.ledger_hmac_key,
+        "TOKEN_HMAC_KEY_CURRENT": settings.token_hmac_key_current,
+    }
+    missing = [
+        name for name in _REQUIRED_SECRETS
+        if not values[name] or len(values[name]) < 32
+    ]
+
+    if settings.environment == "production":
+        if missing:
+            raise RuntimeError(
+                "Cannot start in production without strong values for: "
+                + ", ".join(missing)
+                + ". Each must be at least 32 characters. "
+                + "Set them in .env before deploying."
+            )
+    elif missing:
+        logger.warning(
+            "Running in %s mode with weak or empty secrets: %s. "
+            "Fine for local development. Production will refuse to start.",
+            settings.environment,
+            ", ".join(missing),
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting in %s mode", settings.environment)
+    _validate_secrets()
     try:
         await get_pool()
     except Exception as exc:
