@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { SkeletonList } from '../Shared/Skeleton';
 import { useToast } from '../Shared/Toast';
+import { EmptyState } from '../Shared/EmptyState';
 import { getPartnerMe, getPartnerRedemptions, confirmPartnerRequest, downloadPartnerStatement } from '../../lib/apiClient';
 
 type Role = 'enrolment' | 'fulfilment' | 'audit';
@@ -272,7 +273,7 @@ export const ConsoleView: React.FC = () => {
       )}
 
       {filteredPool.length === 0 && filteredSwap.length === 0 ? (
-        <div className="p-8 bg-white border border-[#111111]/5 shadow-sm rounded-2xl text-center space-y-2"><Activity className="w-6 h-6 text-[#111111]/20 mx-auto" /><p className="text-xs font-bold text-[#111111]">Queue empty</p></div>
+        <EmptyState Icon={Activity} title="Queue empty" body="All requests have been processed." />
       ) : (
         <div className="space-y-2">
           {filteredPool.map(r => {
@@ -334,7 +335,7 @@ export const ConsoleView: React.FC = () => {
       {auditSub === 'flags' && (
         <div className="space-y-2">
           {riskFlags.length === 0 ? (
-            <div className="p-8 bg-white border border-[#111111]/5 shadow-sm rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs text-[#111111]/60">No active flags</p></div>
+            <EmptyState Icon={CheckCircle} title="No active flags" body="All risk flags have been resolved." iconClassName="text-emerald-600" />
           ) : riskFlags.map(flag => (
             <div key={flag.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedDetail({ type: 'flag', item: flag })}>
               <div className="flex items-start justify-between gap-1">
@@ -358,7 +359,7 @@ export const ConsoleView: React.FC = () => {
       {auditSub === 'ocr' && (
         <div className="space-y-2">
           {ocrQueue.length === 0 ? (
-            <div className="p-8 bg-white border border-[#111111]/5 shadow-sm rounded-2xl text-center"><CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" /><p className="text-xs font-bold text-[#111111]">No pending OCR</p></div>
+            <EmptyState Icon={CheckCircle} title="No pending OCR" body="All Tier 3 verifications are complete." iconClassName="text-emerald-600" />
           ) : ocrQueue.map(r => (
             <div key={r.id} className="p-3 bg-white border border-amber-200 rounded-xl space-y-2">
               <div className="flex items-center justify-between"><span className="font-mono text-[11px] text-[#111111]/50">{r.id}</span><span className="text-[10px] font-mono bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-bold">T3 * OCR</span></div>

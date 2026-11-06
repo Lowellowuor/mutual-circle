@@ -8,6 +8,7 @@ import {
   MapPin, Zap, ChevronRight, Clock, Eye, EyeOff, RotateCcw, Lock, Trophy, Edit2, Settings,
 } from 'lucide-react';
 import { SkeletonList } from '../Shared/Skeleton';
+import { EmptyState } from '../Shared/EmptyState';
 
 type Tab = 'home' | 'give' | 'pledge' | 'impact' | 'leaders';
 type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger' | 'settings' | 'activity';
@@ -623,12 +624,12 @@ export const DonorView: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="p-6 bg-white border border-dashed border-[#111111]/20 rounded-xl text-center">
-                <HeartHandshake className="w-6 h-6 text-[#111111]/20 mx-auto mb-2" />
-                <div className="text-[13px] font-bold text-[#111111]">No activity yet</div>
-                <p className="text-[12px] text-[#111111]/50 mt-1 leading-relaxed">Your gifts, pledges, and campaign closures will appear here.</p>
-                <button onClick={() => goTab('give')} className="mt-3 px-4 py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold">Give your first gift</button>
-              </div>
+              <EmptyState
+                Icon={HeartHandshake}
+                title="No activity yet"
+                body="Your gifts, pledges, and campaign closures will appear here."
+                cta={{ label: 'Give your first gift', onClick: () => goTab('give') }}
+              />
             )}
           </div>
         </div>
@@ -665,9 +666,7 @@ export const DonorView: React.FC = () => {
               <span className="text-[11px] font-mono text-[#111111]/50">{donorContributions.length}</span>
             </div>
             {donorContributions.length === 0 ? (
-              <div className="p-4 bg-white border border-dashed border-[#111111]/15 rounded-xl text-center">
-                <p className="text-[12px] text-[#111111]/50">No donations yet. Give above.</p>
-              </div>
+              <EmptyState Icon={Wallet} title="No donations yet" body="Give above to start your contribution history." />
             ) : donorContributions.slice(0, 5).map(d => (
               <div key={d.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl">
                 <div className="flex items-start justify-between gap-2">
@@ -706,9 +705,7 @@ export const DonorView: React.FC = () => {
               <span className="text-[11px] font-mono text-[#111111]/50">{pledges.length}</span>
             </div>
             {pledges.length === 0 ? (
-              <div className="p-4 bg-white border border-dashed border-[#111111]/15 rounded-xl text-center">
-                <p className="text-[12px] text-[#111111]/50">No pledges yet. Submit one above.</p>
-              </div>
+              <EmptyState Icon={Package} title="No pledges yet" body="Submit a pledge above to match with requests." />
             ) : pledges.map(p => {
               const statusLabel = p.status === 'awaiting_match' ? 'Awaiting match' : p.status === 'matched' ? 'Matched' : 'Delivered';
               const statusClass = p.status === 'awaiting_match' ? 'bg-amber-50 text-amber-800 border-amber-200' : p.status === 'matched' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200';
@@ -815,10 +812,7 @@ export const DonorView: React.FC = () => {
               <span className="text-[10px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in</span>
             </div>
             {leaderboard.length === 0 ? (
-              <div className="py-6 text-center">
-                <Trophy className="w-6 h-6 text-[#111111]/20 mx-auto mb-2" />
-                <p className="text-[12px] text-[#111111]/50">No opt-in donors yet. Be the first.</p>
-              </div>
+              <EmptyState Icon={Trophy} title="No opt-in donors yet" body="Be the first to appear here." compact />
             ) : (
               <div className="space-y-1">
                 {leaderboard.map((entry, idx) => (
@@ -868,9 +862,7 @@ export const DonorView: React.FC = () => {
         <div className="p-4 bg-white border border-[#111111]/5 shadow-sm rounded-2xl space-y-2.5">
           <h3 className="text-[11px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Distribution</h3>
           {distribution.length === 0 ? (
-            <div className="text-center py-2">
-              <p className="text-[12px] text-[#111111]/50">No settled disbursements yet. Distribution will appear as data accrues.</p>
-            </div>
+            <EmptyState Icon={TrendingUp} title="No settled disbursements yet" body="Distribution will appear as data accrues." compact />
           ) : distribution.filter(r => r.count > 0).map(r => {
             const colorMap: Record<string, string> = {
               swap_bundle: 'bg-[#1F6B4A]',
@@ -903,9 +895,7 @@ export const DonorView: React.FC = () => {
             <span className="text-[10px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in</span>
           </div>
           {leaderboard.length === 0 ? (
-            <div className="text-center py-3">
-              <p className="text-[12px] text-[#111111]/50">No opt-in donors yet. Join via the Leaders tab.</p>
-            </div>
+            <EmptyState Icon={ShieldCheck} title="No opt-in donors yet" body="Join via the Leaders tab." compact />
           ) : leaderboard.slice(0, 8).map((r, i) => (
             <div key={`${r.display_name}-${i}`} className="flex justify-between text-[10px] py-1.5 border-b border-[#111111]/5 last:border-0">
               <div className="min-w-0">

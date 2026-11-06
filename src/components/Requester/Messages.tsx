@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { EmptyState } from '../Shared/EmptyState';
 import { getNotifications, markAllNotificationsRead } from '../../lib/apiClient';
 import { MessageSquare, Shield, Check, Clock, RotateCcw, Bell } from 'lucide-react';
 
@@ -131,13 +132,11 @@ export const RequesterMessages: React.FC = () => {
           </div>
         </div>
       ) : notifications.length === 0 ? (
-        <div className="p-5 bg-white border border-[#111111]/15 rounded-xl text-center space-y-2">
-          <MessageSquare className="w-6 h-6 text-[#111111]/20 mx-auto" />
-          <div className="text-xs font-bold text-[#111111]">No messages yet</div>
-          <p className="text-[11px] text-[#111111]/50">
-            Make a request on the Mutual Circle tab. Updates will appear here immediately after submission.
-          </p>
-        </div>
+        <EmptyState
+          Icon={MessageSquare}
+          title="No messages yet"
+          body="Make a request on the Mutual Circle tab. Updates will appear here immediately after submission."
+        />
       ) : (
         <div className="space-y-2">
           {notifications.map(n => (

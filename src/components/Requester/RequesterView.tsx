@@ -10,6 +10,7 @@ import {
   MessageSquare, ArrowLeft, Settings,
 } from 'lucide-react';
 import { StatusTimeline } from './StatusTimeline';
+import { EmptyState } from '../Shared/EmptyState';
 import { useToast } from '../Shared/Toast';
 import { SwapRequest, PoolRequest } from '../../types';
 import { RequesterMessages } from './Messages';
@@ -731,7 +732,7 @@ export const RequesterView: React.FC = () => {
         {matchSent && <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-1.5"><CheckCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" /><div><p className="text-[10px] font-bold text-emerald-900">Interest sent</p><p className="text-[9px] text-emerald-900/70 mt-0.5">Provider will contact within 48h.</p></div></div>}
         <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-1.5"><ShieldAlert className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" /><p className="text-[9px] text-amber-900 leading-relaxed">Requires opt-in disclosure. Your token history is never shared.</p></div>
         <div className="space-y-2">
-          {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/5 shadow-sm rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
+          {visible.length === 0 && <EmptyState Icon={Eye} title="No opportunities shown" body="Reset to view all declined opportunities." />}
           {visible.map(opp => { const I = opp.Icon; const sent = matchSent === opp.id; return (
             <div key={opp.id} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
               <div className="flex items-start gap-2"><div className={'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ' + opp.accent}><I className="w-4 h-4" /></div><div className="flex-1 min-w-0"><div className="font-bold text-[11px] text-[#111111] leading-tight">{opp.title}</div><div className="text-[9px] text-[#111111]/50 mt-0.5">{opp.locality} * {opp.commit}</div></div><button onClick={() => setDeclined(s => new Set(s).add(opp.id))} aria-label="Not interested" className="text-[#111111]/30 hover:text-[#111111]/60 shrink-0" title="Not interested"><X className="w-4 h-4" /></button></div>
