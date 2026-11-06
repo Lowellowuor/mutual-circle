@@ -671,6 +671,14 @@ export const RequesterView: React.FC = () => {
             <div className="flex justify-between"><span className="text-[#111111]/50">Amount</span><span className="font-mono font-bold text-[#111111]">KES {poolResult.amount.toLocaleString()}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Status</span><span className={'font-mono uppercase text-[9px] px-1.5 py-0.5 rounded ' + (poolResult.status === 'pending_check' ? 'bg-amber-50 text-amber-800' : 'bg-blue-50 text-blue-800')}>{poolResult.status.replace(/_/g, ' ')}</span></div>
           </div>
+          <div className="p-4 bg-white border border-[#111111]/15 rounded-xl">
+            <div className="text-[9px] font-mono uppercase text-[#111111]/50 mb-3">What happens next</div>
+            <StatusTimeline steps={[
+              { key: 'submitted', label: 'Submitted', time: (poolResult as any).timestamp, state: 'done' },
+              { key: 'review', label: poolResult.status === 'pending_check' ? 'OCR verification' : 'Queued for partner', state: 'current' },
+              { key: 'paid', label: 'Paid to institution', state: 'pending' },
+            ]} />
+          </div>
           <button onClick={() => goTab('home')} className="w-full py-2.5 bg-[#111111] hover:bg-black text-white rounded-xl text-xs font-medium">Done</button>
         </div>
       );
