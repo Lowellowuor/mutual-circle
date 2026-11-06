@@ -546,7 +546,7 @@ export const RequesterView: React.FC = () => {
         <div className="space-y-2">
           <div className="flex justify-between items-center"><h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">My Vouchers</h3><span className="text-[10px] font-mono text-[#111111]/50">{myVouchers.length}</span></div>
           {myVouchers.map(v => (
-            <div key={v.id} className={'p-2.5 rounded-lg border ' + (v.status === 'active' ? 'bg-purple-50 border-purple-200' : 'bg-[#FAF8F4] border-[#111111]/10 opacity-60')}>
+            <div key={v.id} className={'p-3 rounded-lg border ' + (v.status === 'active' ? 'bg-purple-50 border-purple-200' : 'bg-[#FAF8F4] border-[#111111]/10 opacity-60')}>
               <div className="flex justify-between items-start">
                 <div className="min-w-0 flex-1"><div className="text-[13px] font-semibold text-[#111111] truncate">{v.partnerName}</div><div className="text-[11px] font-mono text-[#111111]/50">{v.description}</div></div>
                 <span className={'text-[10px] font-mono uppercase px-1.5 py-0.5 rounded ' + (v.status === 'active' ? 'bg-purple-200 text-purple-900' : 'bg-black/5 text-[#111111]/50')}>{v.status}</span>
@@ -572,7 +572,7 @@ export const RequesterView: React.FC = () => {
               : (r.pin && String(r.pin) !== '----' && String(r.pin).length >= 3 ? String(r.pin) : null);
             const canCollect = r.type === 'swap' && !isWithdrawn && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status);
             return (
-              <div key={r.id} className={'p-2.5 rounded-lg border flex justify-between items-center ' + (isWithdrawn ? 'bg-[#FAF8F4] border-[#111111]/5 opacity-60' : 'bg-white border-[#111111]/10')}>
+              <div key={r.id} className={'p-3 rounded-lg border flex justify-between items-center ' + (isWithdrawn ? 'bg-[#FAF8F4] border-[#111111]/5 opacity-60' : 'bg-white border-[#111111]/10')}>
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {r.type === 'swap' ? <Package className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0" /> : <CreditCard className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
                   <div className="min-w-0 flex-1"><div className={'text-[13px] font-semibold truncate ' + (isWithdrawn ? 'text-[#111111]/40 line-through' : 'text-[#111111]')}>{r.type === 'swap' ? r.bundleCategory : r.category?.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#111111]/50 truncate">{r.type === 'swap' ? r.lockerLocation : r.hashedObjectId}</div></div>
@@ -728,7 +728,7 @@ export const RequesterView: React.FC = () => {
     return (
       <div className="p-4 space-y-3">
         <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Match</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Opportunities. Opt-in only.</p></div>
-        {matchSent && <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" /><div><p className="text-[10px] font-bold text-emerald-900">Interest sent</p><p className="text-[9px] text-emerald-900/70 mt-0.5">Provider will contact within 48h.</p></div></div>}
+        {matchSent && <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" /><div><p className="text-[10px] font-bold text-emerald-900">Interest sent</p><p className="text-[9px] text-emerald-900/70 mt-0.5">Provider will contact within 48h.</p></div></div>}
         <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-1.5"><ShieldAlert className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" /><p className="text-[9px] text-amber-900 leading-relaxed">Requires opt-in disclosure. Your token history is never shared.</p></div>
         <div className="space-y-2">
           {visible.length === 0 && <div className="p-6 bg-white border border-[#111111]/5 shadow-sm rounded-xl text-center"><p className="text-[10px] text-[#111111]/50">No opportunities shown. Reset to view all.</p></div>}
@@ -744,8 +744,8 @@ export const RequesterView: React.FC = () => {
           <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSelectedOpp(null)}>
             <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="flex items-start justify-between"><div><div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 text-[8px] font-mono uppercase"><ShieldAlert className="w-2 h-2" /> Requires disclosure</div><h3 className="font-serif text-base font-bold text-[#111111] mt-1.5">{selectedOpp.title}</h3></div><button onClick={() => setSelectedOpp(null)} aria-label="Close" className="text-[#111111]/40"><X className="w-4 h-4" /></button></div>
-              <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg space-y-1"><p className="text-[10px] font-bold text-amber-900">What this means</p><ul className="text-[10px] text-amber-900/80 leading-relaxed list-disc pl-4 space-y-0.5"><li>Provider receives your contact channel</li><li>Your request history is <strong>not</strong> shared</li><li>Withdraw anytime before contact</li></ul></div>
-              <label className="flex items-start gap-2 p-2.5 rounded-lg border border-[#111111]/15 cursor-pointer bg-[#FAF8F4]"><input type="checkbox" checked={matchConfirmed} onChange={e => setMatchConfirmed(e.target.checked)} className="mt-0.5 accent-[#1F6B4A]" /><span className="text-[10px] text-[#111111]/80 leading-relaxed">I consent to being contacted.</span></label>
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-1"><p className="text-[10px] font-bold text-amber-900">What this means</p><ul className="text-[10px] text-amber-900/80 leading-relaxed list-disc pl-4 space-y-0.5"><li>Provider receives your contact channel</li><li>Your request history is <strong>not</strong> shared</li><li>Withdraw anytime before contact</li></ul></div>
+              <label className="flex items-start gap-2 p-3 rounded-lg border border-[#111111]/15 cursor-pointer bg-[#FAF8F4]"><input type="checkbox" checked={matchConfirmed} onChange={e => setMatchConfirmed(e.target.checked)} className="mt-0.5 accent-[#1F6B4A]" /><span className="text-[10px] text-[#111111]/80 leading-relaxed">I consent to being contacted.</span></label>
               <div className="flex gap-2"><button onClick={() => setSelectedOpp(null)} className="flex-1 py-2 bg-white border border-[#111111]/20 rounded-lg text-[10px] font-medium">Cancel</button><button onClick={() => { setMatchSent(selectedOpp.id); expressInterest(selectedOpp.id, selectedOpp.title); setSelectedOpp(null); }} disabled={!matchConfirmed} className="flex-1 py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[10px] font-medium disabled:opacity-40">Send interest</button></div>
             </div>
           </div>

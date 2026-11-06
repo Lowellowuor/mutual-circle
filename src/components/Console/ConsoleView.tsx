@@ -422,7 +422,7 @@ export const ConsoleView: React.FC = () => {
         {lockerStocks.map((s, i) => {
           const low = s.available <= s.lowStockThreshold;
           return (
-            <div key={i} className={'p-2.5 rounded-lg border ' + (low ? 'bg-amber-50 border-amber-200' : 'bg-white border-[#111111]/10')}>
+            <div key={i} className={'p-3 rounded-lg border ' + (low ? 'bg-amber-50 border-amber-200' : 'bg-white border-[#111111]/10')}>
               <div className="flex justify-between items-start gap-2">
                 <div className="min-w-0 flex-1"><div className="text-[12px] font-semibold text-[#111111] truncate">{s.location}</div><div className="text-[11px] font-mono text-[#111111]/50 truncate">{s.bundleType}</div></div>
                 <div className="text-right shrink-0"><div className="font-mono text-xs font-bold text-[#111111]">{s.available}<span className="text-[#111111]/40">/{s.capacity}</span></div>{low && <div className="text-[10px] font-mono text-amber-700 uppercase font-bold">Low</div>}</div>
@@ -835,7 +835,7 @@ export const ConsoleView: React.FC = () => {
               </select>
             </div>
             {issueSuccess && (
-              <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
                 <div className="text-[11px] font-bold text-emerald-900">Voucher issued</div>
                 <div className="text-[11px] font-mono text-emerald-900/80 mt-0.5">PIN: <strong>{issueSuccess}</strong></div>
                 <div className="text-[10px] text-emerald-900/60 mt-1">Redeemable at {issuePartner}.</div>

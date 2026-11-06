@@ -322,7 +322,7 @@ export const DonorView: React.FC = () => {
             <div className="flex justify-between"><span className="text-[#111111]/50">Ledger</span><span className="font-semibold">{ledger ? 'Visible in ledger' : 'Not listed'}</span></div>
             <div className="flex justify-between border-t border-[#111111]/10 pt-1.5 mt-1.5"><span className="text-[#111111]/50">Recipient link</span><span className="font-semibold text-[#1F6B4A]">None</span></div>
           </div>
-          {ledger && <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-[10px] text-emerald-900 leading-relaxed"><Check className="w-3 h-3 inline mr-1" />Your contribution now appears in the Impact tab's recognition ledger.</div>}
+          {ledger && <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-[10px] text-emerald-900 leading-relaxed"><Check className="w-3 h-3 inline mr-1" />Your contribution now appears in the Impact tab's recognition ledger.</div>}
           <div className="space-y-2 pt-2">
             <button onClick={() => { setScreen('tab'); setCustom(''); }} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium">Give again</button>
             <button onClick={() => { resetFlow(); setTab('give'); }} className="w-full py-2.5 bg-white border border-[#111111]/15 text-[#111111]/70 rounded-xl text-sm font-medium">View my donations</button>
@@ -343,7 +343,7 @@ export const DonorView: React.FC = () => {
             <div className="flex justify-between"><span className="text-[#111111]/50">Locality</span><span className="font-semibold">{pLocality}</span></div>
             <div className="flex justify-between"><span className="text-[#111111]/50">Status</span><span className="font-semibold text-amber-700">Awaiting match</span></div>
           </div>
-          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-900 leading-relaxed">Your pledge is now visible to the Operations team for matching.</div>
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-900 leading-relaxed">Your pledge is now visible to the Operations team for matching.</div>
           <div className="space-y-2 pt-2">
             <button onClick={() => { setScreen('tab'); setPDesc(''); setPValue(''); }} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium">Pledge again</button>
             <button onClick={() => { resetFlow(); setTab('pledge'); }} className="w-full py-2.5 bg-white border border-[#111111]/15 text-[#111111]/70 rounded-xl text-sm font-medium">View my pledges</button>
@@ -390,7 +390,7 @@ export const DonorView: React.FC = () => {
                 <div className="text-[9px] font-mono uppercase text-[#111111]/50 mb-1.5">Recent entries</div>
                 <div className="space-y-1.5">
                   {ledgerData.last_entries.slice(0, 8).map((e: any) => (
-                    <div key={e.id} className="p-2.5 border border-[#111111]/10 rounded-lg flex items-start justify-between gap-2">
+                    <div key={e.id} className="p-3 border border-[#111111]/10 rounded-lg flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="text-[9px] font-mono text-[#111111]/50">{new Date(e.created_at).toLocaleString()}</div>
                         <div className="text-[10px] font-semibold text-[#111111] mt-0.5 truncate">{(e.category || '').replace(/_/g, ' ')}</div>
@@ -401,7 +401,7 @@ export const DonorView: React.FC = () => {
                   ))}
                 </div>
               </div>
-              <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-lg text-[10px] text-blue-900 leading-relaxed">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-[10px] text-blue-900 leading-relaxed">
                 Each entry is chained to the previous by HMAC — one change breaks the chain.
               </div>
             </>
@@ -606,7 +606,7 @@ export const DonorView: React.FC = () => {
             </div>
             {hasActivity ? (
               activityFeed.slice(0, 10).map(item => (
-                <div key={item.id} className="p-2.5 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedActivity(item)}>
+                <div key={item.id} className="p-3 bg-white border border-[#111111]/10 rounded-xl flex items-start gap-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedActivity(item)}>
                   <div className={'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ' + (item.kind === 'donation' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700')}>
                     {item.kind === 'donation' ? <Wallet className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
                   </div>

@@ -1,0 +1,29 @@
+style(ui): normalize padding — p-2.5 to p-3 on 13 elements (C2)
+
+Group C2 — padding consistency pass. The audit called out:
+"Card padding: define p-4 = base card, p-3 = compact, p-5 = hero.
+No p-2.5, p-3.5."
+
+13 p-2.5 occurrences converted to p-3 across 4 files:
+- RequesterView: 5 (voucher chips, history row, 2 alerts, checkbox label)
+- DonorView: 5 (3 alerts, ledger row, activity row)
+- ConsoleView: 2 (locker row, success alert)
+- Messages: 1 (privacy info alert)
+
+One p-2.5 held intentionally:
+- ConsoleView line 892 settings/menu button — its padding is
+  calibrated to the hover state and adjacent menu buttons. Changing
+  would shift the settings panel layout.
+
+Effect: all compact alerts, chips, and info rows now sit at p-3,
+matching the reference tier for card padding. No visible individual
+change — the value is the removal of the p-2.5 outlier class so
+future developers see a consistent scale: p-3 compact, p-4 base,
+p-5 hero.
+
+No behavior change. Only spacing class on 13 elements.
+
+Verified: exactly 1 p-2.5 remains in the codebase (the held button).
+Build clean.
+
+Reference: audit Group C2.

@@ -115,7 +115,7 @@ export const RequesterMessages: React.FC = () => {
         </button>
       </div>
 
-      <div className="p-2.5 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2">
+      <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl flex items-start gap-2">
         <Shield className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0 mt-0.5" />
         <p className="text-[10px] text-[#111111]/70 leading-relaxed">
           Messages are tied to your anonymous token. They never include names, addresses, or clinical details — same rules as the rest of the platform.
