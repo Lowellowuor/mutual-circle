@@ -212,7 +212,7 @@ export const ConsoleView: React.FC = () => {
         {([{ id: 'all' as const, l: 'All' }, { id: 'swap' as const, l: 'Swap' }, { id: 'pool' as const, l: 'Pool' }, { id: 'pending' as const, l: 'Pending' }, { id: 'dispatched' as const, l: 'Sent' }]).map(f => (
           <button key={f.id} onClick={() => setFilter(f.id)} className={'px-2.5 py-1 rounded-md text-[11px] whitespace-nowrap font-medium ' + (filter === f.id ? 'bg-[#111111] text-white' : 'bg-black/5 text-[#111111]/70')}>{f.l}</button>
         ))}
-        <button onClick={() => setEmptyQueueMode(!emptyQueueMode)} className="ml-auto px-2 py-1 rounded-md text-[10px] font-mono border border-[#111111]/15 bg-white whitespace-nowrap shrink-0">{emptyQueueMode ? 'Restore' : 'Empty'}</button>
+        <button onClick={() => setEmptyQueueMode(!emptyQueueMode)} className="ml-auto px-2 py-1 rounded-md text-[11px] font-mono border border-[#111111]/15 bg-white whitespace-nowrap shrink-0">{emptyQueueMode ? 'Restore' : 'Empty'}</button>
       </div>
 
       {receipt && (
@@ -228,7 +228,7 @@ export const ConsoleView: React.FC = () => {
           <div className="text-[11px] font-bold text-amber-900 flex items-center gap-1"><Package className="w-3 h-3" /> Incoming pledges ({awaitingPledges.length})</div>
           {awaitingPledges.map(p => (
             <div key={p.id} className="p-2 bg-white border border-[#111111]/10 rounded-lg flex justify-between items-start gap-2">
-              <div className="min-w-0 flex-1"><div className="text-[11px] font-semibold text-[#111111] truncate">{p.description}</div><div className="text-[10px] font-mono text-[#111111]/50">{p.locality} * {p.type === 'service_credit' ? 'credit' : 'goods'}</div></div>
+              <div className="min-w-0 flex-1"><div className="text-[11px] font-semibold text-[#111111] truncate">{p.description}</div><div className="text-[11px] font-mono text-[#111111]/50">{p.locality} * {p.type === 'service_credit' ? 'credit' : 'goods'}</div></div>
               <button onClick={() => matchPledge(p.id)} className="px-2 py-1 bg-amber-700 text-white rounded text-[10px] font-semibold whitespace-nowrap">Match</button>
             </div>
           ))}
@@ -239,7 +239,7 @@ export const ConsoleView: React.FC = () => {
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
           <div className="flex justify-between items-center">
             <div className="text-[11px] font-bold text-blue-900 flex items-center gap-1"><Users className="w-3 h-3" /> Match interests</div>
-            <div className="text-[10px] font-mono text-blue-900/60">
+            <div className="text-[11px] font-mono text-blue-900/60">
               {matchInterests.filter(m => m.status === 'pending').length} pending * {matchInterests.filter(m => m.status === 'contacted').length} contacted * {matchInterests.filter(m => m.status === 'closed').length} closed
             </div>
           </div>
@@ -248,7 +248,7 @@ export const ConsoleView: React.FC = () => {
               <div className="flex justify-between items-start gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="text-[11px] font-semibold text-[#111111] truncate">{m.title}</div>
-                  <div className="text-[10px] font-mono text-[#111111]/50">{m.timestamp} * token {m.tokenHash.slice(0, 8)}...</div>
+                  <div className="text-[11px] font-mono text-[#111111]/50">{m.timestamp} * token {m.tokenHash.slice(0, 8)}...</div>
                 </div>
                 <span className={'text-[10px] font-mono uppercase px-1.5 py-0.5 rounded shrink-0 ' + (m.status === 'pending' ? 'bg-blue-100 text-blue-800' : m.status === 'contacted' ? 'bg-amber-100 text-amber-800' : 'bg-black/5 text-[#111111]/50')}>{m.status}</span>
               </div>
@@ -263,7 +263,7 @@ export const ConsoleView: React.FC = () => {
               )}
             </div>
           ))}
-          <div className="text-[10px] text-blue-900/70 leading-relaxed">Opt-in disclosure only. Provider must reach out within 48h.</div>
+          <div className="text-[11px] text-blue-900/70 leading-relaxed">Opt-in disclosure only. Provider must reach out within 48h.</div>
         </div>
       )}
 
@@ -407,17 +407,17 @@ export const ConsoleView: React.FC = () => {
       <div className="grid grid-cols-2 gap-2">
         {[{ Icon: Package, l: 'Received', v: depotCounts.receivedUnits, c: 'text-[#111111]' }, { Icon: Check, l: 'Checked', v: depotCounts.qualityCheckedUnits, c: 'text-[#1F6B4A]' }, { Icon: Layers, l: 'Packed', v: depotCounts.packedBundles, c: 'text-[#111111]' }, { Icon: Truck, l: 'Loaded', v: depotCounts.loadedLockerUnits, c: 'text-emerald-700' }].map(row => {
           const I = row.Icon;
-          return (<div key={row.l} className="p-3 bg-white border border-[#111111]/15 rounded-xl"><div className="flex items-center gap-1 text-[10px] uppercase font-mono text-[#111111]/50"><I className="w-2.5 h-2.5" />{row.l}</div><div className={'font-mono text-xl font-bold mt-1 ' + row.c}>{row.v}</div></div>);
+          return (<div key={row.l} className="p-3 bg-white border border-[#111111]/15 rounded-xl"><div className="flex items-center gap-1 text-[11px] uppercase font-mono text-[#111111]/50"><I className="w-2.5 h-2.5" />{row.l}</div><div className={'font-mono text-xl font-bold mt-1 ' + row.c}>{row.v}</div></div>);
         })}
       </div>
       <div className="space-y-1.5">
-        <div className="flex justify-between items-center"><h3 className="text-[11px] font-mono uppercase font-bold text-[#111111]/60">Locker Stock</h3><span className="text-[10px] font-mono text-[#111111]/40">Low &lt; 5</span></div>
+        <div className="flex justify-between items-center"><h3 className="text-[11px] font-mono uppercase font-bold text-[#111111]/60">Locker Stock</h3><span className="text-[11px] font-mono text-[#111111]/40">Low &lt; 5</span></div>
         {lockerStocks.map((s, i) => {
           const low = s.available <= s.lowStockThreshold;
           return (
             <div key={i} className={'p-2.5 rounded-lg border ' + (low ? 'bg-amber-50 border-amber-200' : 'bg-white border-[#111111]/10')}>
               <div className="flex justify-between items-start gap-2">
-                <div className="min-w-0 flex-1"><div className="text-[12px] font-semibold text-[#111111] truncate">{s.location}</div><div className="text-[10px] font-mono text-[#111111]/50 truncate">{s.bundleType}</div></div>
+                <div className="min-w-0 flex-1"><div className="text-[12px] font-semibold text-[#111111] truncate">{s.location}</div><div className="text-[11px] font-mono text-[#111111]/50 truncate">{s.bundleType}</div></div>
                 <div className="text-right shrink-0"><div className="font-mono text-xs font-bold text-[#111111]">{s.available}<span className="text-[#111111]/40">/{s.capacity}</span></div>{low && <div className="text-[10px] font-mono text-amber-700 uppercase font-bold">Low</div>}</div>
               </div>
             </div>
