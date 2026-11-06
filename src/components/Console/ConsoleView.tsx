@@ -7,6 +7,7 @@ import {
   Download, X, Layers, Boxes, Package, Truck, Check, Eye, EyeOff, RotateCcw,
   LogIn, LogOut, Store, KeyRound, Lock, Building2, RefreshCw, Zap, ChevronRight,
 } from 'lucide-react';
+import { SkeletonList } from '../Shared/Skeleton';
 import { getPartnerMe, getPartnerRedemptions, confirmPartnerRequest, downloadPartnerStatement } from '../../lib/apiClient';
 
 type Role = 'enrolment' | 'fulfilment' | 'audit';
@@ -562,7 +563,7 @@ export const ConsoleView: React.FC = () => {
       </div>
 
       {partnerLoading ? (
-        <div className="p-6 text-center text-[11px] text-[#111111]/50">Loading...</div>
+        <SkeletonList count={2} />
       ) : partnerInfo ? (
         <>
           <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-1">

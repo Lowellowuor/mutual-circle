@@ -7,6 +7,7 @@ import {
   HeartHandshake, ShieldCheck, Check, Home, Wallet, Package, TrendingUp,
   MapPin, Zap, ChevronRight, Clock, Eye, EyeOff, RotateCcw, Lock, Trophy, Edit2, Settings,
 } from 'lucide-react';
+import { SkeletonList } from '../Shared/Skeleton';
 
 type Tab = 'home' | 'give' | 'pledge' | 'impact' | 'leaders';
 type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger' | 'settings' | 'activity';
@@ -362,7 +363,7 @@ export const DonorView: React.FC = () => {
             <button onClick={() => setScreen('tab')} className="text-[10px] text-[#111111]/60 hover:text-[#111111]">Back</button>
           </div>
           {ledgerLoading && (
-            <div className="p-6 text-center text-xs text-[#111111]/50">Loading ledger…</div>
+            <SkeletonList count={2} />
           )}
           {ledgerData && (
             <>
