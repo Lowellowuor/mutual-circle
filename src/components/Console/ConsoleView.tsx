@@ -123,8 +123,8 @@ export const ConsoleView: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                <div><label className="text-[10px] font-mono uppercase text-[#111111]/50 focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0 outline-none">Staff ID</label><input value={loginId} onChange={e => setLoginId(e.target.value)} placeholder="Auto-filled" autoFocus className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono text-[#111111] mt-1 focus:border-[#1F6B4A] outline-none" /></div>
-                <div><label className="text-[10px] font-mono uppercase text-[#111111]/50 focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0 outline-none">PIN</label><input type="password" value={loginPin} onChange={e => setLoginPin(e.target.value)} placeholder="Auto-filled" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono text-[#111111] tracking-widest mt-1 focus:border-[#1F6B4A] outline-none" /></div>
+                <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">Staff ID</label><input value={loginId} onChange={e => setLoginId(e.target.value)} placeholder="Auto-filled" autoFocus className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono text-[#111111] mt-1 focus:border-[#1F6B4A] outline-none" /></div>
+                <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">PIN</label><input type="password" value={loginPin} onChange={e => setLoginPin(e.target.value)} placeholder="Auto-filled" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono text-[#111111] tracking-widest mt-1 focus:border-[#1F6B4A] outline-none" /></div>
                 {loginError && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[11px] text-rose-800">{loginError}</div>}
                 <button type="submit" disabled={!loginId || !loginPin} className="w-full py-2.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-xs font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5"><LogIn className="w-3.5 h-3.5" /> Log in</button>
               </form>
@@ -439,10 +439,10 @@ export const ConsoleView: React.FC = () => {
       <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Store className="w-3.5 h-3.5" /> Partner Till</div><p className="text-[11px] text-[#111111]/60 mt-1">R.U.T.H 4.5 - voucher redemption.</p></div>
 
       <form onSubmit={handleRedeem} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
-        <div><label className="text-[11px] font-mono uppercase text-[#111111]/50 focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0 outline-none">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
+        <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
         <div className="grid grid-cols-2 gap-2">
-          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50 focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0 outline-none">PIN</label><input value={tillPin} onChange={e => setTillPin(e.target.value)} placeholder="4 digits" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
-          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50 focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0 outline-none">Amount (KES)</label><input type="number" value={tillAmount} onChange={e => setTillAmount(e.target.value)} placeholder="0" className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
+          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">PIN</label><input value={tillPin} onChange={e => setTillPin(e.target.value)} placeholder="4 digits" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
+          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={tillAmount} onChange={e => setTillAmount(e.target.value)} placeholder="0" className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
         </div>
         <button type="submit" disabled={!tillPin || !tillAmount} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold disabled:opacity-40">Redeem Voucher</button>
       </form>
@@ -830,7 +830,7 @@ export const ConsoleView: React.FC = () => {
             </div>
             <div>
               <label className="text-[11px] font-mono uppercase text-[#111111]/50">Partner</label>
-              <select value={issuePartner} onChange={e => setIssuePartner(e.target.value as any)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0 outline-none">
+              <select value={issuePartner} onChange={e => setIssuePartner(e.target.value as any)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono mt-1 outline-none">
                 <option>Naivas Kibera</option><option>Kenyatta Hospital</option>
               </select>
             </div>
