@@ -321,6 +321,9 @@ export const ConsoleView: React.FC = () => {
 
   const renderAudit = () => (
     <div className="p-4 space-y-3">
+      <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase text-[#111111]/50 tracking-wider">
+        <ShieldAlert className="w-3 h-3" /> Audit Review
+      </div>
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {([{ id: 'flags' as const, l: 'Flags ' + riskFlags.filter(f => f.status === 'pending').length }, { id: 'ocr' as const, l: 'OCR ' + ocrQueue.length }, { id: 'fp' as const, l: 'FP' }, { id: 'dedup' as const, l: 'Dedup' }, { id: 'log' as const, l: 'Log ' + auditLog.length }]).map(s => (
           <button key={s.id} onClick={() => setAuditSub(s.id)} className={'px-2.5 py-1 rounded-md text-[11px] whitespace-nowrap font-medium ' + (auditSub === s.id ? 'bg-[#1F6B4A] text-white' : 'bg-black/5 text-[#111111]/70')}>{s.l}</button>
@@ -795,7 +798,7 @@ export const ConsoleView: React.FC = () => {
                 return (
                   <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'more') setMoreTab('menu'); }} className={'relative py-2.5 flex flex-col items-center gap-1 ' + (active ? 'text-[#1F6B4A]' : 'text-[#111111]/40')}>
                     <div className={'px-3 py-1 rounded-full transition-colors ' + (active ? 'bg-[#DCE8E0]' : '')}><I className="w-4 h-4" /></div>
-                    <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{t.l}</span>
+                    <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{t.id === 'queue' ? (staffRole === 'enrolment' ? 'Metrics' : staffRole === 'audit' ? 'Audit' : 'Queue') : t.l}</span>
                     {((t.id === 'queue' && pendingQueueCount > 0) || (t.id === 'more' && pendingMoreCount > 0)) && (
                       <span className="absolute top-0.5 right-3 min-w-[14px] h-[14px] bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                         {(t.id === 'queue' ? pendingQueueCount : pendingMoreCount) > 9 ? '9+' : (t.id === 'queue' ? pendingQueueCount : pendingMoreCount)}
