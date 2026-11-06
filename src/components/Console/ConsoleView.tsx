@@ -47,6 +47,7 @@ export const ConsoleView: React.FC = () => {
   const [tillPartner, setTillPartner] = useState('Naivas Kibera');
   const [tillResult, setTillResult] = useState<{ ok: boolean; reason?: string } | null>(null);
 
+  const [matchingPledge, setMatchingPledge] = useState<{ id: string; description: string; locality: string; type: string } | null>(null);
   const [issueModal, setIssueModal] = useState<{ requestId: string; amount: number } | null>(null);
   const [issuePartner, setIssuePartner] = useState<'Naivas Kibera' | 'Kenyatta Hospital'>('Naivas Kibera');
   const [issueSuccess, setIssueSuccess] = useState<string | null>(null);
@@ -232,7 +233,7 @@ export const ConsoleView: React.FC = () => {
           {awaitingPledges.map(p => (
             <div key={p.id} className="p-2 bg-white border border-[#111111]/10 rounded-lg flex justify-between items-start gap-2">
               <div className="min-w-0 flex-1"><div className="text-[11px] font-semibold text-[#111111] truncate">{p.description}</div><div className="text-[11px] font-mono text-[#111111]/50">{p.locality} * {p.type === 'service_credit' ? 'credit' : 'goods'}</div></div>
-              <button onClick={async () => { const r = await matchPledge(p.id); push(r.ok ? { kind: 'success', message: 'Pledge matched' } : { kind: 'error', message: r.reason ?? 'Match failed' }); }} className="px-2 py-1 bg-amber-700 text-white rounded text-[10px] font-semibold whitespace-nowrap">Match</button>
+              <button onClick={() => setMatchingPledge({ id: p.id, description: p.description, locality: p.locality, type: p.type })} className="px-2 py-1 bg-amber-700 text-white rounded text-[10px] font-semibold whitespace-nowrap">Match</button>
             </div>
           ))}
         </div>
@@ -858,6 +859,46 @@ export const ConsoleView: React.FC = () => {
           </div>
         </div>
       )}
+      {matchingPledge && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setMatchingPledge(null)}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-serif text-base font-bold text-[#111111]">Match pledge to request</h3>
+                <p className="text-[11px] text-[#111111]/50 mt-0.5">{matchingPledge.description} \u00b7 {matchingPledge.locality}</p>
+              </div>
+              <button onClick={() => setMatchingPledge(null)} className="text-[#111111]/40" aria-label="Close"><X className="w-4 h-4" /></button>
+            </div>
+            {(() => {
+              const eligible = poolRequests.filter(r => r.status === 'verified');
+              if (eligible.length === 0) {
+                return <div className="p-4 text-center text-[11px] text-[#111111]/50">No verified pool requests awaiting match.</div>;
+              }
+              return (
+                <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
+                  {eligible.map(r => (
+                    <button
+                      key={r.id}
+                      onClick={async () => {
+                        const res = await matchPledge(matchingPledge.id, r.id);
+                        push(res.ok
+                          ? { kind: 'success', message: 'Pledge matched to REF-' + r.id.slice(0, 8).toUpperCase() }
+                          : { kind: 'error', message: res.reason ?? 'Match failed' });
+                        if (res.ok) setMatchingPledge(null);
+                      }}
+                      className="w-full p-2.5 bg-[#FAF8F4] hover:bg-[#DCE8E0] border border-[#111111]/10 rounded-lg text-left transition-colors"
+                    >
+                      <div className="text-[12px] font-semibold text-[#111111] capitalize">{(r.category || 'request').replace(/_/g, ' ')}</div>
+                      <div className="text-[10px] font-mono text-[#111111]/50 mt-0.5">REF-{r.id.slice(0, 8).toUpperCase()}</div>
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

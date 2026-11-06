@@ -218,8 +218,12 @@ export const expressMatchInterest = (token: string, requestId: string, opportuni
 export const listFulfilmentPledges = (sessionToken: string) =>
   call<{ pledges: any[] }>('/fulfilment/pledges', { headers: { Authorization: `Bearer ${sessionToken}` } });
 
-export const matchPledge = (sessionToken: string, pledgeId: string) =>
-  call<{ id: string; status: string }>(`/fulfilment/pledges/${pledgeId}/match`, { method: 'POST', headers: { Authorization: `Bearer ${sessionToken}` } });
+export const matchPledge = (sessionToken: string, pledgeId: string, requestId?: string) =>
+  call<{ id: string; status: string }>(`/fulfilment/pledges/${pledgeId}/match`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${sessionToken}` },
+    body: JSON.stringify({ request_id: requestId ?? null }),
+  });
 
 export const listMatchInterests = (sessionToken: string) =>
   call<{ interests: any[] }>('/fulfilment/match-interests', { headers: { Authorization: `Bearer ${sessionToken}` } });

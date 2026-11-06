@@ -559,9 +559,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { ok: true };
   };
 
-  const matchPledge = async (pledgeId: string): Promise<{ ok: boolean; reason?: string }> => {
+  const matchPledge = async (pledgeId: string, requestId?: string): Promise<{ ok: boolean; reason?: string }> => {
     if (!sessionToken) return { ok: false, reason: 'Session expired' };
-    const r = await api.matchPledge(sessionToken, pledgeId).catch(() => null);
+    const r = await api.matchPledge(sessionToken, pledgeId, requestId).catch(() => null);
     if (!r) return { ok: false, reason: 'Backend unreachable' };
     await refetchAll();
     return { ok: true };
