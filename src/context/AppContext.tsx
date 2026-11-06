@@ -59,7 +59,7 @@ interface AppContextType {
   expressInterest: (opportunityId: string, title: string) => void;
   addDonorContribution: (amount: number, isAnonymous: boolean, optInLedger: boolean) => void;
   addPledge: (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => void;
-  logAction: (role: StaffRole | 'system', action: string, targetHash: string) => void;
+  downloadAuditCsv: () => Promise<boolean>;
 
   refetchAll: () => Promise<void>;
 }
@@ -592,7 +592,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Backend logs privileged actions; frontend no-op for compatibility
-  const logAction = (_role: StaffRole | 'system', _action: string, _targetHash: string) => {};
+  const downloadAuditCsv = async (): Promise<boolean> => {
+    if (!sessionToken) return false;
+    try {
+      await api.downloadAuditCsv(sessionToken);
+      return true;
+    } catch (e) {
+      console.error("[audit-download] failed", e);
+      return false;
+    }
+  };
 
   return (
     <AppContext.Provider value={{
@@ -604,7 +613,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       executeSwap, executePool, withdrawRequest, dispatchRequest, collectRequest,
       issueVoucher, redeemVoucher, completeOcrCheck,
       routeFlagToTier4, clearFlagAsFalsePositive, matchPledge, closeMatchInterest, expressInterest,
-      addDonorContribution, addPledge, logAction,
+      addDonorContribution, addPledge, downloadAuditCsv,
       refetchAll,
     }}>
       {children}

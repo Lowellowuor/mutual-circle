@@ -384,6 +384,24 @@ export async function downloadPublicLedgerCsv(): Promise<void> {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+// --- Audit log CSV download (backed by GET /audit/export.csv) ---
+export async function downloadAuditCsv(sessionToken: string): Promise<void> {
+  const res = await fetch(`${BASE}/audit/export.csv`, {
+    headers: { Authorization: `Bearer ${sessionToken}` },
+  });
+  if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+  const blob = await res.blob();
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = `mutual-circle-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 // --- Partner statement CSV download (Gap 3) ---
 export async function downloadPartnerStatement(partnerKey: string, partnerId: string): Promise<void> {
   const res = await fetch(`${BASE}/partners/me/statement.csv`, {

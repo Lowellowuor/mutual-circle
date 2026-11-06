@@ -51,6 +51,25 @@ Items are grouped by how they would be caught. **P0** = a security audit or a cu
 - `catch {}` in ~10 places swallows errors silently. In a money flow this hides bugs.
 - The Bench and messaging database URLs and `messaging_encryption_key` are defined in config but unused. Either wire them or remove them from the config.
 
+## What is and isn't logged
+
+**Server-triggered state changes are logged.** Every dispatch, voucher
+issuance, OCR verification, partner confirmation, and flag resolution
+writes to the `audit_log` table via `append_audit`. Readable at
+`GET /audit/log` (JSON) and `GET /audit/export.csv` (CSV), and shown
+in the Console under Audit > Log.
+
+**Client-initiated actions that don't change server state are not
+logged.** Filter changes, view resets, and modal opens are not
+persisted. The Console's CSV export (Audit > Export) now routes through
+`GET /audit/export.csv` -- the same source of truth as the JSON audit
+log -- instead of a client-generated file built from local state.
+
+**Compliance-critical actions must be audited server-side.** If you add
+a new action a compliance auditor would care about, add a backend route
+that writes to `audit_log` -- do not add a client-side placeholder
+function.
+
 ## What is *not* a security issue
 
 - The blind-pool invariant is enforced at the schema level. No field links a donor to a disbursement.

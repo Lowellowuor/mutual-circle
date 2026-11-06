@@ -20,7 +20,7 @@ type Filter = 'all' | 'swap' | 'pool' | 'pending' | 'dispatched';
 export const ConsoleView: React.FC = () => {
   const {
     swapRequests, poolRequests, riskFlags, auditLog, dedupItems, lockerStocks, depotCounts, pledges,
-    vouchers, voucherRedemptions, staffRole, staffId, loginStaff, logoutStaff, logAction,
+    vouchers, voucherRedemptions, staffRole, staffId, loginStaff, logoutStaff, downloadAuditCsv,
     issueVoucher, matchInterests, closeMatchInterest,
     dispatchRequest, routeFlagToTier4, clearFlagAsFalsePositive, completeOcrCheck, matchPledge, redeemVoucher,
     emptyQueueMode, setEmptyQueueMode,
@@ -176,15 +176,9 @@ export const ConsoleView: React.FC = () => {
 
   const handleDispatch = async (id: string) => { const r = await dispatchRequest(id, 'pool'); if (r) { setReceipt(r); setTimeout(() => setReceipt(null), 6000); } };
 
-  const downloadCsv = () => {
-    const rows = auditLog.map(e => ({ time: e.timestamp, role: e.actorRole, action: e.action, target: e.targetHash }));
-    const header = Object.keys(rows[0] ?? {});
-    const csv = [header.join(','), ...rows.map(r => header.map(k => JSON.stringify((r as any)[k] ?? '')).join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'mutual-circle-audit-log.csv'; a.click(); URL.revokeObjectURL(url);
-    logAction(staffRole!, 'Exported compliance CSV', 'system');
-    setExportSuccess(true);
+  const downloadCsv = async () => {
+    const ok = await downloadAuditCsv();
+    if (ok) setExportSuccess(true);
     setTimeout(() => { setExportModal(false); setExportSuccess(false); }, 1500);
   };
 
