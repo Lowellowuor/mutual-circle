@@ -637,47 +637,47 @@ export const DonorView: React.FC = () => {
     if (tab === 'give') {
       return (
         <div className="p-5 space-y-4">
-          <div><h2 className="font-serif text-lg font-bold text-[#111111]">Give Cash</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Into the blind pool. No recipient chosen.</p></div>
+          <div><h2 className="font-serif text-xl font-bold text-[#111111]">Give Cash</h2><p className="text-[12px] text-[#111111]/50 mt-0.5">Into the blind pool. No recipient chosen.</p></div>
           <div className="grid grid-cols-2 gap-2">
             {[1000, 2500, 5000, 10000].map(v => (
               <button key={v} onClick={() => { setSelected(v); setCustom(''); }} className={'py-3 rounded-xl border text-center font-mono text-sm transition-all ' + (selected === v && !custom ? 'bg-[#1F6B4A] text-white border-[#1F6B4A] font-bold' : 'bg-white border-[#111111]/15 text-[#111111] font-semibold')}>{v.toLocaleString()}</button>
             ))}
           </div>
           <div className="relative">
-            <span className="absolute left-3 top-3 text-[10px] font-mono font-bold text-[#111111]/40">KES</span>
+            <span className="absolute left-3 top-3 text-[11px] font-mono font-bold text-[#111111]/40">KES</span>
             <input type="number" value={custom} onChange={e => setCustom(e.target.value)} placeholder="Custom amount" className="w-full bg-white border border-[#111111]/15 rounded-xl pl-12 pr-3 py-3 text-sm font-mono font-bold text-[#111111] focus:ring-2 focus:ring-[#1F6B4A] focus:outline-none" />
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-3 p-3 bg-white border border-[#111111]/10 rounded-xl cursor-pointer">
               <input type="checkbox" checked={anon} onChange={e => setAnon(e.target.checked)} className="accent-[#1F6B4A] w-4 h-4" />
-              <div className="flex-1"><div className="text-xs font-semibold text-[#111111]">Anonymous</div><div className="text-[10px] text-[#111111]/50">Recommended</div></div>
+              <div className="flex-1"><div className="text-[13px] font-semibold text-[#111111]">Anonymous</div><div className="text-[11px] text-[#111111]/50">Recommended</div></div>
             </label>
             <label className="flex items-center gap-3 p-3 bg-white border border-[#111111]/10 rounded-xl cursor-pointer">
               <input type="checkbox" checked={ledger} onChange={e => setLedger(e.target.checked)} className="accent-[#1F6B4A] w-4 h-4" />
-              <div className="flex-1"><div className="text-xs font-semibold text-[#111111]">Show in recognition ledger</div><div className="text-[10px] text-[#111111]/50">Aggregate * no recipient link</div></div>
+              <div className="flex-1"><div className="text-[13px] font-semibold text-[#111111]">Show in recognition ledger</div><div className="text-[11px] text-[#111111]/50">Aggregate * no recipient link</div></div>
             </label>
           </div>
           <button onClick={handleGive} disabled={processing || finalAmount <= 0} className="w-full py-3.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50 mt-2">{processing ? 'Processing...' : `Contribute KES ${finalAmount.toLocaleString()}`}</button>
 
           <div className="pt-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Your donations</h3>
-              <span className="text-[10px] font-mono text-[#111111]/50">{donorContributions.length}</span>
+              <h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Your donations</h3>
+              <span className="text-[11px] font-mono text-[#111111]/50">{donorContributions.length}</span>
             </div>
             {donorContributions.length === 0 ? (
               <div className="p-4 bg-white border border-dashed border-[#111111]/15 rounded-xl text-center">
-                <p className="text-[10px] text-[#111111]/50">No donations yet. Give above.</p>
+                <p className="text-[12px] text-[#111111]/50">No donations yet. Give above.</p>
               </div>
             ) : donorContributions.slice(0, 5).map(d => (
               <div key={d.id} className="p-3 bg-white border border-[#111111]/10 rounded-xl">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-semibold text-[#111111]">KES {d.amount.toLocaleString()}</div>
-                    <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">{new Date(d.timestamp).toLocaleString()}</div>
+                    <div className="text-[13px] font-semibold text-[#111111]">KES {d.amount.toLocaleString()}</div>
+                    <div className="text-[11px] font-mono text-[#111111]/50 mt-0.5">{new Date(d.timestamp).toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    {d.isAnonymous && <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#DCE8E0] text-[#1F6B4A]">Anon</span>}
-                    {d.optInLedger && <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Listed</span>}
+                    {d.isAnonymous && <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#DCE8E0] text-[#1F6B4A]">Anon</span>}
+                    {d.optInLedger && <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Listed</span>}
                   </div>
                 </div>
               </div>
@@ -690,24 +690,24 @@ export const DonorView: React.FC = () => {
     if (tab === 'pledge') {
       return (
         <div className="p-5 space-y-4">
-          <div><h2 className="font-serif text-lg font-bold text-[#111111]">Pledge Resource</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Matched by category and locality. Never by name.</p></div>
+          <div><h2 className="font-serif text-xl font-bold text-[#111111]">Pledge Resource</h2><p className="text-[12px] text-[#111111]/50 mt-0.5">Matched by category and locality. Never by name.</p></div>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => setPType('service_credit')} className={'p-3 rounded-xl border text-left ' + (pType === 'service_credit' ? 'bg-[#1F6B4A] border-[#1F6B4A] text-white' : 'bg-white border-[#111111]/15 text-[#111111]')}><Zap className={'w-4 h-4 mb-1 ' + (pType === 'service_credit' ? 'text-white' : 'text-amber-600')} /><div className="text-xs font-bold">Service Credit</div><div className={'text-[9px] mt-0.5 ' + (pType === 'service_credit' ? 'text-white/70' : 'text-[#111111]/50')}>Pay a bill</div></button>
             <button onClick={() => setPType('goods')} className={'p-3 rounded-xl border text-left ' + (pType === 'goods' ? 'bg-[#1F6B4A] border-[#1F6B4A] text-white' : 'bg-white border-[#111111]/15 text-[#111111]')}><Package className={'w-4 h-4 mb-1 ' + (pType === 'goods' ? 'text-white' : 'text-blue-600')} /><div className="text-xs font-bold">Surplus Goods</div><div className={'text-[9px] mt-0.5 ' + (pType === 'goods' ? 'text-white/70' : 'text-[#111111]/50')}>Food, blankets</div></button>
           </div>
-          <div className="space-y-1.5"><label className="text-[10px] font-mono uppercase text-[#111111]/50">Description</label><input value={pDesc} onChange={e => setPDesc(e.target.value)} placeholder={pType === 'service_credit' ? 'Bill up to KES 5,000' : 'e.g. 50kg maize'} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none" /></div>
-          {pType === 'service_credit' && (<div className="space-y-1.5"><label className="text-[10px] font-mono uppercase text-[#111111]/50">Max value (KES)</label><input type="number" value={pValue} onChange={e => setPValue(e.target.value)} placeholder="5000" className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none" /></div>)}
-          <div className="space-y-1.5"><label className="text-[10px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> Locality</label><select value={pLocality} onChange={e => setPLocality(e.target.value)} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none">{['Nairobi County', 'Mombasa County', 'Kisumu County', 'Nakuru County'].map(c => <option key={c}>{c}</option>)}</select></div>
+          <div className="space-y-1.5"><label className="text-[11px] font-mono uppercase text-[#111111]/50">Description</label><input value={pDesc} onChange={e => setPDesc(e.target.value)} placeholder={pType === 'service_credit' ? 'Bill up to KES 5,000' : 'e.g. 50kg maize'} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none" /></div>
+          {pType === 'service_credit' && (<div className="space-y-1.5"><label className="text-[11px] font-mono uppercase text-[#111111]/50">Max value (KES)</label><input type="number" value={pValue} onChange={e => setPValue(e.target.value)} placeholder="5000" className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none" /></div>)}
+          <div className="space-y-1.5"><label className="text-[11px] font-mono uppercase text-[#111111]/50 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> Locality</label><select value={pLocality} onChange={e => setPLocality(e.target.value)} className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none">{['Nairobi County', 'Mombasa County', 'Kisumu County', 'Nakuru County'].map(c => <option key={c}>{c}</option>)}</select></div>
           <button onClick={handlePledge} disabled={pProcessing || !pDesc} className="w-full py-3.5 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium disabled:opacity-50 mt-2">{pProcessing ? 'Submitting...' : 'Submit Pledge'}</button>
 
           <div className="pt-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Your Pledges</h3>
-              <span className="text-[10px] font-mono text-[#111111]/50">{pledges.length}</span>
+              <h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Your Pledges</h3>
+              <span className="text-[11px] font-mono text-[#111111]/50">{pledges.length}</span>
             </div>
             {pledges.length === 0 ? (
               <div className="p-4 bg-white border border-dashed border-[#111111]/15 rounded-xl text-center">
-                <p className="text-[10px] text-[#111111]/50">No pledges yet. Submit one above.</p>
+                <p className="text-[12px] text-[#111111]/50">No pledges yet. Submit one above.</p>
               </div>
             ) : pledges.map(p => {
               const statusLabel = p.status === 'awaiting_match' ? 'Awaiting match' : p.status === 'matched' ? 'Matched' : 'Delivered';
@@ -717,12 +717,12 @@ export const DonorView: React.FC = () => {
                 <div key={p.id} className="p-3 bg-white border border-[#111111]/10 rounded-xl space-y-1.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-semibold text-[#111111] truncate">{p.description}</div>
-                      <div className="text-[9px] font-mono text-[#111111]/50 mt-0.5">{p.locality} · {p.type === 'goods' ? 'Goods' : 'Service credit'}</div>
+                      <div className="text-[13px] font-semibold text-[#111111] truncate">{p.description}</div>
+                      <div className="text-[11px] font-mono text-[#111111]/50 mt-0.5">{p.locality} · {p.type === 'goods' ? 'Goods' : 'Service credit'}</div>
                     </div>
-                    <span className={'text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 ' + statusClass}>{statusLabel}</span>
+                    <span className={'text-[10px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 ' + statusClass}>{statusLabel}</span>
                   </div>
-                  {ref && <div className="text-[9px] font-mono text-[#1F6B4A] pt-1 border-t border-[#111111]/5">Linked to {ref}</div>}
+                  {ref && <div className="text-[11px] font-mono text-[#1F6B4A] pt-1 border-t border-[#111111]/5">Linked to {ref}</div>}
                 </div>
               );
             })}
