@@ -508,11 +508,11 @@ export const RequesterView: React.FC = () => {
       {unseenRedemptions.length > 0 && (
         <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-purple-900"><CheckCircle className="w-3.5 h-3.5" /> {unseenRedemptions.length} {unseenRedemptions.length === 1 ? 'voucher was' : 'vouchers were'} redeemed</div>
+            <div className="flex items-center gap-1.5 text-[12px] font-bold text-purple-900"><CheckCircle className="w-3.5 h-3.5" /> {unseenRedemptions.length} {unseenRedemptions.length === 1 ? 'voucher was' : 'vouchers were'} redeemed</div>
             <button onClick={dismissRedemptions} aria-label="Dismiss" className="text-purple-700 hover:text-purple-900"><X className="w-3.5 h-3.5" /></button>
           </div>
           {unseenRedemptions.slice(0, 2).map(({ redemption, voucher }) => (
-            <div key={redemption.id} className="text-[9px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> * KES {redemption.amount.toLocaleString()} * {redemption.timestamp}</div>
+            <div key={redemption.id} className="text-[13px] text-purple-900/70 leading-relaxed"><strong>{voucher!.partnerName}</strong> * KES {redemption.amount.toLocaleString()} * {redemption.timestamp}</div>
           ))}
         </div>
       )}
@@ -520,17 +520,17 @@ export const RequesterView: React.FC = () => {
       {unseen.length > 0 && (
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1.5">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-900"><CheckCircle className="w-3.5 h-3.5" /> {unseen.length} {unseen.length === 1 ? 'request was' : 'requests were'} dispatched</div>
+            <div className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-900"><CheckCircle className="w-3.5 h-3.5" /> {unseen.length} {unseen.length === 1 ? 'request was' : 'requests were'} dispatched</div>
             <button onClick={dismissUnseen} aria-label="Dismiss" className="text-emerald-700 hover:text-emerald-900"><X className="w-3.5 h-3.5" /></button>
           </div>
-          <p className="text-[9px] text-emerald-900/70 leading-relaxed">Funds have been sent to the institution. Confirmation SMS within 2 hours.</p>
+          <p className="text-[13px] text-emerald-900/70 leading-relaxed">Funds have been sent to the institution. Confirmation SMS within 2 hours.</p>
         </div>
       )}
 
       <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
-        <div className="flex justify-between items-center"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Session allowance</div><div className="text-[9px] font-mono text-[#111111]/50">{MAX_REQUESTS - rate.count} left</div></div>
+        <div className="flex justify-between items-center"><div className="text-[11px] font-mono uppercase text-[#111111]/50">Session allowance</div><div className="text-[11px] font-mono text-[#111111]/50">{MAX_REQUESTS - rate.count} left</div></div>
         <div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={(rate.count / MAX_REQUESTS > 0.8 ? 'bg-rose-500 ' : 'bg-[#1F6B4A] ') + 'h-full transition-all'} style={{ width: (rate.count / MAX_REQUESTS) * 100 + '%' }} /></div>
-        <div className="flex justify-between text-[9px] font-mono text-[#111111]/50"><span>{rate.count}/{MAX_REQUESTS} requests</span><span>KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>
+        <div className="flex justify-between text-[11px] font-mono text-[#111111]/50"><span>{rate.count}/{MAX_REQUESTS} requests</span><span>KES {rate.value.toLocaleString()} / {MAX_VALUE.toLocaleString()}</span></div>
       </div>
 
       {rateLimited && (<div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><div><div className="text-[10px] font-bold text-rose-900">Daily limit reached</div><p className="text-[9px] text-rose-900/70 mt-0.5">Try again tomorrow or use a different channel.</p></div></div>)}
@@ -544,16 +544,16 @@ export const RequesterView: React.FC = () => {
 
       {myVouchers.length > 0 && (
         <div className="space-y-2">
-          <div className="flex justify-between items-center"><h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">My Vouchers</h3><span className="text-[10px] font-mono text-[#111111]/50">{myVouchers.length}</span></div>
+          <div className="flex justify-between items-center"><h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">My Vouchers</h3><span className="text-[10px] font-mono text-[#111111]/50">{myVouchers.length}</span></div>
           {myVouchers.map(v => (
             <div key={v.id} className={'p-2.5 rounded-lg border ' + (v.status === 'active' ? 'bg-purple-50 border-purple-200' : 'bg-[#FAF8F4] border-[#111111]/10 opacity-60')}>
               <div className="flex justify-between items-start">
-                <div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[#111111] truncate">{v.partnerName}</div><div className="text-[9px] font-mono text-[#111111]/50">{v.description}</div></div>
+                <div className="min-w-0 flex-1"><div className="text-[13px] font-semibold text-[#111111] truncate">{v.partnerName}</div><div className="text-[11px] font-mono text-[#111111]/50">{v.description}</div></div>
                 <span className={'text-[8px] font-mono uppercase px-1.5 py-0.5 rounded ' + (v.status === 'active' ? 'bg-purple-200 text-purple-900' : 'bg-black/5 text-[#111111]/50')}>{v.status}</span>
               </div>
               <div className="flex items-center justify-between mt-1.5">
-                <div className="text-[10px] font-mono font-bold text-[#111111]">PIN <span className="text-purple-700">{v.pin}</span></div>
-                <div className="text-[9px] font-mono text-[#111111]/60">Max KES {v.maxValue.toLocaleString()}</div>
+                <div className="text-[13px] font-mono font-bold text-[#111111]">PIN <span className="text-purple-700">{v.pin}</span></div>
+                <div className="text-[11px] font-mono text-[#111111]/60">Max KES {v.maxValue.toLocaleString()}</div>
               </div>
             </div>
           ))}
@@ -562,7 +562,7 @@ export const RequesterView: React.FC = () => {
 
       {mergedHistory.length > 0 && (
         <div className="space-y-2">
-          <div className="flex justify-between items-center"><h3 className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Your history</h3><span className="text-[10px] font-mono text-[#111111]/50">{mergedHistory.length}</span></div>
+          <div className="flex justify-between items-center"><h3 className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Your history</h3><span className="text-[10px] font-mono text-[#111111]/50">{mergedHistory.length}</span></div>
           {mergedHistory.slice(0, 5).map((r: any) => {
             const isWithdrawn = r.status === 'withdrawn';
             const canWithdraw = r.type === 'swap' ? r.status === 'reserved' : (r.status === 'verified' || r.status === 'pending_check');
@@ -575,10 +575,10 @@ export const RequesterView: React.FC = () => {
               <div key={r.id} className={'p-2.5 rounded-lg border flex justify-between items-center ' + (isWithdrawn ? 'bg-[#FAF8F4] border-[#111111]/5 opacity-60' : 'bg-white border-[#111111]/10')}>
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {r.type === 'swap' ? <Package className="w-3.5 h-3.5 text-[#1F6B4A] shrink-0" /> : <CreditCard className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
-                  <div className="min-w-0 flex-1"><div className={'text-[11px] font-semibold truncate ' + (isWithdrawn ? 'text-[#111111]/40 line-through' : 'text-[#111111]')}>{r.type === 'swap' ? r.bundleCategory : r.category?.replace('_', ' ')}</div><div className="text-[9px] font-mono text-[#111111]/50 truncate">{r.type === 'swap' ? r.lockerLocation : r.hashedObjectId}</div></div>
+                  <div className="min-w-0 flex-1"><div className={'text-[13px] font-semibold truncate ' + (isWithdrawn ? 'text-[#111111]/40 line-through' : 'text-[#111111]')}>{r.type === 'swap' ? r.bundleCategory : r.category?.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#111111]/50 truncate">{r.type === 'swap' ? r.lockerLocation : r.hashedObjectId}</div></div>
                 </div>
                 <div className="text-right shrink-0 ml-2 flex flex-col items-end gap-1">
-                  <div className="text-[10px] font-mono font-bold text-[#111111]">{r.type === 'swap' ? `PIN ${r.pin}` : `KES ${r.amount?.toLocaleString()}`}</div>
+                  <div className="text-[13px] font-mono font-bold text-[#111111]">{r.type === 'swap' ? `PIN ${r.pin}` : `KES ${r.amount?.toLocaleString()}`}</div>
                   {canWithdraw && (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-2.5 h-2.5" />Withdraw</button>)}
                   {canCollect && (<button onClick={async () => { setCollectError(null); if (!resolvedPin) { setCollectError('PIN unavailable — refresh page'); setTimeout(() => setCollectError(null), 4000); return; } const ok = await collectRequest(r.id, resolvedPin); if (!ok) { setCollectError('Unable to confirm — state refreshed'); setTimeout(() => setCollectError(null), 4000); } else { setTimeout(() => setCollectError(null), 3000); } }} className="text-[9px] text-emerald-700 hover:underline flex items-center gap-0.5"><CheckCircle className="w-2.5 h-2.5" />I've collected</button>)}
                   {!canWithdraw && !canCollect && (<div className={'text-[8px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : r.status === 'collected' ? 'text-emerald-600 font-bold' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
@@ -592,13 +592,13 @@ export const RequesterView: React.FC = () => {
 
       {mergedHistory.length > 0 && (
         <div className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Session summary</div>
+          <div className="text-[11px] font-mono uppercase tracking-wider text-[#111111]/50">Session summary</div>
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center"><div className="font-mono text-lg font-bold text-[#111111]">{sessionStats.total}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Requests</div></div>
             <div className="text-center border-l border-r border-[#111111]/10"><div className="font-mono text-lg font-bold text-emerald-700">{sessionStats.dispatched}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Dispatched</div></div>
             <div className="text-center"><div className="font-mono text-lg font-bold text-amber-700">{sessionStats.pending}</div><div className="text-[8px] font-mono uppercase text-[#111111]/50">Pending</div></div>
           </div>
-          <div className="text-[9px] font-mono text-[#111111]/50 text-center pt-1 border-t border-[#111111]/10">KES {sessionStats.totalValue.toLocaleString()} requested this session</div>
+          <div className="text-[11px] font-mono text-[#111111]/50 text-center pt-1 border-t border-[#111111]/10">KES {sessionStats.totalValue.toLocaleString()} requested this session</div>
         </div>
       )}
     </div>
