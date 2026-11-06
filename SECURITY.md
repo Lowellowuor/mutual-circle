@@ -18,7 +18,7 @@ Items are grouped by how they would be caught. **P0** = a security audit or a cu
 
 ### Cryptography
 
-- **`jwt_secret` defaults to empty.** Nothing validates secrets at startup. If `JWT_SECRET` is unset in a deploy, staff JWTs are signed with the empty string and are forgeable. *Fix:* fail-fast startup validation that refuses to boot if any critical secret is empty or shorter than 32 bytes.
+- ~~**`jwt_secret` defaults to empty.**~~ **FIXED in `fd3aa83`.** The config still defaults to empty strings (for local dev convenience), but `_validate_secrets()` in `main.py` now refuses to start in production if `JWT_SECRET`, `LEDGER_HMAC_KEY`, or `TOKEN_HMAC_KEY_CURRENT` is missing or shorter than 32 characters. In development/other environments, it logs a warning listing the weak secrets but allows startup. Covered by 6 tests in `backend/tests/test_secret_validation.py`.
 
 - **Locker PINs are generated with `Math.random()` in the browser.** JS `Math.random()` is not cryptographically secure. *Fix:* generate on the server using `secrets.token_digits()`, store the hash only, add expiry and attempt limit.
 
