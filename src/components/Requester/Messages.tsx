@@ -68,7 +68,7 @@ export const RequesterMessages: React.FC = () => {
           setNotifications(list.map((n: Notification) =>
             n.read_at ? n : { ...n, read_at: now }
           ));
-          markAllNotificationsRead(tokenHash).catch(() => {});
+          markAllNotificationsRead(tokenHash).catch((e) => { console.error('[messages] mark-all-read failed', e); });
         }
       }
     })();

@@ -75,7 +75,8 @@ function getOrCreateDonorHash(): string {
       localStorage.setItem('mtc-donor-hash', h);
     }
     return h;
-  } catch {
+  } catch (e) {
+    console.warn('[donor-hash] crypto.randomUUID unavailable, falling back to shared anonymous hash', e);
     return 'donor-anonymous';
   }
 }
@@ -537,7 +538,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const completeOcrCheck = async (requestId: string): Promise<{ ok: boolean; reason?: string }> => {
     if (!sessionToken) return { ok: false, reason: 'Session expired' };
-    const r = await api.completeOcr(sessionToken, requestId).catch(() => null);
+    const r = await api.completeOcr(sessionToken, requestId).catch((e) => { console.error('[complete-ocr]', e); return null; });
     if (!r) return { ok: false, reason: 'Backend unreachable' };
     await refetchAll();
     return { ok: true };
@@ -545,7 +546,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const routeFlagToTier4 = async (flagId: string): Promise<{ ok: boolean; reason?: string }> => {
     if (!sessionToken) return { ok: false, reason: 'Session expired' };
-    const r = await api.routeFlagToTier4(sessionToken, flagId).catch(() => null);
+    const r = await api.routeFlagToTier4(sessionToken, flagId).catch((e) => { console.error('[route-flag-tier4]', e); return null; });
     if (!r) return { ok: false, reason: 'Backend unreachable' };
     await refetchAll();
     return { ok: true };
@@ -553,7 +554,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearFlagAsFalsePositive = async (flagId: string, note: string): Promise<{ ok: boolean; reason?: string }> => {
     if (!sessionToken) return { ok: false, reason: 'Session expired' };
-    const r = await api.clearFlag(sessionToken, flagId, note).catch(() => null);
+    const r = await api.clearFlag(sessionToken, flagId, note).catch((e) => { console.error('[clear-flag]', e); return null; });
     if (!r) return { ok: false, reason: 'Backend unreachable' };
     await refetchAll();
     return { ok: true };
@@ -561,7 +562,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const matchPledge = async (pledgeId: string, requestId?: string): Promise<{ ok: boolean; reason?: string }> => {
     if (!sessionToken) return { ok: false, reason: 'Session expired' };
-    const r = await api.matchPledge(sessionToken, pledgeId, requestId).catch(() => null);
+    const r = await api.matchPledge(sessionToken, pledgeId, requestId).catch((e) => { console.error('[match-pledge]', e); return null; });
     if (!r) return { ok: false, reason: 'Backend unreachable' };
     await refetchAll();
     return { ok: true };
@@ -569,7 +570,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const closeMatchInterest = async (id: string, status: 'contacted' | 'closed'): Promise<{ ok: boolean; reason?: string }> => {
     if (!sessionToken) return { ok: false, reason: 'Session expired' };
-    const r = await api.closeMatchInterest(sessionToken, id, status).catch(() => null);
+    const r = await api.closeMatchInterest(sessionToken, id, status).catch((e) => { console.error('[close-interest]', e); return null; });
     if (!r) return { ok: false, reason: 'Backend unreachable' };
     await refetchAll();
     return { ok: true };
@@ -577,18 +578,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const expressInterest = (opportunityId: string, title: string) => {
     if (!tokenHash) return;
-    (async () => { await api.expressMatchInterest(tokenHash, 'self', opportunityId, title); await refetchAll(); })().catch(() => {});
+    (async () => { await api.expressMatchInterest(tokenHash, 'self', opportunityId, title); await refetchAll(); })().catch((e) => { console.error('[express-interest]', e); });
   };
 
   const addDonorContribution = (amount: number, isAnonymous: boolean, optInLedger: boolean) => {
-    (async () => { await api.createDonation(donorHash, Math.round(amount * 100), isAnonymous, optInLedger); await refetchAll(); })().catch(() => {});
+    (async () => { await api.createDonation(donorHash, Math.round(amount * 100), isAnonymous, optInLedger); await refetchAll(); })().catch((e) => { console.error('[create-donation]', e); });
   };
 
   const addPledge = (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => {
     (async () => {
       await api.createPledge(donorHash, type, description, locality, maxValue ? Math.round(maxValue * 100) : undefined);
       await refetchAll();
-    })().catch(() => {});
+    })().catch((e) => { console.error('[add-pledge]', e); });
   };
 
   // Backend logs privileged actions; frontend no-op for compatibility

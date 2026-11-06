@@ -205,7 +205,7 @@ export const DonorView: React.FC = () => {
         localStorage.setItem(key, JSON.stringify(impactStats));
         sessionStorage.setItem(sessionKey, '1');
       }
-    } catch { setImpactDelta(null); }
+    } catch (e) { console.error('[donor] impact delta compute failed', e); setImpactDelta(null); }
   }, [impactStats, donorHash]);
 
   const handleDownloadDonations = () => {
