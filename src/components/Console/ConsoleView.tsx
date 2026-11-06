@@ -360,7 +360,7 @@ export const ConsoleView: React.FC = () => {
               <div><div className="font-bold text-[12px] text-[#111111] uppercase">{r.category.replace('_', ' ')}</div><div className="text-[11px] font-mono text-[#1F6B4A]">{r.hashedObjectId}</div></div>
               <div className="flex items-center justify-between"><span className="font-mono font-bold text-[#111111]"><span className="text-[9px] text-[#111111]/50 mr-0.5">KES</span><span className="text-sm tabular-nums">{r.amount.toLocaleString()}</span></span><span className="text-[10px] font-mono text-[#111111]/50">{r.timestamp}</span></div>
               <div className="p-2 bg-amber-50 border border-amber-200 rounded text-[10px] text-amber-900 leading-relaxed">Awaiting bill photo OCR verification. <strong>SLA:</strong> 4 business hours. Escalates to Tier 4 if unresolved.</div>
-              <button onClick={async () => { const r = await completeOcrCheck(r.id); push(r.ok ? { kind: 'success', message: 'OCR verified' } : { kind: 'error', message: r.reason ?? 'Verification failed' }); }} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1"><Check className="w-3 h-3" /> Complete OCR & Verify</button>
+              <button onClick={async () => { const result = await completeOcrCheck(r.id); push(result.ok ? { kind: 'success', message: 'OCR verified' } : { kind: 'error', message: result.reason ?? 'Verification failed' }); }} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1"><Check className="w-3 h-3" /> Complete OCR & Verify</button>
             </div>
           ))}
         </div>

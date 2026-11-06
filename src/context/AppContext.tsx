@@ -51,11 +51,11 @@ interface AppContextType {
   dispatchRequest: (id: string, type?: 'swap' | 'pool') => Promise<string | null>;
   issueVoucher: (requestId: string, partnerName: string, partnerType: 'retailer' | 'hospital') => Promise<Voucher | null>;
   redeemVoucher: (pin: string, amountPence: number, partnerName: string) => Promise<{ ok: boolean; reason?: string }>;
-  completeOcrCheck: (requestId: string) => void;
-  routeFlagToTier4: (flagId: string) => void;
-  clearFlagAsFalsePositive: (flagId: string, note: string) => void;
-  matchPledge: (pledgeId: string) => void;
-  closeMatchInterest: (id: string, status: 'contacted' | 'closed') => void;
+  completeOcrCheck: (requestId: string) => Promise<{ ok: boolean; reason?: string }>;
+  routeFlagToTier4: (flagId: string) => Promise<{ ok: boolean; reason?: string }>;
+  clearFlagAsFalsePositive: (flagId: string, note: string) => Promise<{ ok: boolean; reason?: string }>;
+  matchPledge: (pledgeId: string, requestId?: string) => Promise<{ ok: boolean; reason?: string }>;
+  closeMatchInterest: (id: string, status: 'contacted' | 'closed') => Promise<{ ok: boolean; reason?: string }>;
   expressInterest: (opportunityId: string, title: string) => void;
   addDonorContribution: (amount: number, isAnonymous: boolean, optInLedger: boolean) => void;
   addPledge: (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => void;

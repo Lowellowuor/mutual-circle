@@ -325,7 +325,7 @@ export const getDistribution = () =>
   );
 // --- Requester notifications (Gap 1) ---
 export const getNotifications = (token: string) =>
-  call<{ notifications: { id: string; request_id: string | null; template: string; content: string; status: string; created_at: string; sent_at: string | null }[] }>(
+  call<{ notifications: { id: string; request_id: string | null; template: string; content: string; status: string; created_at: string; sent_at: string | null; read_at: string | null }[] }>(
     '/notifications/mine', { headers: { 'X-Token': token } },
   );
 
