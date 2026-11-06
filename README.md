@@ -1,25 +1,32 @@
-﻿# Mutual Circle
+# Mutual Circle
 
-Anonymous, blind-pooled resource sharing for Kenya. Requesters submit a need — a food bundle or a bill to pay — and receive an outcome without ever being linked to a specific donor. Donors give to a pool, never to a person. Fulfilment staff settle requests with partner institutions. Every state change is on a public HMAC-chained ledger.
+**Resource-sharing network for Kenya.** Requesters submit a need — a food bundle or a bill to pay — and receive an outcome without ever being linked to a specific donor. Donors give to a blind pool, never to a person. Fulfilment staff settle requests with partner institutions. Every state change is on a public HMAC-chained ledger.
 
-## What it does
+**Status:** Functional prototype. Production-ready architecture; pilot-ready operations. Waiting on: real payment integration, SMS provider, partner authentication hardening, and the security items in `SECURITY.md` before public deployment.
 
-- **Requesters** apply by phone (SMS, USSD, WhatsApp, or web), declare household size, and either reserve a food bundle or submit a bill for payment. Every request returns a reference and a collection PIN.
-- **Staff** see a fulfilment queue, dispatch verified requests to partner institutions (KPLC, schools, hospitals), or issue vouchers where the requester collects from a retail partner. Audit staff run OCR verification on Tier 3 requests.
-- **Donors** give to the blind pool. They can opt in to a public recognition ledger, edit their display name, or stay fully anonymous. They can also pledge goods or services which fulfilment staff match to requests.
+## What works today
+
+- **Requesters** apply by phone (web), declare household size, and either reserve a food bundle or submit a bill for payment. Every request returns a reference and a collection PIN.
+- **Staff** see a fulfilment queue, dispatch verified requests to partner institutions (KPLC, schools, hospitals), issue vouchers where the requester collects from a retail partner, and process the OCR queue for Tier 3 requests.
+- **Donors** give to the blind pool, opt in to a public recognition ledger, pledge goods or services that fulfilment staff match to specific requests.
 - **Partners** see only the redemptions and settlements that concern them, via a scoped API key.
+- The **blind-pool invariant holds**: no field in the schema connects a specific donor to a specific disbursement. Enforced at the data model, not just the UI.
 
-No donor is linked to a specific recipient anywhere in the schema. The blind-pool invariant is enforced at the data model, not just the UI.
+## What is stubbed or mocked
+
+See the [Current Limitations](#current-limitations) section below. In short: payments, SMS, USSD, WhatsApp, and locker hardware are simulated. The code paths, contracts, and audit trail for those systems exist; they are not connected to live providers.
 
 ## Stack
 
-- **Backend:** FastAPI + asyncpg + Postgres (Neon), Alembic for migrations
-- **Frontend:** React 18 + Vite + TypeScript + Tailwind CSS
-- **Ledger:** HMAC-chained, publicly verifiable at GET /ledger/public with CSV export
-- **Testing:** 38-assertion PowerShell integration test, all passing
-- **Deployment:** GitHub Pages for the frontend, backend on any ASGI host
+- **Backend:** FastAPI + asyncpg + Postgres (Neon). Alembic for migrations.
+- **Frontend:** React 18 + Vite + TypeScript + Tailwind CSS.
+- **Ledger:** HMAC-chained, publicly verifiable at `GET /ledger/public` with CSV export.
+- **Testing:** 38-assertion PowerShell integration test, all passing.
+- **Deployment:** Frontend on GitHub Pages, backend on any ASGI host.
 
 ## Quick start
+
+See `docs/deploy.md` for the full walkthrough. Short version:
 
 ### Backend
 
@@ -31,82 +38,54 @@ No donor is linked to a specific recipient anywhere in the schema. The blind-poo
     .\.venv\Scripts\alembic upgrade head
     .\.venv\Scripts\python -m uvicorn mtc.main:app --host 127.0.0.1 --port 8000 --app-dir src
 
-Wait for Application startup complete. Leave this terminal open.
-
 ### Frontend
 
-In a second terminal:
-
-    cd mutual-circle
     npm install
     npm run dev
 
-Open http://localhost:3000/mutual-circle/ (or whichever URL Vite prints — it may be 3001).
-
-### Integration test
-
-In a third terminal. Stop the demo backend first — the test kills all venv python during setup:
-
-    & .\scripts\integration-test.ps1
-
-Expect Total: 38 / 38 passed.
-## Endpoints
-
-| Method | Path | Auth | Purpose |
-|---|---|---|---|
-| POST | /tokens | none | Issue HMAC token from phone |
-| POST | /requests/swap | X-Token | Create food-bundle request |
-| POST | /requests/pool | X-Token | Create bill-payment request (tier 1-4) |
-| POST | /requests/{id}/collect | X-Token | Confirm collection with PIN |
-| POST | /requests/collect | X-Token | PIN-only collection (SMS/USSD/WA) |
-| GET | /requests/mine | X-Token | Requester's requests |
-| GET | /notifications/mine | X-Token | Requester notification feed |
-| POST | /donations | X-Donor-Hash | Donor gives to pool |
-| GET | /donations/mine | X-Donor-Hash | Donor's giving history |
-| POST | /donations/profile | X-Donor-Hash | Join or leave leaderboard |
-| GET | /donations/leaderboard | none | Public recognition ledger |
-| POST | /pledges | X-Donor-Hash | Pledge goods or services |
-| POST | /staff/login | none | Issue staff JWT |
-| GET | /fulfilment/queue | Bearer | Fulfilment queue (tier-appropriate) |
-| POST | /fulfilment/requests/{id}/dispatch | Bearer | Settle to institution (direct) |
-| POST | /fulfilment/requests/{id}/voucher | Bearer | Issue retail voucher |
-| GET | /audit/ocr-queue | Bearer | Pending OCR verification |
-| POST | /audit/ocr/{id}/complete | Bearer | Mark OCR verified |
-| GET | /ledger/public | none | Chain verification + recent entries |
-| GET | /ledger/public.csv | none | CSV export of full ledger |
-| GET | /partners/me | X-Partner-Key | Partner profile |
-| GET | /partners/me/redemptions | X-Partner-Key | Partner's scope |
+Open http://localhost:3000/mutual-circle/ (or whichever URL Vite prints).
 
 ## Documentation
 
-- docs/auth.md — four auth schemes and their roles
-- docs/tiers.md — tier 1-4 assignment logic
-- docs/payout.md — when to dispatch vs. issue a voucher
-- ROADMAP.md — what's shipped and what's pending
+- **`docs/api.md`** — API reference with auth flows and sample requests
+- `docs/auth.md` — four auth schemes and their roles
+- `docs/roles.md` — six-actor permission matrix, blind-pool invariant
+- `docs/payout.md` — when to dispatch vs. issue a voucher
+- `docs/tiers.md` — tier 1-4 assignment logic
+- `docs/deploy.md` — deployment walkthrough
+- `SECURITY.md` — known security gaps before public deployment
+- `ROADMAP.md` — what's shipped, what's planned
 
-## Status
+## Current limitations
 
-Working end-to-end:
+**Payments are simulated.** No M-PESA Daraja integration. Donations are database rows; dispatch and voucher paths write placeholder receipt strings (`MPESA-XXXXXXXX`). The tier system, dispatch/voucher decision, and HMAC ledger entry are all real; only the actual money movement is missing. See `ROADMAP.md` Phase B.
 
-- 38-assertion integration test, all passing
-- 4 channels functional (SMS, USSD, WhatsApp, web)
-- Collection confirmation across all 4 channels with bcrypt PIN verification
-- HMAC ledger verification with public proof page and CSV export
-- Household-size capture and bundle sizing
-- Donor portal with privacy state, impact deltas, and donations CSV
-- Alembic migrations reproducible (001_ledger -> 002_collected_status)
+**Messaging is simulated.** No SMS, USSD, or WhatsApp gateway connected. Notification templates exist and persist to the `notifications` table; they do not go out as SMS. OTP and PIN are displayed in the browser for the pilot.
 
-Not yet built (see ROADMAP.md):
+**Locker hardware is simulated.** The locker service records the assignment but does not open a physical locker.
 
-- Idempotency keys on POST endpoints (double-tap risk)
-- Pledge-to-request linkage (donor cannot see whether their pledge was delivered)
-- Notification i18n (English only today)
-- Full Alembic coverage (18+ tables still created by raw SQL)
+**Partner auth is pilot-grade.** `X-Partner-Key` is a static per-partner key. Real deployment needs per-partner JWTs with rotation. See `SECURITY.md`.
 
-## Operational note
+**Audit trail is partial.** Compliance-critical actions (dispatch, voucher issuance, OCR verification, flag resolution, partner confirm) write to `audit_log`. Some operator actions are local-only — see `SECURITY.md` for the full list.
 
-The integration test runs on port 8010 to isolate from any zombie socket on 8000. Stop the demo backend with Ctrl+C, not Stop-Process — killing uvicorn with Stop-Process leaves the Windows socket in LISTEN state for hours.
+**Bench tab is a stub.** The Requester Bench shows the top-level entry (helplines + "reach out directly") but is not the full peer-support experience.
+
+**No CI pipeline yet.** Tests run locally; no GitHub Actions, no automated deploy. See `ROADMAP.md` Phase C.
+
+## Blind-pool invariant
+
+No donor is linked to a specific recipient anywhere in the schema. This is enforced at the data model, not just the UI. If you find a query that appears to link donor to recipient, that is a bug — report it.
+
+## Integration test
+
+    & .\scripts\integration-test.ps1
+
+Expect `Total: 38 / 38 passed`. The test runs on port 8010 to isolate from a zombie socket on 8000.
+
+## Deployment note (Windows)
+
+The integration test kills all venv python during setup. Stop the demo backend with `Ctrl+C`, not `Stop-Process` — killing uvicorn with `Stop-Process` leaves the Windows socket in LISTEN state for hours.
 
 ## License
 
-Internal prototype — not for public distribution.
+See `LICENSE`. Prototype — not for public deployment without addressing `SECURITY.md`.
