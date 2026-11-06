@@ -757,10 +757,13 @@ export const RequesterView: React.FC = () => {
     );
   };
 
+  // Pilot version of the Bench: helplines only. Full peer-chat UI lives
+  // in BenchView.tsx (rendered in demo mode via App.tsx:98). When the
+  // peer-chat backend ships, replace this stub with <BenchView />.
   const renderBench = () => (
     <div className="p-4 space-y-3">
-      <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Bench</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Separate system. Confidential.</p></div>
-      <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[10px] font-bold text-purple-900"><ShieldCheck className="w-3 h-3" /> Isolated from your account</div><p className="text-[10px] text-purple-900/70 leading-relaxed">No shared identifiers with Swap/Pool.</p></div>
+      <div><h2 className="font-serif text-lg font-bold text-[#111111]">The Bench</h2><p className="text-[10px] text-[#111111]/50 mt-0.5">Peer chat coming soon. Direct helplines available now.</p></div>
+      <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5"><div className="flex items-center gap-1 text-[10px] font-bold text-purple-900"><ShieldCheck className="w-3 h-3" /> Isolated from your account</div><p className="text-[10px] text-purple-900/70 leading-relaxed">No shared identifiers with Swap/Pool. Peer chat is launching soon — the helplines below are available today.</p></div>
       <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2"><div className="text-[9px] font-mono uppercase text-[#111111]/50">Reach out directly</div>{helplines.map(h => (<div key={h.id} className="flex items-center justify-between py-1.5 border-b border-[#111111]/5 last:border-0"><div><div className="text-[10px] uppercase tracking-wider text-[#111111]/50 font-mono">{h.name}</div><div className="text-sm font-bold font-mono text-[#111111]">{h.number}</div><div className="text-[9px] text-[#111111]/50">{h.sub}</div></div><Phone className="w-4 h-4 text-purple-600" /></div>))}</div>
     </div>
   );
