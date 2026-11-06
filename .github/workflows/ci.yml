@@ -65,8 +65,15 @@ jobs:
       # and Alembic migrations; they are not wired into CI yet. Adding
       # them needs a Postgres service container + seed data. Tracked
       # as a follow-up (audit I2 + I5).
+      # CI_NO_DB=1 makes tests/conftest.py skip the session-scoped pool
+      # lifecycle fixture. The current test target (test_secret_validation.py)
+      # does not need a DB. The other 5 test files (test_auth,
+      # test_dispatch, test_flags_vouchers, test_ledger, test_requests)
+      # DO need a live Postgres. Enabling those requires a Postgres
+      # service container + migrations + seed data (audit items I2 + I5).
       - name: Test (secret validation only)
         working-directory: backend
         env:
           PYTHONPATH: src
+          CI_NO_DB: "1"
         run: pytest tests/test_secret_validation.py -v
