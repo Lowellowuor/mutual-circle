@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "ci-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend (lint + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Lint (tsc --noEmit)
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  backend:
+    name: Backend (pytest — isolated tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install -e .
+          fi
+          pip install pytest pytest-asyncio
+          pip list
+
+      # Only test_secret_validation.py runs here. The other 5 test
+      # files (test_auth, test_dispatch, test_flags_vouchers,
+      # test_ledger, test_requests) require a live Postgres instance
+      # and Alembic migrations; they are not wired into CI yet. Adding
+      # them needs a Postgres service container + seed data. Tracked
+      # as a follow-up (audit I2 + I5).
+      - name: Test (secret validation only)
+        working-directory: backend
+        env:
+          PYTHONPATH: src
+        run: pytest tests/test_secret_validation.py -v
