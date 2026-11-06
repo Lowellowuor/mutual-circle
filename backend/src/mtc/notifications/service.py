@@ -21,6 +21,7 @@ TEMPLATES = {
     "withdrawn":       "Mutual Circle: Request withdrawn. Ref: {ref}.",
     "collected":       "Mutual Circle: Bundle collected. Thank you.",
     "pool_collected":  "Mutual Circle: Your bill was paid at {partner}. Ref: {ref}. Thank you.",
+"pool_fulfilled":  "Mutual Circle: Payment confirmed by {partner}. Ref: {ref}. Thank you.",
 }
 
 

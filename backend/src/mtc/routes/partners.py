@@ -168,7 +168,7 @@ async def confirm_request(
     partner: dict = Depends(require_partner),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
-    req = await conn.fetchrow("SELECT id FROM requests WHERE id = $1", request_id)
+    req = await conn.fetchrow("SELECT id, token_hash, status FROM requests WHERE id = $1", request_id)
     if req is None:
         raise HTTPException(404, "Request not found")
     try:
@@ -181,6 +181,26 @@ async def confirm_request(
                    note = EXCLUDED.note""",
             partner["id"], request_id, body.confirmation_type, body.note,
         )
+        if body.confirmation_type in ("delivered", "settled") and req["status"] == "submitted_to_partner":
+            await conn.execute(
+                "UPDATE requests SET status = 'fulfilled', updated_at = now() WHERE id = $1",
+                request_id,
+            )
+            partner_name = "the institution"
+            try:
+                prow = await conn.fetchrow(
+                    "SELECT name FROM partners WHERE id = $1", partner["id"],
+                )
+                if prow and prow.get("name"):
+                    partner_name = prow["name"]
+            except Exception:
+                pass
+            from mtc.notifications.service import notify
+            await notify(
+                conn, req["token_hash"], request_id, "pool_fulfilled",
+                {"partner": partner_name, "ref": "REF-" + request_id[:8].upper()},
+            )
+
         return {"ok": True, "request_id": request_id, "confirmation_type": body.confirmation_type}
     except Exception as exc:
         raise HTTPException(500, f"Confirmation failed: {exc}")
