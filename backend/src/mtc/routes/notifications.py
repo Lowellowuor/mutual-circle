@@ -20,7 +20,7 @@ async def my_notifications(
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     rows = await conn.fetch(
-        """SELECT id, request_id, template, content, status, created_at, sent_at
+        """SELECT id, request_id, template, content, status, created_at, sent_at, read_at
            FROM notifications
            WHERE token_hash = $1
            ORDER BY created_at DESC
@@ -37,6 +37,7 @@ async def my_notifications(
                 "status": r["status"],
                 "created_at": r["created_at"].isoformat(),
                 "sent_at": r["sent_at"].isoformat() if r["sent_at"] else None,
+                "read_at": r["read_at"].isoformat() if r["read_at"] else None,
             }
             for r in rows
         ]
@@ -53,3 +54,28 @@ async def unread_count(
         token,
     )
     return {"unread_count": int(count or 0)}
+
+
+@router.patch("/{notification_id}/read")
+async def mark_read(
+    notification_id: str,
+    token: str = Depends(_require_token),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Mark a notification as read. Idempotent — re-marking is a no-op.
+
+    Uses RETURNING to distinguish wrong-token (0 rows) from
+    already-read-right-token (COALESCE preserves timestamp, 1 row).
+    """
+    try:
+        row = await conn.fetchrow(
+            "UPDATE notifications SET read_at = COALESCE(read_at, now()) "
+            "WHERE id = $1::uuid AND token_hash = $2 "
+            "RETURNING id",
+            notification_id, token,
+        )
+    except Exception:
+        raise HTTPException(404, "Notification not found")
+    if row is None:
+        raise HTTPException(404, "Notification not found")
+    return {"ok": True}

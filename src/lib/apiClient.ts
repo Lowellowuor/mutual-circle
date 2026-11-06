@@ -328,6 +328,12 @@ export const getNotifications = (token: string) =>
 export const getUnreadNotificationCount = (token: string) =>
   call<{ unread_count: number }>('/notifications/unread_count', { headers: { 'X-Token': token } });
 
+export const markNotificationRead = (token: string, notificationId: string) =>
+  call<{ ok: boolean }>(`/notifications/${notificationId}/read`, {
+    method: 'PATCH',
+    headers: { 'X-Token': token },
+  });
+
 // --- Public ledger (Gap 2) ---
 export const getPublicLedger = (limit = 20) =>
   call<{
