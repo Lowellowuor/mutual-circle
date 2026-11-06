@@ -639,6 +639,7 @@ export const RequesterView: React.FC = () => {
         <div><h2 className="font-serif text-xl font-bold text-[#111111]">The Swap</h2><p className="text-[12px] text-[#111111]/50 mt-0.5">Reserve a bundle. Collect any time.</p></div>
         {rateLimited && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[12px] text-rose-900">Daily limit reached. Try again tomorrow.</p></div>}
         {swapError && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[12px] text-rose-900">{swapError}</p></div>}
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Step {swapStep === 'bundle' ? 1 : 2} of 2</div>
         <div className="flex items-center gap-1.5">
           {(['bundle', 'location'] as SwapStep[]).map((s, i) => {
             const active = swapStep === s || (s === 'bundle' && swapStep !== 'bundle');
@@ -693,6 +694,7 @@ export const RequesterView: React.FC = () => {
         <div><h2 className="font-serif text-xl font-bold text-[#111111]">The Pool</h2><p className="text-[12px] text-[#111111]/50 mt-0.5">Funds go directly to the institution.</p></div>
         {rateLimited && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[12px] text-rose-900">Daily limit reached.</p></div>}
         {poolError && <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2"><AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" /><p className="text-[12px] text-rose-900">{poolError}</p></div>}
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[#111111]/50">Step {poolStep === 'category' ? 1 : 2} of 2</div>
         <div className="flex items-center gap-1.5">
           {(['category', 'details'] as PoolStep[]).map((s, i) => {
             const active = poolStep === s || (s === 'category' && poolStep !== 'category');
