@@ -535,29 +535,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { ok: r.ok, reason: r.reason };
   };
 
-  const completeOcrCheck = (requestId: string) => {
-    if (!sessionToken) return;
-    (async () => { await api.completeOcr(sessionToken, requestId); await refetchAll(); })().catch(() => {});
+  const completeOcrCheck = async (requestId: string): Promise<{ ok: boolean; reason?: string }> => {
+    if (!sessionToken) return { ok: false, reason: 'Session expired' };
+    const r = await api.completeOcr(sessionToken, requestId).catch(() => null);
+    if (!r) return { ok: false, reason: 'Backend unreachable' };
+    await refetchAll();
+    return { ok: true };
   };
 
-  const routeFlagToTier4 = (flagId: string) => {
-    if (!sessionToken) return;
-    (async () => { await api.routeFlagToTier4(sessionToken, flagId); await refetchAll(); })().catch(() => {});
+  const routeFlagToTier4 = async (flagId: string): Promise<{ ok: boolean; reason?: string }> => {
+    if (!sessionToken) return { ok: false, reason: 'Session expired' };
+    const r = await api.routeFlagToTier4(sessionToken, flagId).catch(() => null);
+    if (!r) return { ok: false, reason: 'Backend unreachable' };
+    await refetchAll();
+    return { ok: true };
   };
 
-  const clearFlagAsFalsePositive = (flagId: string, note: string) => {
-    if (!sessionToken) return;
-    (async () => { await api.clearFlag(sessionToken, flagId, note); await refetchAll(); })().catch(() => {});
+  const clearFlagAsFalsePositive = async (flagId: string, note: string): Promise<{ ok: boolean; reason?: string }> => {
+    if (!sessionToken) return { ok: false, reason: 'Session expired' };
+    const r = await api.clearFlag(sessionToken, flagId, note).catch(() => null);
+    if (!r) return { ok: false, reason: 'Backend unreachable' };
+    await refetchAll();
+    return { ok: true };
   };
 
-  const matchPledge = (pledgeId: string) => {
-    if (!sessionToken) return;
-    (async () => { await api.matchPledge(sessionToken, pledgeId); await refetchAll(); })().catch(() => {});
+  const matchPledge = async (pledgeId: string): Promise<{ ok: boolean; reason?: string }> => {
+    if (!sessionToken) return { ok: false, reason: 'Session expired' };
+    const r = await api.matchPledge(sessionToken, pledgeId).catch(() => null);
+    if (!r) return { ok: false, reason: 'Backend unreachable' };
+    await refetchAll();
+    return { ok: true };
   };
 
-  const closeMatchInterest = (id: string, status: 'contacted' | 'closed') => {
-    if (!sessionToken) return;
-    (async () => { await api.closeMatchInterest(sessionToken, id, status); await refetchAll(); })().catch(() => {});
+  const closeMatchInterest = async (id: string, status: 'contacted' | 'closed'): Promise<{ ok: boolean; reason?: string }> => {
+    if (!sessionToken) return { ok: false, reason: 'Session expired' };
+    const r = await api.closeMatchInterest(sessionToken, id, status).catch(() => null);
+    if (!r) return { ok: false, reason: 'Backend unreachable' };
+    await refetchAll();
+    return { ok: true };
   };
 
   const expressInterest = (opportunityId: string, title: string) => {
