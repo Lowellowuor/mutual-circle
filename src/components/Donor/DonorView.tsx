@@ -814,7 +814,7 @@ export const DonorView: React.FC = () => {
               <div className="space-y-1">
                 {leaderboard.map((entry, idx) => (
                   <div key={`${entry.display_name}-${idx}`} className="flex items-center gap-3 py-2 border-b border-[#111111]/5 last:border-0">
-                    <div className="w-6 text-center font-mono text-[10px] font-bold text-[#111111]/40">#{idx + 1}</div>
+                    <div className="w-6 text-center font-mono text-[11px] font-bold text-[#111111]/40">#{idx + 1}</div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-semibold text-[#111111] truncate">{entry.display_name}</div>
                       <div className="text-[11px] font-mono text-[#111111]/50">{entry.gift_count} gift{entry.gift_count !== 1 ? 's' : ''}</div>
