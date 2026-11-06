@@ -435,10 +435,10 @@ export const ConsoleView: React.FC = () => {
       <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Store className="w-3.5 h-3.5" /> Partner Till</div><p className="text-[11px] text-[#111111]/60 mt-1">R.U.T.H 4.5 - voucher redemption.</p></div>
 
       <form onSubmit={handleRedeem} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
-        <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
+        <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
         <div className="grid grid-cols-2 gap-2">
-          <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">PIN</label><input value={tillPin} onChange={e => setTillPin(e.target.value)} placeholder="4 digits" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
-          <div><label className="text-[10px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={tillAmount} onChange={e => setTillAmount(e.target.value)} placeholder="0" className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
+          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">PIN</label><input value={tillPin} onChange={e => setTillPin(e.target.value)} placeholder="4 digits" maxLength={4} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
+          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={tillAmount} onChange={e => setTillAmount(e.target.value)} placeholder="0" className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none" /></div>
         </div>
         <button type="submit" disabled={!tillPin || !tillAmount} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold disabled:opacity-40">Redeem Voucher</button>
       </form>
@@ -446,27 +446,27 @@ export const ConsoleView: React.FC = () => {
       {tillResult && (
         <div className={'p-3 rounded-xl flex items-start gap-2 ' + (tillResult.ok ? 'bg-emerald-50 border border-emerald-200' : 'bg-rose-50 border border-rose-200')}>
           {tillResult.ok ? <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" /> : <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />}
-          <div className="flex-1"><div className={'text-[11px] font-bold ' + (tillResult.ok ? 'text-emerald-900' : 'text-rose-900')}>{tillResult.ok ? 'Voucher accepted' : 'Voucher rejected'}</div>{!tillResult.ok && <p className="text-[10px] text-rose-900/70 mt-0.5">{tillResult.reason}</p>}</div>
+          <div className="flex-1"><div className={'text-[11px] font-bold ' + (tillResult.ok ? 'text-emerald-900' : 'text-rose-900')}>{tillResult.ok ? 'Voucher accepted' : 'Voucher rejected'}</div>{!tillResult.ok && <p className="text-[11px] text-rose-900/70 mt-0.5">{tillResult.reason}</p>}</div>
           <button onClick={() => setTillResult(null)} className="text-[#111111]/40 shrink-0" aria-label="Dismiss"><X className="w-3 h-3" /></button>
         </div>
       )}
 
       <div className="space-y-1.5">
-        <div className="text-[10px] font-mono uppercase text-[#111111]/50">Recent redemptions</div>
+        <div className="text-[11px] font-mono uppercase text-[#111111]/50">Recent redemptions</div>
         {voucherRedemptions.length === 0 ? (
           <div className="p-3 bg-white border border-[#111111]/10 rounded-lg text-center"><p className="text-[11px] text-[#111111]/40">No redemptions yet</p></div>
         ) : voucherRedemptions.slice(0, 4).map(r => (
           <div key={r.id} className="p-2 bg-white border border-[#111111]/10 rounded-lg flex justify-between text-[11px]">
-            <div><div className="font-mono font-bold text-[#111111]">{r.voucherId} * {r.pin}</div><div className="text-[10px] text-[#111111]/50">{r.partnerName} * {r.timestamp}</div></div>
-            <span className={'text-[10px] font-mono uppercase px-1.5 py-0.5 rounded self-start ' + (r.status === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800')}>{r.status}</span>
+            <div><div className="font-mono font-bold text-[#111111]">{r.voucherId} * {r.pin}</div><div className="text-[11px] text-[#111111]/50">{r.partnerName} * {r.timestamp}</div></div>
+            <span className={'text-[11px] font-mono uppercase px-1.5 py-0.5 rounded self-start ' + (r.status === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800')}>{r.status}</span>
           </div>
         ))}
       </div>
 
       <div className="space-y-1.5">
         <div className="flex justify-between items-center">
-          <div className="text-[10px] font-mono uppercase text-[#111111]/50">Issued vouchers</div>
-          <div className="text-[10px] font-mono text-[#111111]/40">{vouchers.filter(v => v.status === 'active').length} active * {vouchers.length} total</div>
+          <div className="text-[11px] font-mono uppercase text-[#111111]/50">Issued vouchers</div>
+          <div className="text-[11px] font-mono text-[#111111]/40">{vouchers.filter(v => v.status === 'active').length} active * {vouchers.length} total</div>
         </div>
         {vouchers.length === 0 ? (
           <div className="p-3 bg-white border border-[#111111]/10 rounded-lg text-center">
@@ -477,11 +477,11 @@ export const ConsoleView: React.FC = () => {
             <div className="flex justify-between items-start">
               <div className="min-w-0 flex-1">
                 <div className="text-[11px] font-semibold text-[#111111] truncate">{v.partnerName}</div>
-                <div className="text-[10px] font-mono text-[#111111]/50">PIN <strong className="text-purple-700">{v.pin}</strong> * {v.description}</div>
+                <div className="text-[11px] font-mono text-[#111111]/50">PIN <strong className="text-purple-700">{v.pin}</strong> * {v.description}</div>
               </div>
               <div className="text-right shrink-0 ml-2">
                 <div className="text-[11px] font-mono font-bold text-[#111111]">KES {v.maxValue.toLocaleString()}</div>
-                <span className={'text-[10px] font-mono uppercase ' + (v.status === 'active' ? 'text-purple-700 font-bold' : 'text-[#111111]/50')}>{v.status}</span>
+                <span className={'text-[11px] font-mono uppercase ' + (v.status === 'active' ? 'text-purple-700 font-bold' : 'text-[#111111]/50')}>{v.status}</span>
               </div>
             </div>
           </div>
@@ -494,7 +494,7 @@ export const ConsoleView: React.FC = () => {
     <div className="p-4 space-y-3">
       <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl"><h3 className="text-[12px] font-bold text-[#111111]">Separation of Duties</h3><p className="text-[11px] text-[#111111]/60 mt-1">No role holds both identity and payment authority.</p></div>
       <div className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl overflow-x-auto">
-        <table className="w-full text-left text-[10px]">
+        <table className="w-full text-left text-[11px]">
           <thead className="text-[#111111]/50 uppercase font-mono"><tr><th className="pb-2">Role</th><th className="pb-2 text-center">Id</th><th className="pb-2 text-center">Pay</th><th className="pb-2 text-center">Flag</th><th className="pb-2 text-center">Log</th></tr></thead>
           <tbody className="divide-y divide-[#111111]/5">
             {[{ r: 'Enrolment', p: [true, false, false, false] }, { r: 'Fulfilment', p: [false, true, false, false] }, { r: 'Audit', p: [false, false, true, true] }].map(row => (
@@ -511,7 +511,7 @@ export const ConsoleView: React.FC = () => {
     <div className="p-4 space-y-2">
       {[{ n: 1, tag: 'Low', title: 'Self-declared', desc: 'Standard bundles. 7-day rate limit + 5% sample.' }, { n: 2, tag: 'Object', title: 'Institutional check', desc: 'Utility/school/hospital < KES 5,000.' }, { n: 3, tag: 'High', title: 'OCR check', desc: 'Amount > KES 5,000. Automated bill photo.' }, { n: 4, tag: 'Anomaly', title: 'Independent panel', desc: 'Flagged anomalies. Off-system review.' }].map(row => (
         <div key={row.n} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl">
-          <div className="flex justify-between items-center"><span className="font-bold text-[#1F6B4A] font-mono text-[12px]">Tier {row.n}</span><span className="text-[10px] font-mono bg-black/5 px-1.5 py-0.5 rounded uppercase">{row.tag}</span></div>
+          <div className="flex justify-between items-center"><span className="font-bold text-[#1F6B4A] font-mono text-[12px]">Tier {row.n}</span><span className="text-[11px] font-mono bg-black/5 px-1.5 py-0.5 rounded uppercase">{row.tag}</span></div>
           <div className="font-semibold text-[12px] text-[#111111] mt-1">{row.title}</div>
           <p className="text-[11px] text-[#111111]/60 mt-0.5 leading-relaxed">{row.desc}</p>
         </div>
@@ -559,7 +559,7 @@ export const ConsoleView: React.FC = () => {
               className={'p-2 rounded-lg border-2 text-center transition-all ' + (active ? 'bg-[#1F6B4A] text-white border-[#1F6B4A]' : 'bg-white border-[#111111]/15 text-[#111111] hover:border-[#111111]/30')}
             >
               <Icon className="w-3.5 h-3.5 mx-auto mb-0.5" />
-              <div className="text-[10px] font-bold">{p.label}</div>
+              <div className="text-[11px] font-bold">{p.label}</div>
             </button>
           );
         })}
@@ -574,8 +574,8 @@ export const ConsoleView: React.FC = () => {
               <Building2 className="w-4 h-4 text-[#1F6B4A]" />
               <div className="text-[12px] font-bold text-[#111111] leading-tight">{partnerInfo.name}</div>
             </div>
-            <div className="text-[10px] font-mono text-[#111111]/50 uppercase">{partnerInfo.type}</div>
-            <div className="flex justify-between pt-1.5 border-t border-[#111111]/10 text-[10px] font-mono">
+            <div className="text-[11px] font-mono text-[#111111]/50 uppercase">{partnerInfo.type}</div>
+            <div className="flex justify-between pt-1.5 border-t border-[#111111]/10 text-[11px] font-mono">
               <span className="text-[#111111]/50">Total: {partnerRedemptions.length}</span>
               <span className="text-emerald-700">Confirmed: {partnerRedemptions.filter((r: any) => r.confirmed).length}</span>
             </div>
@@ -601,7 +601,7 @@ export const ConsoleView: React.FC = () => {
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="text-[11px] font-semibold text-[#111111] capitalize truncate">{details}</div>
-                      <div className="text-[10px] font-mono text-[#111111]/50 truncate">
+                      <div className="text-[11px] font-mono text-[#111111]/50 truncate">
                         {String(r.id).slice(0, 8)}… · {(r.status || '').replace(/_/g, ' ')}
                       </div>
                     </div>
@@ -612,14 +612,14 @@ export const ConsoleView: React.FC = () => {
                     )}
                   </div>
                   {r.confirmed ? (
-                    <div className="text-[10px] font-mono text-emerald-700 flex items-center gap-1">
+                    <div className="text-[11px] font-mono text-emerald-700 flex items-center gap-1">
                       <Check className="w-2.5 h-2.5" /> Confirmed
                     </div>
                   ) : (
                     <button
                       onClick={() => handlePartnerConfirm(r.id)}
                       disabled={confirmingPartner === r.id}
-                      className="w-full py-1 bg-[#1F6B4A] text-white rounded text-[10px] font-semibold flex items-center justify-center gap-1 disabled:opacity-40"
+                      className="w-full py-1 bg-[#1F6B4A] text-white rounded text-[11px] font-semibold flex items-center justify-center gap-1 disabled:opacity-40"
                     >
                       <Check className="w-2.5 h-2.5" /> {confirmingPartner === r.id ? 'Confirming...' : 'Confirm delivery'}
                     </button>
@@ -684,7 +684,7 @@ export const ConsoleView: React.FC = () => {
                 <div className="flex justify-between"><span className="text-[#111111]/50">Vouchers active</span><span className="text-[#111111]">{vouchers.filter(v => v.status === 'active').length}</span></div>
                 <div className="flex justify-between border-t border-[#111111]/10 pt-2 mt-2"><span className="text-[#111111]/50">Raw PII columns</span><span className="font-bold text-rose-600">NONE</span></div>
               </div>
-              {showRaw && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[10px] text-rose-800 leading-relaxed mt-2"><strong>Invariant:</strong> no column stores name, phone, or raw object number.</div>}
+              {showRaw && <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[11px] text-rose-800 leading-relaxed mt-2"><strong>Invariant:</strong> no column stores name, phone, or raw object number.</div>}
             </div>
           </div>
         </div>
