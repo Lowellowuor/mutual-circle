@@ -737,12 +737,12 @@ export const DonorView: React.FC = () => {
           <div className="rounded-2xl bg-gradient-to-br from-[#1F6B4A] to-[#18553a] p-5 text-white space-y-2">
             <Trophy className="w-6 h-6 text-white/80" />
             <h2 className="font-serif text-xl font-bold leading-tight">Community Leaders</h2>
-            <p className="text-[11px] text-white/70 leading-relaxed">Opt-in recognition. Aggregate totals only. No recipient linkage.</p>
+            <p className="text-[12px] text-white/70 leading-relaxed">Opt-in recognition. Aggregate totals only. No recipient linkage.</p>
           </div>
 
           <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-3">
             <div className="flex items-center justify-between">
-              <div className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Your standing</div>
+              <div className="text-[11px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Your standing</div>
               {!editingProfile && (
                 <button onClick={() => setEditingProfile(true)} className="text-[10px] text-[#1F6B4A] hover:underline flex items-center gap-1">
                   <Edit2 className="w-3 h-3" /> Edit
@@ -753,11 +753,11 @@ export const DonorView: React.FC = () => {
             {!editingProfile ? (
               myProfile?.opt_in_ledger ? (
                 <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
+                  <div className="flex justify-between text-[13px]">
                     <span className="text-[#111111]/60">Display name</span>
                     <span className="font-semibold text-[#111111]">{myProfile.display_name || 'Anonymous Contributor'}</span>
                   </div>
-                  <div className="flex justify-between text-xs border-t border-[#111111]/10 pt-1.5">
+                  <div className="flex justify-between text-[13px] border-t border-[#111111]/10 pt-1.5">
                     <span className="text-[#111111]/60">Listed publicly</span>
                     <span className="font-semibold text-[#1F6B4A]">Yes</span>
                   </div>
@@ -775,7 +775,7 @@ export const DonorView: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono uppercase text-[#111111]/50">Display name (optional)</label>
+                  <label className="text-[11px] font-mono uppercase text-[#111111]/50">Display name (optional)</label>
                   <input
                     type="text"
                     value={profileName}
@@ -783,13 +783,13 @@ export const DonorView: React.FC = () => {
                     placeholder="e.g. Nairobi Tech Workers"
                     className="w-full bg-white border border-[#111111]/15 rounded-xl px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-[#1F6B4A] outline-none"
                   />
-                  <p className="text-[9px] text-[#111111]/50">Leave blank to appear as "Anonymous Contributor".</p>
+                  <p className="text-[11px] text-[#111111]/50">Leave blank to appear as "Anonymous Contributor".</p>
                 </div>
                 <label className="flex items-start gap-3 p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl cursor-pointer">
                   <input type="checkbox" checked={profileOptIn} onChange={e => setProfileOptIn(e.target.checked)} className="mt-0.5 accent-[#1F6B4A]" />
                   <div className="flex-1">
-                    <div className="text-xs font-semibold text-[#111111]">Show me on the public leaderboard</div>
-                    <div className="text-[10px] text-[#111111]/50 mt-0.5">Only your total given and gift count are shown. Never a recipient link.</div>
+                    <div className="text-[13px] font-semibold text-[#111111]">Show me on the public leaderboard</div>
+                    <div className="text-[11px] text-[#111111]/50 mt-0.5">Only your total given and gift count are shown. Never a recipient link.</div>
                   </div>
                 </label>
                 <div className="flex gap-2">
@@ -802,13 +802,13 @@ export const DonorView: React.FC = () => {
 
           <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Top contributors</h3>
-              <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in</span>
+              <h3 className="text-[11px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Top contributors</h3>
+              <span className="text-[10px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in</span>
             </div>
             {leaderboard.length === 0 ? (
               <div className="py-6 text-center">
                 <Trophy className="w-6 h-6 text-[#111111]/20 mx-auto mb-2" />
-                <p className="text-[10px] text-[#111111]/50">No opt-in donors yet. Be the first.</p>
+                <p className="text-[12px] text-[#111111]/50">No opt-in donors yet. Be the first.</p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -816,10 +816,10 @@ export const DonorView: React.FC = () => {
                   <div key={`${entry.display_name}-${idx}`} className="flex items-center gap-3 py-2 border-b border-[#111111]/5 last:border-0">
                     <div className="w-6 text-center font-mono text-[10px] font-bold text-[#111111]/40">#{idx + 1}</div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-[#111111] truncate">{entry.display_name}</div>
-                      <div className="text-[9px] font-mono text-[#111111]/50">{entry.gift_count} gift{entry.gift_count !== 1 ? 's' : ''}</div>
+                      <div className="text-[13px] font-semibold text-[#111111] truncate">{entry.display_name}</div>
+                      <div className="text-[11px] font-mono text-[#111111]/50">{entry.gift_count} gift{entry.gift_count !== 1 ? 's' : ''}</div>
                     </div>
-                    <div className="text-xs font-mono font-bold text-[#1F6B4A] shrink-0">KES {(entry.total_pence / 100).toLocaleString()}</div>
+                    <div className="text-[13px] font-mono font-bold text-[#1F6B4A] shrink-0">KES {(entry.total_pence / 100).toLocaleString()}</div>
                   </div>
                 ))}
               </div>
@@ -827,13 +827,13 @@ export const DonorView: React.FC = () => {
           </div>
 
           <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl">
-            <div className="text-[10px] font-bold text-rose-900 mb-1">What the leaderboard does NOT show</div>
-            <ul className="text-[10px] text-rose-900/80 leading-relaxed space-y-0.5">
+            <div className="text-[12px] font-bold text-rose-900 mb-1">What the leaderboard does NOT show</div>
+            <ul className="text-[12px] text-rose-900/80 leading-relaxed space-y-0.5">
               <li>* Which specific bills or recipients your money funded</li>
               <li>* Per-contribution timestamps or categories</li>
               <li>* Any identification of who received the resources</li>
             </ul>
-            <p className="text-[9px] text-rose-900/60 pt-1.5 border-t border-rose-200 mt-1.5">Aggregate totals only. Recipient dignity comes first.</p>
+            <p className="text-[11px] text-rose-900/60 pt-1.5 border-t border-rose-200 mt-1.5">Aggregate totals only. Recipient dignity comes first.</p>
           </div>
         </div>
       );
@@ -841,7 +841,7 @@ export const DonorView: React.FC = () => {
 
     return (
       <div className="p-5 space-y-4">
-        <div><h2 className="font-serif text-lg font-bold text-[#111111]">Impact</h2><p className="text-[11px] text-[#111111]/50 mt-0.5">Aggregate. Never individual.</p></div>
+        <div><h2 className="font-serif text-xl font-bold text-[#111111]">Impact</h2><p className="text-[12px] text-[#111111]/50 mt-0.5">Aggregate. Never individual.</p></div>
         <div className="grid grid-cols-2 gap-2">
           {[
             { label: 'Total Pooled', value: impactStats ? 'KES ' + (impactStats.total_pooled_pence / 100).toLocaleString() : '—', sub: 'Committed' },
@@ -850,17 +850,17 @@ export const DonorView: React.FC = () => {
             { label: 'Students', value: impactStats ? impactStats.student_terms_paid.toLocaleString() : '—', sub: 'Term fees' },
           ].map(s => (
             <div key={s.label} className="p-3 bg-white border border-[#111111]/15 rounded-xl">
-              <div className="text-[9px] font-mono uppercase text-[#111111]/50 tracking-wider">{s.label}</div>
+              <div className="text-[11px] font-mono uppercase text-[#111111]/50 tracking-wider">{s.label}</div>
               <div className="font-mono text-lg font-bold text-[#1F6B4A] mt-0.5">{s.value}</div>
-              <div className="text-[9px] text-[#111111]/40 font-mono">{s.sub}</div>
+              <div className="text-[11px] text-[#111111]/40 font-mono">{s.sub}</div>
             </div>
           ))}
         </div>
         <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2.5">
-          <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Distribution</h3>
+          <h3 className="text-[11px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Distribution</h3>
           {distribution.length === 0 ? (
             <div className="text-center py-2">
-              <p className="text-[10px] text-[#111111]/50">No settled disbursements yet. Distribution will appear as data accrues.</p>
+              <p className="text-[12px] text-[#111111]/50">No settled disbursements yet. Distribution will appear as data accrues.</p>
             </div>
           ) : distribution.filter(r => r.count > 0).map(r => {
             const colorMap: Record<string, string> = {
@@ -871,31 +871,31 @@ export const DonorView: React.FC = () => {
             };
             return (
               <div key={r.category} className="space-y-1">
-                <div className="flex justify-between text-[10px] font-mono"><span className="text-[#111111]/70">{r.label}</span><span className="font-bold text-[#111111]">{r.percentage}%</span></div>
+                <div className="flex justify-between text-[11px] font-mono"><span className="text-[#111111]/70">{r.label}</span><span className="font-bold text-[#111111]">{r.percentage}%</span></div>
                 <div className="h-1.5 bg-black/5 rounded-full overflow-hidden"><div className={'h-full ' + (colorMap[r.category] || 'bg-[#1F6B4A]')} style={{ width: r.percentage + '%' }} /></div>
               </div>
             );
           })}
         </div>
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-1.5">
-          <div className="text-[10px] font-bold text-rose-900">What we cannot show you</div>
-          <ul className="text-[10px] text-rose-900/80 leading-relaxed space-y-0.5">
+          <div className="text-[12px] font-bold text-rose-900">What we cannot show you</div>
+          <ul className="text-[12px] text-rose-900/80 leading-relaxed space-y-0.5">
             <li>? Which specific person received your money</li>
             <li>? Their name, age, or precise location</li>
             <li>? Their medical condition (if any)</li>
             <li>? Which of your contributions went to which bill</li>
           </ul>
-          <p className="text-[9px] text-rose-900/60 pt-1 border-t border-rose-200 leading-relaxed">Not because we are hiding it. Because this data does not exist on our servers. That is the entire point.</p>
+          <p className="text-[11px] text-rose-900/60 pt-1 border-t border-rose-200 leading-relaxed">Not because we are hiding it. Because this data does not exist on our servers. That is the entire point.</p>
         </div>
 
         <div className="p-4 bg-white border border-[#111111]/15 rounded-2xl space-y-2">
           <div className="flex justify-between items-center">
-            <h3 className="text-[10px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Recognition Ledger</h3>
-            <span className="text-[8px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in</span>
+            <h3 className="text-[11px] font-mono uppercase font-bold text-[#111111]/60 tracking-wider">Recognition Ledger</h3>
+            <span className="text-[10px] font-mono bg-[#DCE8E0] text-[#1F6B4A] px-1.5 py-0.5 rounded">Opt-in</span>
           </div>
           {leaderboard.length === 0 ? (
             <div className="text-center py-3">
-              <p className="text-[10px] text-[#111111]/50">No opt-in donors yet. Join via the Leaders tab.</p>
+              <p className="text-[12px] text-[#111111]/50">No opt-in donors yet. Join via the Leaders tab.</p>
             </div>
           ) : leaderboard.slice(0, 8).map((r, i) => (
             <div key={`${r.display_name}-${i}`} className="flex justify-between text-[10px] py-1.5 border-b border-[#111111]/5 last:border-0">
@@ -904,7 +904,7 @@ export const DonorView: React.FC = () => {
                   {myProfile?.display_name === r.display_name && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
                   {r.display_name}
                 </div>
-                <div className="text-[8px] text-[#111111]/40 font-mono">{r.gift_count} gift{r.gift_count !== 1 ? 's' : ''}</div>
+                <div className="text-[10px] text-[#111111]/40 font-mono">{r.gift_count} gift{r.gift_count !== 1 ? 's' : ''}</div>
               </div>
               <span className="font-mono font-bold text-[#1F6B4A] shrink-0 ml-2">KES {(r.total_pence / 100).toLocaleString()}</span>
             </div>
