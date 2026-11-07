@@ -28,6 +28,8 @@ from mtc.routes.public import router as public_router
 from mtc.routes.requester import router as requester_router
 from mtc.routes.staff import router as staff_router
 from mtc.routes.stats import router as stats_router
+from mtc.routes.sms import router as sms_router
+from mtc.routes.ussd import router as ussd_router
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -38,11 +40,6 @@ _REQUIRED_SECRETS = (
     "LEDGER_HMAC_KEY",
     "TOKEN_HMAC_KEY_CURRENT",
     "PARTNER_HMAC_KEY",
-    # Added with /requests/{id}/pay (M-PESA STK initiation). Each is
-    # genuinely secret (leak = attack) and reliably >=32 chars. Non-secret
-    # M-PESA config (SHORTCODE, CONSUMER_KEY, CALLBACK_URL) is checked at
-    # first-call time inside initiate_stk_push's RuntimeError path — the
-    # 32-char invariant does not apply to a 6-digit shortcode or a URL.
     "MPESA_CONSUMER_SECRET",
     "MPESA_PASSKEY",
     "AT_API_KEY",
@@ -202,6 +199,8 @@ app.include_router(notifications_router)
 app.include_router(ledger_public_router)
 app.include_router(partners_router)
 app.include_router(mpesa_router)
+app.include_router(sms_router)
+app.include_router(ussd_router)
 
 
 @app.get("/")
