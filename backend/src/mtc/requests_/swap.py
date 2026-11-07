@@ -44,7 +44,6 @@ async def create_swap(
     metadata = {
         "bundle": bundle_category,
         "location": locker_location,
-        "pin": pin,
         "pin_hash": pin_hash,
         "qr": qr_payload,
         "household_size": household_size,
@@ -53,11 +52,11 @@ async def create_swap(
 
     row = await conn.fetchrow(
         """
-        INSERT INTO requests (token_hash, type, category, metadata, tier, status)
-        VALUES ($1, 'swap', 'swap_bundle', $2::jsonb, $3, $4)
+        INSERT INTO requests (token_hash, type, category, metadata, tier, status, pin_last4)
+        VALUES ($1, 'swap', 'swap_bundle', $2::jsonb, $3, $4, $5)
         RETURNING id, created_at, tier, status
         """,
-        token_hash, json.dumps(metadata), tier, status,
+        token_hash, json.dumps(metadata), tier, status, pin[-4:],
     )
     await notify(
         conn, token_hash, str(row["id"]), "swap_submitted",

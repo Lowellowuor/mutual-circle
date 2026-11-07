@@ -30,6 +30,7 @@ from mtc.routes.staff import router as staff_router
 from mtc.routes.stats import router as stats_router
 from mtc.routes.sms import router as sms_router
 from mtc.routes.ussd import router as ussd_router
+from mtc.routes.locker import router as locker_router
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -201,6 +202,7 @@ app.include_router(partners_router)
 app.include_router(mpesa_router)
 app.include_router(sms_router)
 app.include_router(ussd_router)
+app.include_router(locker_router)
 
 
 @app.get("/")
