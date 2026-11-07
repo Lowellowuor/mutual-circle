@@ -48,3 +48,6 @@ _c1_dump/
 
 # Temp commit message files (all patterns)
 .commit-*.txt
+
+# Local diagnostic logs
+_*.log
