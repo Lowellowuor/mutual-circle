@@ -30,8 +30,23 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Verify VITE_API_URL is configured
+        run: |
+          if [ -z "${{ secrets.VITE_API_URL }}" ]; then
+            echo "::warning::VITE_API_URL secret is not set."
+            echo "::warning::The GitHub Pages build will use localhost fallback."
+            echo "::warning::Remote users will see 'backend unreachable' banner."
+            echo "::warning::Set it in Settings > Secrets and variables > Actions."
+          else
+            echo "VITE_API_URL is configured"
+          fi
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
       - name: Build
         run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: SPA fallback (404.html)
         run: cp dist/index.html dist/404.html
