@@ -33,6 +33,22 @@ class Settings(BaseSettings):
     jwt_secret: str = ""
     partner_hmac_key: str = ""
 
+
+    # M-PESA Daraja
+    mpesa_environment: str = "sandbox"  # "sandbox" | "production"
+    mpesa_consumer_key: str = ""
+    mpesa_consumer_secret: str = ""
+    mpesa_shortcode: str = ""
+    mpesa_passkey: str = ""
+    mpesa_callback_url: str = ""
+    mpesa_transaction_type: str = "CustomerPayBillOnline"
+
+    # Africa's Talking SMS
+    at_environment: str = "sandbox"  # "sandbox" | "production"
+    at_username: str = "sandbox"
+    at_api_key: str = ""
+    at_sender_id: str = ""
+
     # Staff credentials
     staff_enrol_id: str = ""
     staff_enrol_pin_hash: str = ""
