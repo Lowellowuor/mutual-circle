@@ -1,4 +1,4 @@
-﻿# Deployment
+# Deployment
 
 Frontend on GitHub Pages. Backend on any ASGI host. Database on Neon Postgres.
 
@@ -48,12 +48,79 @@ Expected: Total: 47 / 47 passed.
 ## Database (Neon)
 
 - DATABASE_URL_MAIN must include ?sslmode=require for Neon.
-- Migration chain: 001_ledger -> 002_collected_status -> 003_idempotency_keys -> 004_pledge_request_link.
-- Fresh DB: alembic upgrade head.
-- Existing DB (created by raw SQL before Alembic bootstrap):
-      alembic stamp 001_ledger
-      alembic upgrade head
-- Always pg_dump before touching a live DB.
+- Migration chain (linear):
+      000_baseline         -> 21 app tables + 13 indexes (post-005 shape)
+      001_ledger           -> ledger_entries (append-only hash chain)
+      002_collected_status -> ensures 'collected' in requests.status CHECK
+      003_idempotency_keys -> idempotency_keys
+      004_pledge_request_link -> requests.pledge_id FK
+      005_notification_read_at -> notifications.read_at
+- All 001-005 are idempotent (IF NOT EXISTS / IF EXISTS / early-return).
+  000_baseline is first, so 002/004/005 no-op on a fresh DB where 000
+  already created the schema at post-005 shape.
+- **Fresh DB:** `alembic upgrade head` — one command creates the entire
+  schema (21 tables from 000_baseline, then ledger_entries from 001,
+  then idempotency_keys from 003, plus all indexes). 002/004/005 are
+  no-ops because 000 already created the schema at post-005 shape.
+
+- **Existing DB already at 005** (e.g. the current Neon instance):
+  **do nothing.** Alembic sees the DB at 005 = head of the chain. 000
+  is an ancestor Alembic infers was applied — you cannot be at 005
+  without having gone through it. `alembic upgrade head` returns
+  "already at head, nothing to do".
+
+- **Never stamp backwards on an existing DB.** Stamping to 000 (or
+  any earlier revision) resets the version tracker, and the next
+  `upgrade head` will attempt to re-run migrations against a schema
+  that already exists. 001 has no IF NOT EXISTS on its CREATE TABLE,
+  so this fails with "relation ledger_entries already exists". A prior
+  version of this doc recommended stamping to an older revision —
+  same problem, same failure mode.
+
+- **The correct way to inspect state is `alembic current`.** It reads
+  the DB's version table, not the migration files, so it always
+  reflects reality. If `current` says `005_notification_read_at
+  (head)` and `heads` says the same, you're done.
+
+- Always `pg_dump` before touching a live DB.
+
+## Verifying the migration on a fresh Postgres
+
+To confirm a fresh install produces the same schema as the current
+Neon instance:
+
+    # 1. Create a scratch Postgres (Neon free tier, or local)
+    #    Take the connection URL, including ?sslmode=require
+
+    # 2. Point DATABASE_URL_MAIN at it in backend/.env, then:
+    cd backend
+    .\.venv\Scripts\alembic.exe upgrade head
+
+    # Expected: 6 "Running upgrade" lines (000 -> 001 -> 002 -> 003 -> 004 -> 005)
+    # with no errors.
+
+    # 3. Count tables in the scratch DB:
+    psql $env:DATABASE_URL_MAIN -c "\dt"
+    # Expected: 25 tables
+    #   21 from 000_baseline
+    #   + ledger_entries (from 001)
+    #   + idempotency_keys (from 003)
+    #   + alembic_version (Alembic's own)
+
+    # 4. Spot-check the requests table:
+    psql $env:DATABASE_URL_MAIN -c "\d requests"
+    # Expected: 12 columns including id, token_hash, type, category,
+    # amount_pence, hashed_object_id, metadata, tier, status,
+    # created_at, updated_at, pledge_id
+
+    # 5. Compare to production:
+    #    Regenerate _c1_dump/live_schema.txt against Neon and diff
+    #    the two \dt outputs. They should match exactly (aside from
+    #    alembic_version contents).
+
+If a migration fails on the fresh DB, the error names the specific
+ALTER or CREATE that drifted. Fix 000_baseline to match, re-run
+`alembic downgrade base && alembic upgrade head` on the scratch DB.
 
 ## Frontend deployment (GitHub Pages)
 
