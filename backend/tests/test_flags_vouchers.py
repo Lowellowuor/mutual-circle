@@ -112,7 +112,8 @@ async def test_redeem_voucher_success(client, clean_db):
     )
     pin = issue.json()["pin"]
     r = await client.post(
-        "/partner/redeem",
+        "/fulfilment/redeem",
+        headers=h,
         json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 300000},
     )
     assert r.status_code == 200
@@ -128,7 +129,8 @@ async def test_redeem_wrong_partner(client, clean_db):
     )
     pin = issue.json()["pin"]
     r = await client.post(
-        "/partner/redeem",
+        "/fulfilment/redeem",
+        headers=h,
         json={"pin": pin, "partner_name": "Different Partner", "amount_pence": 300000},
     )
     assert r.json()["ok"] is False
@@ -142,9 +144,9 @@ async def test_redeem_twice(client, clean_db):
         headers=h, json={"partner_name": "Naivas Kibera", "partner_type": "retailer"},
     )
     pin = issue.json()["pin"]
-    r1 = await client.post("/partner/redeem", json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 100000})
+    r1 = await client.post("/fulfilment/redeem", headers=h, json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 100000})
     assert r1.json()["ok"] is True
-    r2 = await client.post("/partner/redeem", json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 100000})
+    r2 = await client.post("/fulfilment/redeem", headers=h, json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 100000})
     assert r2.json()["ok"] is False
     assert "already" in r2.json()["reason"].lower()
 
@@ -157,7 +159,7 @@ async def test_redeem_exceeds_value(client, clean_db):
         headers=h, json={"partner_name": "Naivas Kibera", "partner_type": "retailer"},
     )
     pin = issue.json()["pin"]
-    r = await client.post("/partner/redeem", json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 500000})
+    r = await client.post("/fulfilment/redeem", headers=h, json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 500000})
     assert r.json()["ok"] is False
 
 

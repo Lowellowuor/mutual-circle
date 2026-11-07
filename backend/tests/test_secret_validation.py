@@ -73,6 +73,7 @@ def test_production_all_valid_no_raise():
         jwt_secret="a" * 64,
         ledger_hmac_key="b" * 64,
         token_hmac_key_current="c" * 64,
+        partner_hmac_key="d" * 64,
     )
     with patch("mtc.main.settings", s):
         _validate_secrets()
@@ -97,6 +98,7 @@ def test_development_valid_no_warning(caplog):
         jwt_secret="a" * 64,
         ledger_hmac_key="b" * 64,
         token_hmac_key_current="c" * 64,
+        partner_hmac_key="d" * 64,
     )
     with patch("mtc.main.settings", s):
         _validate_secrets()
