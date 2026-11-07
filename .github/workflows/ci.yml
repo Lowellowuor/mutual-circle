@@ -100,7 +100,7 @@ jobs:
         env:
           PYTHONPATH: src
           CI_NO_DB: "1"
-        run: pytest tests/test_secret_validation.py tests/test_mpesa_callback.py -v
+        run: pytest tests/test_secret_validation.py tests/test_mpesa_callback.py tests/test_pay_route.py -v
 
       - name: Test (real DB)
         working-directory: backend
