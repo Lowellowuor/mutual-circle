@@ -35,7 +35,6 @@ async def _fulf_headers(client):
     return {"Authorization": f"Bearer {r.json()['session_token']}"}
 
 
-# --- Flags -------------------------------------------------------------------
 
 async def test_flags_list(client, clean_db):
     h = await _audit_headers(client)
@@ -46,7 +45,6 @@ async def test_flags_list(client, clean_db):
 
 async def test_flag_route_tier4(client, clean_db):
     h = await _audit_headers(client)
-    # Create a flag directly (no endpoint to create)
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
@@ -74,7 +72,6 @@ async def test_flag_clear(client, clean_db):
     assert r.json()["status"] == "cleared_false_positive"
 
 
-# --- Vouchers ----------------------------------------------------------------
 
 async def _create_verified_pool(client, phone="+254700111222", amount=350000):
     tok = (await client.post("/tokens", json={"phone": phone})).json()["token"]
@@ -152,7 +149,7 @@ async def test_redeem_twice(client, clean_db):
 
 
 async def test_redeem_exceeds_value(client, clean_db):
-    _, request_id = await _create_verified_pool(client, amount=350000)  # 3,500 KES
+    _, request_id = await _create_verified_pool(client, amount=350000)
     h = await _fulf_headers(client)
     issue = await client.post(
         f"/fulfilment/requests/{request_id}/voucher",
@@ -171,14 +168,12 @@ async def test_redeem_lockout(client, clean_db):
         headers=h, json={"partner_name": "Naivas Kibera", "partner_type": "retailer"},
     )
     pin = issue.json()["pin"]
-    wrong_pin = "99" + pin[2:]  # Ensure it targets the same voucher by matching pin_last4
+    wrong_pin = "99" + pin[2:]
 
-    # 3 failed attempts
     for _ in range(3):
         r = await client.post("/fulfilment/redeem", headers=h, json={"pin": wrong_pin, "partner_name": "Naivas Kibera", "amount_pence": 1000})
         assert r.json()["ok"] is False
 
-    # 4th attempt with CORRECT PIN should fail because it's locked
     r = await client.post("/fulfilment/redeem", headers=h, json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 1000})
     assert r.json()["ok"] is False
     assert "locked" in r.json()["reason"].lower()
@@ -196,7 +191,6 @@ async def test_requester_lists_vouchers(client, clean_db):
     assert r.json()["vouchers"][0]["partner_name"] == "Naivas Kibera"
 
 
-# --- Enrolment ---------------------------------------------------------------
 
 async def test_enrolment_metrics(client, clean_db):
     r = await client.post("/staff/login", json={"role": "enrolment", "staff_id": "ENROL-04", "pin": "4821"})

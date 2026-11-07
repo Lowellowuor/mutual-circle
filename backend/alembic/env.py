@@ -25,15 +25,6 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# The app uses asyncpg (declared in pyproject.toml). SQLAlchemy's
-# default `postgresql://` scheme maps to psycopg (v3), which is NOT
-# a dependency. Rewrite scheme AND ssl query params:
-#   postgresql://...          -> postgresql+asyncpg://...
-#   ?sslmode=require          -> ?ssl=true
-#   &channel_binding=require  -> (dropped; psycopg-only)
-# asyncpg's connect() rejects `sslmode` and `channel_binding` as
-# unexpected kwargs; this translation keeps the URL the app uses
-# unchanged while giving asyncpg what it expects.
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 def _rewrite_db_url(url: str) -> str:
@@ -41,11 +32,6 @@ def _rewrite_db_url(url: str) -> str:
         return url
     parsed = urlparse(url)
     query = parse_qs(parsed.query)
-    # asyncpg's connect() rejects both `sslmode` (libpq) and
-    # `channel_binding` (psycopg-only) as unexpected kwargs. SQLAlchemy
-    # 2.1.6 passes URL query params straight through to connect(), so we
-    # must strip them here. SSL is re-added via connect_args in
-    # run_async_migrations(), based on the original URL's sslmode value.
     query.pop("sslmode", None)
     query.pop("channel_binding", None)
     new_query = urlencode(query, doseq=True)
@@ -63,11 +49,6 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     connect_args = {}
-    # If the original URL was using sslmode=require, tell asyncpg to use SSL.
-    # SQLAlchemy's URL-query-to-connect-kwargs path passes sslmode directly
-    # to asyncpg (which rejects it), so SSL must be set via connect_args.
-    # CI's Postgres service container has no SSL — this branch correctly
-    # skips it there.
     if "sslmode=require" in settings.database_url_main:
         connect_args["ssl"] = True
 

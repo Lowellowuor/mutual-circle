@@ -44,8 +44,8 @@ async def create_swap(
     metadata = {
         "bundle": bundle_category,
         "location": locker_location,
-        "pin": pin,  # kept for migration window; removed after backfill
-        "pin_hash": pin_hash,  # preferred by collect endpoints
+        "pin": pin,
+        "pin_hash": pin_hash,
         "qr": qr_payload,
         "household_size": household_size,
         "bundle_variant": bundle_variant,
@@ -71,7 +71,7 @@ async def create_swap(
         "locker_location": locker_location,
         "bundle_variant": bundle_variant,
         "household_size": household_size,
-        "pin": pin,  # kept for migration window; removed after backfill
+        "pin": pin,
         "qr_payload": qr_payload,
         "tier": row["tier"],
         "status": row["status"],

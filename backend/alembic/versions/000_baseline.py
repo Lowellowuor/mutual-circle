@@ -195,7 +195,6 @@ def upgrade() -> None:
         status text NOT NULL,
         created_at timestamptz NOT NULL DEFAULT now())""")
 
-    # Indexes for hot paths
     op.execute("CREATE INDEX IF NOT EXISTS idx_requests_token ON requests(token_hash)")
     op.execute("CREATE INDEX IF NOT EXISTS idx_requests_status ON requests(status)")
     op.execute("CREATE INDEX IF NOT EXISTS idx_notifications_token ON notifications(token_hash)")

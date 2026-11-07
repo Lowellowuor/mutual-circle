@@ -9,9 +9,9 @@ R.U.T.H Section 4.8:
 from typing import Literal
 
 Category = Literal["utility", "school_fee", "hospital_invoice", "swap_bundle"]
-Tier = int  # 1-4
+Tier = int
 
-TIER_3_THRESHOLD_PENCE = 500_000  # 5,000 KES
+TIER_3_THRESHOLD_PENCE = 500_000
 
 
 def assign_tier(category: Category, amount_pence: int) -> Tier:

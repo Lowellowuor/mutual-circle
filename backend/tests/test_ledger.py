@@ -59,7 +59,6 @@ async def test_duplicate_object_rejected(clean_conn):
     with pytest.raises(DuplicateObjectError):
         await append_entry(conn, object_hash="meter-abc", category="utility", amount_pence=3500, settled_by_hash="fund-b")
 
-    # Also verify the DB-level constraint (defence in depth)
     with pytest.raises(asyncpg.UniqueViolationError):
         await conn.execute(
             """INSERT INTO ledger_entries
@@ -77,7 +76,6 @@ async def test_tamper_detected(clean_conn):
     result = await verify_chain(conn)
     assert result["ok"] is True
 
-    # Tamper: change an amount directly in the DB, bypassing the append function
     await conn.execute("UPDATE ledger_entries SET amount_pence = 35000 WHERE object_hash = 'meter-abc'")
 
     result = await verify_chain(conn)

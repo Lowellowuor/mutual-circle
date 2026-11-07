@@ -10,7 +10,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Add FK column: each request references at most one pledge (nullable)
     op.execute("""
         ALTER TABLE requests
         ADD COLUMN IF NOT EXISTS pledge_id uuid REFERENCES pledges(id) ON DELETE SET NULL
@@ -19,7 +18,6 @@ def upgrade() -> None:
         CREATE INDEX IF NOT EXISTS idx_requests_pledge_id
         ON requests (pledge_id) WHERE pledge_id IS NOT NULL
     """)
-    # Widen pledges.status constraint to allow 'settled' if it exists
     op.execute("""
         DO $$
         DECLARE cdef text;

@@ -63,7 +63,6 @@ async def check_or_claim(
     )
 
     if not row:
-        # Key exists but with different scope/caller — collision
         raise HTTPException(409, "Idempotency key conflict")
 
     if row["response_body"] is not None:
@@ -72,7 +71,6 @@ async def check_or_claim(
             body = json.loads(body)
         return body
 
-    # Winner still in flight
     raise HTTPException(409, "Request in progress. Please retry in a moment.")
 
 

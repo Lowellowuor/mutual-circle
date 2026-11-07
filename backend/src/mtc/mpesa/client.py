@@ -38,9 +38,6 @@ def _base_url() -> str:
     raise ValueError(f"MPESA_ENVIRONMENT must be 'sandbox' or 'production', got {env!r}")
 
 
-# ---------------------------------------------------------------------
-# OAuth token cache (per-process, TTL from server)
-# ---------------------------------------------------------------------
 _token_lock = asyncio.Lock()
 _token_cache: dict[str, Any] = {"token": None, "expires_at": 0.0}
 
@@ -89,9 +86,6 @@ def _reset_token_cache_for_tests() -> None:
     _token_cache["expires_at"] = 0.0
 
 
-# ---------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------
 def _normalize_phone(phone: str) -> str:
     if not phone:
         raise ValueError("phone is empty")
@@ -128,9 +122,6 @@ def _password(shortcode: str, passkey: str, ts: str) -> str:
     return base64.b64encode(f"{shortcode}{passkey}{ts}".encode()).decode()
 
 
-# ---------------------------------------------------------------------
-# STK Push initiation
-# ---------------------------------------------------------------------
 async def initiate_stk_push(
     *,
     phone: str,
@@ -199,9 +190,6 @@ async def initiate_stk_push(
     }
 
 
-# ---------------------------------------------------------------------
-# Callback parsing
-# ---------------------------------------------------------------------
 def parse_stk_callback(body: dict[str, Any]) -> dict[str, Any] | None:
     """Normalize a Safaricom STK callback. Returns ``None`` on malformed input."""
     try:

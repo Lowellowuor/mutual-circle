@@ -321,7 +321,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const c = await api.listCampaigns();
     if (c) setCampaigns(mapCampaigns(c));
 
-    const r = await api.listFulfilmentRedemptions(sessionToken || '');
+    const r = sessionToken ? await api.listFulfilmentRedemptions(sessionToken) : null;
     if (r) setVoucherRedemptions(mapRedemptions(r));
 
     if (tokenHash) {

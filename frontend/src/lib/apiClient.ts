@@ -409,3 +409,36 @@ export const payPledge = (donorHash: string, pledgeId: string, phone: string) =>
     `/pledges/${pledgeId}/pay`,
     { method: 'POST', headers: { 'X-Donor-Hash': donorHash, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ phone }) },
   );
+
+
+export const sendSimulatorSms = async (from: string, text: string) => {
+  const res = await fetch(`${BASE}/sms`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ from, text }).toString()
+  });
+  if (!res.ok) throw new Error('SMS failed');
+  return await res.json() as { reply: string };
+};
+
+export const sendSimulatorUssd = async (sessionId: string, serviceCode: string, phoneNumber: string, text: string) => {
+  const res = await fetch(`${BASE}/ussd`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ sessionId, serviceCode, phoneNumber, text }).toString()
+  });
+  if (!res.ok) throw new Error('USSD failed');
+  return await res.text();
+};
+
+
+export const payPoolRequestStrict = async (token: string, requestId: string, phone: string) => {
+  const res = await fetch(`${BASE}/requests/${requestId}/pay`, {
+    method: 'POST',
+    headers: { 'X-Token': token, 'Idempotency-Key': genIdempotencyKey(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.reason || 'Payment failed');
+  return data;
+};

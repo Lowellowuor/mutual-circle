@@ -31,19 +31,16 @@ async def test_dispatch_verified_pool(clean_conn):
         conn, token_hash=token, category="utility",
         hashed_object_id="objhash-dispatch-1", amount_pence=350_000,
     )
-    # Tier 2 → status verified. Dispatch directly.
     result = await dispatch_pool_request(conn, request_id=created["id"], staff_id="FULF-08")
     assert result["receipt"].startswith("MPESA-")
     assert result["status"] == "submitted_to_partner"
 
-    # Ledger got an entry
     ledger_row = await conn.fetchrow(
         "SELECT object_hash, amount_pence FROM ledger_entries WHERE object_hash = 'objhash-dispatch-1'"
     )
     assert ledger_row is not None
     assert ledger_row["amount_pence"] == 350_000
 
-    # Audit log recorded
     logs = await list_audit(conn)
     assert any("Dispatched" in e["action"] and e["actor_role"] == "fulfilment" for e in logs)
 
@@ -55,7 +52,6 @@ async def test_dispatch_pending_check_rejected(clean_conn):
         conn, token_hash=token, category="hospital_invoice",
         hashed_object_id="objhash-dispatch-2", amount_pence=1_200_000,
     )
-    # Tier 3 → pending_check. Dispatch must fail.
     with pytest.raises(DispatchConflict):
         await dispatch_pool_request(conn, request_id=created["id"], staff_id="FULF-08")
 
@@ -71,9 +67,7 @@ async def test_dispatch_duplicate_object_blocked(clean_conn):
         conn, token_hash=issue_token("+254700777888"), category="utility",
         hashed_object_id="objhash-same", amount_pence=350_000,
     )
-    # First dispatch succeeds
     await dispatch_pool_request(conn, request_id=a["id"], staff_id="FULF-08")
-    # Second dispatch of same object_hash must fail
     with pytest.raises(DispatchConflict):
         await dispatch_pool_request(conn, request_id=b["id"], staff_id="FULF-08")
 
@@ -90,7 +84,6 @@ async def test_ocr_completes_pending_to_verified(clean_conn):
     result = await complete_ocr(conn, request_id=created["id"], staff_id="AUDIT-02")
     assert result["status"] == "verified"
 
-    # Now dispatch should work
     dispatch = await dispatch_pool_request(conn, request_id=created["id"], staff_id="FULF-08")
     assert dispatch["status"] == "submitted_to_partner"
 
@@ -102,6 +95,5 @@ async def test_ocr_on_non_pending_rejected(clean_conn):
         conn, token_hash=token, category="utility",
         hashed_object_id="objhash-ocr-2", amount_pence=350_000,
     )
-    # Already 'verified', not 'pending_check'
     with pytest.raises(OcrConflict):
         await complete_ocr(conn, request_id=created["id"], staff_id="AUDIT-02")

@@ -37,7 +37,6 @@ async def public_ledger(
         limit,
     )
 
-    # Full chain verification
     all_rows = await conn.fetch(
         "SELECT * FROM ledger_entries ORDER BY created_at ASC, id ASC"
     )
@@ -64,10 +63,6 @@ async def public_ledger(
             break
         expected_prev = r["entry_hash"]
 
-    # NOTE: settled_by_hash is fetched from the DB (line above) only
-    # because compute_entry_hash needs it for chain verification.
-    # It is deliberately NOT included in the response below — see
-    # CSV endpoint for the same reason (audit item A9).
     return {
         "total_pooled_pence": int(total_pence),
         "entry_count": int(entry_count),
@@ -99,12 +94,6 @@ async def public_ledger_csv(conn: asyncpg.Connection = Depends(get_conn)):
     )
     buf = io.StringIO()
     writer = csv.writer(buf)
-    # NOTE: settled_by_hash (the settling staff member's ID) is
-    # deliberately omitted from public output. Audit item A9: exposing
-    # it lets an auditor map any settlement to the exact staff member.
-    # The field remains in the DB and in compute_entry_hash() — that
-    # is required for append-only chain integrity and internal audit.
-    # Only the public-facing CSV is stripped.
     writer.writerow([
         "id", "object_hash", "category", "amount_pence",
         "previous_entry_hash", "entry_hash", "created_at",

@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import asyncpg
 
 MAX_REQUESTS_PER_DAY = 25
-MAX_VALUE_PENCE_PER_DAY = 10_000_000  # 100,000 KES
+MAX_VALUE_PENCE_PER_DAY = 10_000_000
 
 
 class RateLimitExceeded(Exception):
@@ -63,7 +63,6 @@ async def consume_quota(
             )
         return RateState(request_count=count, total_value_pence=total)
 
-# --- A3-c: IP Rate Limiting ---
 
 MAX_IP_REQS_PER_DAY = {
     "pay": 10,
@@ -79,7 +78,6 @@ async def check_ip_rate_limit(
 ) -> None:
     """Enforce per-IP rate limits. Raises RateLimitExceeded if breached."""
     limit = MAX_IP_REQS_PER_DAY.get(endpoint, 100)
-    # We prefix with IP: so it doesn't collide with user token hashes
     identifier = f"IP:{ip_address}:{endpoint}"
 
     async with conn.transaction():

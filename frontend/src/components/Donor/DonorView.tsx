@@ -330,11 +330,11 @@ export const DonorView: React.FC = () => {
             <button onClick={() => setPayingDonation(payingDonation)} className="w-full py-3 mt-4 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold shadow-md shadow-green-600/20">Pay with M-PESA</button>
           )}
           </div>
-          {payingDonation && (
+          {payingDonation && donorContributions.find(d => d.id === payingDonation.id)?.status !== 'paid' && (
             <button onClick={() => setPayingDonation(payingDonation)} className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold shadow-md shadow-green-600/20">Pay with M-PESA</button>
           )}
 
-      {payingDonation && (
+      {payingDonation && donorContributions.find(d => d.id === payingDonation.id)?.status !== 'paid' && (
             <button onClick={() => setPayingDonation(payingDonation)} className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold shadow-md shadow-green-600/20">Pay with M-PESA</button>
           )}
           <div className="p-3 bg-[#FAF8F4] rounded-xl border border-[#111111]/10 space-y-1.5 text-[11px] font-mono">
@@ -366,7 +366,7 @@ export const DonorView: React.FC = () => {
           </div>
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-900 leading-relaxed">Your pledge is now visible to the Operations team for matching.</div>
           <div className="space-y-2 pt-2">
-            {payingPledge && (
+            {payingPledge && pledges.find(p => p.id === payingPledge.id)?.status !== 'settled' && (
               <button onClick={() => setPayingPledge(payingPledge)} className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold shadow-md shadow-green-600/20">Pay with M-PESA</button>
             )}
             <button onClick={() => { setScreen('tab'); setPDesc(''); setPValue(''); }} className="w-full py-3 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-xl text-sm font-medium">Pledge again</button>

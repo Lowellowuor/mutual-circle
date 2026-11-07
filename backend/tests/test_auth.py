@@ -37,7 +37,6 @@ def test_authenticate_correct():
 
 
 def test_authenticate_wrong_role():
-    # Enrolment PIN submitted under Fulfilment role → fails at ID check
     assert authenticate("fulfilment", "ENROL-04", "4821") is None
 
 
@@ -92,7 +91,5 @@ async def test_role_enforcement(client, clean_db):
     token = login.json()["session_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Audit cannot hit fulfilment endpoints
     assert (await client.get("/fulfilment/queue", headers=headers)).status_code == 403
-    # Audit can hit audit endpoints
     assert (await client.get("/audit/ocr-queue", headers=headers)).status_code == 200

@@ -16,16 +16,13 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Environment
     environment: str = "development"
     log_level: str = "info"
 
-    # Database connections (three separate databases)
     database_url_main: str = ""
     database_url_bench: str = ""
     database_url_messaging: str = ""
 
-    # Cryptographic keys
     ledger_hmac_key: str = ""
     token_hmac_key_current: str = ""
     token_hmac_key_previous: str = ""
@@ -34,8 +31,7 @@ class Settings(BaseSettings):
     partner_hmac_key: str = ""
 
 
-    # M-PESA Daraja
-    mpesa_environment: str = "sandbox"  # "sandbox" | "production"
+    mpesa_environment: str = "sandbox"
     mpesa_consumer_key: str = ""
     mpesa_consumer_secret: str = ""
     mpesa_shortcode: str = ""
@@ -43,13 +39,11 @@ class Settings(BaseSettings):
     mpesa_callback_url: str = ""
     mpesa_transaction_type: str = "CustomerPayBillOnline"
 
-    # Africa's Talking SMS
-    at_environment: str = "sandbox"  # "sandbox" | "production"
+    at_environment: str = "sandbox"
     at_username: str = "sandbox"
     at_api_key: str = ""
     at_sender_id: str = ""
 
-    # Staff credentials
     staff_enrol_id: str = ""
     staff_enrol_pin_hash: str = ""
     staff_fulf_id: str = ""

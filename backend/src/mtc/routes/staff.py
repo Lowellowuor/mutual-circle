@@ -23,7 +23,6 @@ class LoginBody(BaseModel):
 async def login(body: LoginBody, conn: asyncpg.Connection = Depends(get_conn)):
     cred = authenticate(body.role, body.staff_id, body.pin)
     if cred is None:
-        # Deliberate: same message whether the ID is wrong or the PIN is wrong
         raise HTTPException(401, "Invalid credentials")
     session = await create_session(conn, staff_id=cred.staff_id, role=cred.role)
     await append_audit(

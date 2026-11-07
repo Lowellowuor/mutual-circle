@@ -27,7 +27,6 @@ async def redeem_voucher(
     pin_last4 = pin[-4:]
 
     async with conn.transaction():
-        # Narrow by (partner, pin_last4, status) — usually a single row
         candidates = await conn.fetch(
             """SELECT * FROM vouchers
                WHERE partner_name = $1 AND pin_last4 = $2 AND status IN ('active', 'redeemed')
@@ -50,9 +49,6 @@ async def redeem_voucher(
             if locked:
                 return {"ok": False, "reason": "Voucher is locked due to multiple failed attempts. Try again in 15 minutes."}
 
-            # A3-b: Increment failed_attempts for any active vouchers matching this pin_last4
-            # to prevent brute-forcing the full 6-digit PIN.
-            # If they hit 3, lock the voucher for 15 minutes.
             candidates_to_lock = await conn.fetch(
                 "SELECT id, failed_attempts FROM vouchers WHERE partner_name = $1 AND pin_last4 = $2 AND status = 'active'",
                 partner_name, pin_last4
@@ -109,7 +105,6 @@ async def redeem_voucher(
             "INSERT INTO voucher_redemptions (voucher_id, partner_name, amount_pence, status) VALUES ($1, $2, $3, 'success')",
             matched["id"], partner_name, amount_pence,
         )
-    # Transition the linked request to 'collected' (voucher redemption = delivery)
     if matched["request_id"]:
         from mtc.notifications.service import notify
         await conn.execute(

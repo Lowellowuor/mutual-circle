@@ -43,9 +43,6 @@ def upgrade() -> None:
         ALTER TABLE requests
         ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'n/a'
     """)
-    # ADD CONSTRAINT does not support IF NOT EXISTS in Postgres — the
-    # DO block is the standard idempotent form. Mirrors the style of
-    # the schema-wide CHECK on requests.status.
     op.execute("""
         DO $$
         BEGIN

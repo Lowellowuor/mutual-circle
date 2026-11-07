@@ -26,7 +26,6 @@ async def clean_conn():
                 pass
 
 
-# -- Pure function tests -----------------------------------------------------
 
 def test_tier_assignment_swap():
     assert assign_tier("swap_bundle", 0) == 1
@@ -34,12 +33,12 @@ def test_tier_assignment_swap():
 
 
 def test_tier_assignment_small_utility():
-    assert assign_tier("utility", 350_000) == 2  # 3,500 KES
+    assert assign_tier("utility", 350_000) == 2
     assert initial_status(2) == "verified"
 
 
 def test_tier_assignment_large_utility():
-    assert assign_tier("utility", 500_000) == 3  # exactly 5,000 KES
+    assert assign_tier("utility", 500_000) == 3
     assert initial_status(3) == "pending_check"
     assert assign_tier("hospital_invoice", 1_200_000) == 3
 
@@ -60,7 +59,6 @@ def test_token_deterministic():
     assert a != c
 
 
-# -- DB-backed tests ---------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_create_swap_persists(clean_conn):
@@ -117,7 +115,6 @@ async def test_rate_limit_request_count(clean_conn):
 async def test_rate_limit_value(clean_conn):
     conn = clean_conn
     token = issue_token("+254700555666")
-    # 3 requests of 4,000,000 pence (40,000 KES each)
     await consume_quota(conn, token_hash=token, value_pence=4_000_000)
     await consume_quota(conn, token_hash=token, value_pence=4_000_000)
     with pytest.raises(RateLimitExceeded) as exc:
@@ -161,7 +158,6 @@ async def test_withdraw_after_dispatch_blocked(clean_conn):
         conn, token_hash=token, category="utility",
         hashed_object_id="objhash-eeee", amount_pence=350_000,
     )
-    # Manually simulate dispatch
     await conn.execute(
         "UPDATE requests SET status = 'submitted_to_partner' WHERE id = $1",
         created["id"],

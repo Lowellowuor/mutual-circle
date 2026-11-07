@@ -198,6 +198,8 @@ async def pay_donation(
             raise HTTPException(404, "Donation not found")
         if row["status"] == "paid":
             raise HTTPException(409, "Donation already paid")
+        if row["status"] == "pending_payment":
+            raise HTTPException(409, "Payment is already in progress. Please check your phone.")
 
         account_ref = "DON-" + str(row["id"])[:8].upper()
         stk = await initiate_stk_push(
@@ -212,6 +214,10 @@ async def pay_donation(
             """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id)
                VALUES ($1, $2, 'donor_contributions', $3)""",
             checkout_id, row["amount_pence"], row["id"]
+        )
+        await conn.execute(
+            "UPDATE donor_contributions SET status = 'pending_payment' WHERE id = $1",
+            row["id"]
         )
 
         response = {"ok": True, "checkout_request_id": checkout_id, "message": stk.get("customer_message")}

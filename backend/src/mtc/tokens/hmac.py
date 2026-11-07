@@ -11,7 +11,7 @@ import hmac
 
 from mtc.config import settings
 
-TOKEN_LENGTH = 16  # hex characters
+TOKEN_LENGTH = 16
 
 
 def current_weekly_salt() -> str:

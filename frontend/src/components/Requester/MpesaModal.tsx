@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, CheckCircle, XCircle, Loader2, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { payPoolRequestStrict } from '../../lib/apiClient';
 
 interface Props {
   mode: 'request' | 'donation' | 'pledge';
@@ -10,7 +11,7 @@ interface Props {
 }
 
 export const MpesaModal: React.FC<Props> = ({ mode, targetId, amount, onClose }) => {
-  const { payPoolRequest } = useApp();
+  const { payPoolRequest, payDonation, payPledge, tokenHash, donorHash } = useApp();
   const [phone, setPhone] = useState('');
   const [step, setStep] = useState<'phone' | 'pending' | 'success' | 'failed'>('phone');
   const [error, setError] = useState<string | null>(null);
@@ -18,43 +19,72 @@ export const MpesaModal: React.FC<Props> = ({ mode, targetId, amount, onClose })
   const handlePay = async () => {
     setStep('pending');
     setError(null);
-    let ok = false;
-    if (mode === 'request') ok = await payPoolRequest(targetId, phone);
-    else if (mode === 'donation') ok = await payDonation(targetId, phone);
-    else ok = await payPledge(targetId, phone);
-    if (!ok) {
-      setStep('failed');
-      setError('Failed to initiate payment. Check your number and try again.');
-    } else {
-      // Start polling
+
+    try {
+      const apiBase = (import.meta.env.VITE_API_URL as string) || 'http://127.0.0.1:8000';
+      let endpoint = '';
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+      if (mode === 'request') {
+        endpoint = `${apiBase}/requests/${targetId}/pay`;
+        headers['X-Token'] = tokenHash || '';
+      } else if (mode === 'donation') {
+        endpoint = `${apiBase}/donations/${targetId}/pay`;
+        headers['X-Donor-Hash'] = donorHash || '';
+      } else if (mode === 'pledge') {
+        endpoint = `${apiBase}/pledges/${targetId}/pay`;
+        headers['X-Donor-Hash'] = donorHash || '';
+      }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ phone })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // Show the exact error from the backend (e.g. "Daily rate limit reached", "Request already paid")
+        setStep('failed');
+        setError(data.reason || `Failed to initiate payment (HTTP ${res.status}).`);
+        return;
+      }
+
+      // Success - start polling
       const interval = setInterval(async () => {
-        // In a real app, we'd have a specific fetch request for this ID
-        // Here we rely on the AppContext refetching the whole list
-        // We'll simulate a check by fetching the status
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/requests/mine`, {
-          headers: { 'X-Token': localStorage.getItem('token') || '' }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const req = data.requests.find((r: any) => r.id === requestId);
-          if (req?.payment_status === 'paid') {
-            setStep('success');
-            clearInterval(interval);
-          } else if (status === 'payment_failed' || status === 'failed') {
-            setStep('failed');
-            setError('Payment was cancelled or failed.');
-            clearInterval(interval);
+        const url = mode === 'request' ? `${apiBase}/requests/mine` : `${apiBase}/donations/mine`;
+        const pollHeaders: Record<string, string> = mode === 'request' ? { 'X-Token': tokenHash || '' } : { 'X-Donor-Hash': donorHash || '' };
+        
+        try {
+          const pRes = await fetch(url, { headers: pollHeaders });
+          if (pRes.ok) {
+            const pData = await pRes.json();
+            const list = mode === 'request' ? pData.requests : (pData.donations || []);
+            const item = list.find((r: any) => r.id === targetId);
+            const st = mode === 'request' ? item?.payment_status : item?.status;
+            
+            if (st === 'paid') {
+              setStep('success');
+              clearInterval(interval);
+            } else if (st === 'payment_failed' || st === 'failed') {
+              setStep('failed');
+              setError('Payment was cancelled or failed on the M-PESA prompt.');
+              clearInterval(interval);
+            }
           }
-        }
+        } catch { /* ignore transient polling errors */ }
       }, 3000);
-      // Timeout after 90 seconds
+
       setTimeout(() => {
         clearInterval(interval);
-        if (step === 'pending') {
-          setStep('failed');
-          setError('Payment timed out. Please try again.');
-        }
+        setStep((prev) => prev === 'pending' ? 'failed' : prev);
+        setError('Payment timed out. Please try again.');
       }, 90000);
+
+    } catch (err: any) {
+      setStep('failed');
+      setError(err.message || 'Network error. Is the backend running?');
     }
   };
 

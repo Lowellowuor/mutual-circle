@@ -130,7 +130,7 @@ async def partner_redemptions(
                 for r in rows
             ],
         }
-    else:  # retail
+    else:
         rows = await conn.fetch(
             """SELECT vr.id, vr.voucher_id, vr.amount_pence, vr.status, vr.created_at,
                       v.partner_name, v.description,
