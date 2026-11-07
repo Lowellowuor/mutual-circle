@@ -36,7 +36,7 @@ Items are grouped by how they would be caught. **P0** = a security audit or a cu
 
 - **No API-wide rate limiting or security headers.** No `X-RateLimit-*`, no HSTS, no `Content-Security-Policy`, no `X-Content-Type-Options: nosniff`. *Fix:* add middleware for the standard headers, define limits per endpoint.
 
-- **`settled_by_hash` in the ledger export is the staff ID.** An auditor reading the public ledger can map a settlement to the exact staff member. *Fix:* use a per-staff pseudonym, or omit from the public export.
+- ~~**`settled_by_hash` in the ledger export is the staff ID.**~~ **FIXED.** The public JSON endpoint never exposed it (only fetched the column for chain verification). The public CSV did — removed in the current commit. `settled_by_hash` remains in the DB and in `compute_entry_hash()` because removing it from either would break append-only chain integrity. Only the public CSV output is stripped. Verified: grep of CSV function shows no data-column reference. (Audit item A9.)
 
 - **The rate-limit history and request history live in `localStorage`.** A user can clear local storage to reset their rate limit; a compromised device can dump the full history. *Fix:* move both to server-side tables, clear local data on logout.
 
