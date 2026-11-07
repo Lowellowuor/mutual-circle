@@ -33,7 +33,20 @@ logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
 
 
-_REQUIRED_SECRETS = ("JWT_SECRET", "LEDGER_HMAC_KEY", "TOKEN_HMAC_KEY_CURRENT", "PARTNER_HMAC_KEY")
+_REQUIRED_SECRETS = (
+    "JWT_SECRET",
+    "LEDGER_HMAC_KEY",
+    "TOKEN_HMAC_KEY_CURRENT",
+    "PARTNER_HMAC_KEY",
+    # Added with /requests/{id}/pay (M-PESA STK initiation). Each is
+    # genuinely secret (leak = attack) and reliably >=32 chars. Non-secret
+    # M-PESA config (SHORTCODE, CONSUMER_KEY, CALLBACK_URL) is checked at
+    # first-call time inside initiate_stk_push's RuntimeError path — the
+    # 32-char invariant does not apply to a 6-digit shortcode or a URL.
+    "MPESA_CONSUMER_SECRET",
+    "MPESA_PASSKEY",
+    "AT_API_KEY",
+)
 
 
 def _validate_secrets() -> None:
@@ -52,6 +65,9 @@ def _validate_secrets() -> None:
         "LEDGER_HMAC_KEY": settings.ledger_hmac_key,
         "TOKEN_HMAC_KEY_CURRENT": settings.token_hmac_key_current,
         "PARTNER_HMAC_KEY": settings.partner_hmac_key,
+        "MPESA_CONSUMER_SECRET": settings.mpesa_consumer_secret,
+        "MPESA_PASSKEY": settings.mpesa_passkey,
+        "AT_API_KEY": settings.at_api_key,
     }
     missing = [
         name for name in _REQUIRED_SECRETS
