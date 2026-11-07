@@ -20,6 +20,7 @@ from mtc.routes.partner import router as partner_router
 from mtc.routes.pledges import router as pledges_router
 from mtc.routes.helplines import router as helplines_router
 from mtc.routes.ledger_public import router as ledger_public_router
+from mtc.mpesa.routes import router as mpesa_router
 from mtc.routes.notifications import router as notifications_router
 from mtc.routes.opportunities import router as opportunities_router
 from mtc.routes.partners import router as partners_router
@@ -74,10 +75,43 @@ def _validate_secrets() -> None:
         )
 
 
+def _log_integration_status() -> None:
+    """Log which external integrations are configured (no fail-fast).
+
+    These are not in _REQUIRED_SECRETS yet because no route currently
+    calls initiate_stk_push or send_sms. When /pool/{id}/pay lands,
+    promote MPESA_CONSUMER_SECRET, MPESA_PASSKEY, and AT_API_KEY to
+    _REQUIRED_SECRETS. Until then, empty values are logged as warnings
+    so production deploys know what is missing without refusing to start.
+    """
+    integrations = {
+        "M-PESA (STK Push)": all([
+            settings.mpesa_consumer_key,
+            settings.mpesa_consumer_secret,
+            settings.mpesa_shortcode,
+            settings.mpesa_passkey,
+            settings.mpesa_callback_url,
+        ]),
+        "Africa's Talking (SMS)": all([
+            settings.at_api_key, settings.at_username,
+        ]),
+    }
+    for name, configured in integrations.items():
+        if configured:
+            logger.info("Integration configured: %s", name)
+        else:
+            logger.warning(
+                "Integration NOT configured: %s. "
+                "Related routes will fail if called.",
+                name,
+            )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting in %s mode", settings.environment)
     _validate_secrets()
+    _log_integration_status()
     try:
         await get_pool()
     except Exception as exc:
@@ -151,6 +185,7 @@ app.include_router(stats_router)
 app.include_router(notifications_router)
 app.include_router(ledger_public_router)
 app.include_router(partners_router)
+app.include_router(mpesa_router)
 
 
 @app.get("/")

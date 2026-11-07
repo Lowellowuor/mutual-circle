@@ -80,3 +80,48 @@ function.
 ## Reporting
 
 Report security issues to the maintainer directly. Do not open a public issue.
+
+
+## Webhook attack surface — M-PESA Daraja callback
+
+`POST /mpesa/stk/callback` receives Safaricom STK Push callbacks. The
+endpoint is unauthenticated by design: Safaricom does not sign payloads,
+and their egress IP ranges change. The only verification is that the
+`CheckoutRequestID` in the callback matches a request we initiated
+(write-then-call contract in `/pool/{id}/pay`).
+
+Mitigations:
+
+1. **Idempotency on CheckoutRequestID.** A duplicate callback returns
+   the cached response from the first. A malformed or spoofed
+   CheckoutRequestID returns 200 with `{"status": "unknown_checkout_id"}`
+   and does NOT update any request row.
+
+2. **Always return 200.** Permanent failures and in-flight states would
+   trigger Safaricom retries that cannot succeed. We return 200 to stop
+   retries, and log the full payload. Manual reconciliation via
+   `mpesa_receipt` is deferred to a future operations runbook.
+
+3. **No trusted data from the callback alone.** `requests.mpesa_receipt`
+   is stored but never used as an authorization signal. The
+   `payment_status` column reflects Safaricom's claim, not a verified
+   fact. Downstream business logic (voucher issuance, tier checks) does
+   not read `payment_status` yet.
+
+Residual risks accepted for pilot:
+
+- A spoofed callback with a valid CheckoutRequestID (obtained from a
+  real STK push) could mark a request as `paid`. Mitigation requires a
+  secondary confirmation via the Daraja transaction status API, which
+  is deferred to Phase 3 proper.
+- A DB error during callback processing logs and returns 200 (no
+  retry), potentially leaving the request in `pending_payment`. Manual
+  reconciliation is required.
+
+When `/pool/{id}/pay` lands:
+
+- Add `MPESA_CONSUMER_SECRET`, `MPESA_PASSKEY`, and `AT_API_KEY` to
+  `_REQUIRED_SECRETS` in `main.py` — the fail-fast logic must be
+  promoted at the same time as the callers.
+- Implement the transaction status API as a secondary verification for
+  callbacks with a receipt above a threshold (e.g. > KES 5,000).
