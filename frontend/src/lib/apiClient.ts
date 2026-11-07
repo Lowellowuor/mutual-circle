@@ -232,8 +232,8 @@ export const getLockerStock = (sessionToken: string) =>
 export const getDedupItems = (sessionToken: string) =>
   call<{ items: any[] }>('/admin/dedup', { headers: { Authorization: `Bearer ${sessionToken}` } });
 
-export const listPartnerRedemptions = () =>
-  call<{ redemptions: any[] }>('/partner/redemptions');
+export const listFulfilmentRedemptions = (sessionToken: string) =>
+  call<{ redemptions: any[] }>('/fulfilment/redemptions', { headers: { Authorization: `Bearer ${sessionToken}` } });
 export async function issueTokenStrict(phone: string): Promise<{ token: string }> {
   const res = await fetch(`${BASE}/tokens`, {
     method: 'POST',
@@ -394,4 +394,18 @@ export const payPoolRequest = (token: string, requestId: string, phone: string) 
   call<{ ok: boolean; checkout_request_id: string; message: string }>(
     `/requests/${requestId}/pay`,
     { method: 'POST', headers: { 'X-Token': token, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ phone }) },
+  );
+
+
+export const payDonation = (donorHash: string, donationId: string, phone: string) =>
+  call<{ ok: boolean; checkout_request_id: string; message: string }>(
+    `/donations/${donationId}/pay`,
+    { method: 'POST', headers: { 'X-Donor-Hash': donorHash, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ phone }) },
+  );
+
+
+export const payPledge = (donorHash: string, pledgeId: string, phone: string) =>
+  call<{ ok: boolean; checkout_request_id: string; message: string }>(
+    `/pledges/${pledgeId}/pay`,
+    { method: 'POST', headers: { 'X-Donor-Hash': donorHash, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ phone }) },
   );

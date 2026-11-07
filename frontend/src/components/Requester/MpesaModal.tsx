@@ -3,12 +3,13 @@ import { Phone, CheckCircle, XCircle, Loader2, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 interface Props {
-  requestId: string;
+  mode: 'request' | 'donation' | 'pledge';
+  targetId: string;
   amount: number;
   onClose: () => void;
 }
 
-export const MpesaModal: React.FC<Props> = ({ requestId, amount, onClose }) => {
+export const MpesaModal: React.FC<Props> = ({ mode, targetId, amount, onClose }) => {
   const { payPoolRequest } = useApp();
   const [phone, setPhone] = useState('');
   const [step, setStep] = useState<'phone' | 'pending' | 'success' | 'failed'>('phone');
@@ -17,7 +18,10 @@ export const MpesaModal: React.FC<Props> = ({ requestId, amount, onClose }) => {
   const handlePay = async () => {
     setStep('pending');
     setError(null);
-    const ok = await payPoolRequest(requestId, phone);
+    let ok = false;
+    if (mode === 'request') ok = await payPoolRequest(targetId, phone);
+    else if (mode === 'donation') ok = await payDonation(targetId, phone);
+    else ok = await payPledge(targetId, phone);
     if (!ok) {
       setStep('failed');
       setError('Failed to initiate payment. Check your number and try again.');
@@ -27,7 +31,7 @@ export const MpesaModal: React.FC<Props> = ({ requestId, amount, onClose }) => {
         // In a real app, we'd have a specific fetch request for this ID
         // Here we rely on the AppContext refetching the whole list
         // We'll simulate a check by fetching the status
-        const res = await fetch(`http://127.0.0.1:8000/requests/mine`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/requests/mine`, {
           headers: { 'X-Token': localStorage.getItem('token') || '' }
         });
         if (res.ok) {
@@ -36,7 +40,7 @@ export const MpesaModal: React.FC<Props> = ({ requestId, amount, onClose }) => {
           if (req?.payment_status === 'paid') {
             setStep('success');
             clearInterval(interval);
-          } else if (req?.payment_status === 'payment_failed') {
+          } else if (status === 'payment_failed' || status === 'failed') {
             setStep('failed');
             setError('Payment was cancelled or failed.');
             clearInterval(interval);

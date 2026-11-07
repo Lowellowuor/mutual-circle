@@ -109,7 +109,7 @@ export const RequesterView: React.FC = () => {
 
     const patched = history.map(h => {
       const live = liveMap.get(h.id);
-      return live ? { ...h, status: live.status } : h;
+      return live ? { ...h, status: live.status, paymentStatus: (live as any).paymentStatus } : h;
     });
 
     const historyIds = new Set(history.map(h => h.id));
@@ -121,6 +121,7 @@ export const RequesterView: React.FC = () => {
           id: r.id,
           type: isSwap ? 'swap' : 'pool',
           status: r.status,
+          paymentStatus: (r as any).paymentStatus,
           bundleCategory: isSwap ? (r as any).bundleCategory : undefined,
           lockerLocation: isSwap ? (r as any).lockerLocation : undefined,
           pin: isSwap ? (r as any).pin : undefined,
@@ -563,6 +564,16 @@ export const RequesterView: React.FC = () => {
                   <div className="text-[13px] font-mono font-bold text-[#111111]">{r.type === 'swap' ? `PIN ${r.pin}` : `KES ${r.amount?.toLocaleString()}`}</div>
                   {canWithdraw && (<button onClick={() => handleWithdraw(r.id, r.type)} className="text-[9px] text-rose-600 hover:underline flex items-center gap-0.5"><Trash2 className="w-3 h-3" />Withdraw</button>)}
                   {canCollect && (<button onClick={async () => { setCollectError(null); if (!resolvedPin) { setCollectError('PIN unavailable — refresh page'); setTimeout(() => setCollectError(null), 4000); return; } const ok = await collectRequest(r.id, resolvedPin); if (!ok) { setCollectError('Unable to confirm — state refreshed'); setTimeout(() => setCollectError(null), 4000); } else { setTimeout(() => setCollectError(null), 3000); } }} className="text-[9px] text-emerald-700 hover:underline flex items-center gap-0.5"><CheckCircle className="w-3 h-3" />I've collected</button>)}
+                  {r.type === 'pool' && r.status === 'fulfilled' && r.paymentStatus !== 'paid' && (
+
+                    <button onClick={() => setPayingRequest({ id: r.id, amount: r.amount * 100 })} className="text-[9px] text-emerald-700 hover:underline flex items-center gap-0.5 font-bold">
+
+                      <CreditCard className="w-3 h-3" />Settle
+
+                    </button>
+
+                  )}
+
                   {!canWithdraw && !canCollect && (<div className={'text-[10px] uppercase ' + (isWithdrawn ? 'text-[#111111]/30' : r.status === 'pending_check' ? 'text-amber-700' : r.status === 'submitted_to_partner' ? 'text-emerald-700' : r.status === 'collected' ? 'text-emerald-600 font-bold' : 'text-[#1F6B4A]')}>{r.status?.replace(/_/g, ' ')}</div>)}
                   {collectError && <div className="text-[11px] text-rose-600">{collectError}</div>}
                 </div>
@@ -666,9 +677,6 @@ export const RequesterView: React.FC = () => {
               { key: 'paid', label: 'Paid to institution', state: 'pending' },
             ]} />
           </div>
-          {poolResult.status === 'verified' && (
-            <button onClick={() => setPayingRequest({ id: poolResult.id, amount: poolResult.amount })} className="w-full py-2.5 mb-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold shadow-md shadow-green-600/20">Pay with M-PESA</button>
-          )}
           <button onClick={() => goTab('home')} className="w-full py-2.5 bg-[#111111] hover:bg-black text-white rounded-xl text-xs font-medium">Done</button>
         </div>
       );
@@ -964,12 +972,9 @@ export const RequesterView: React.FC = () => {
       </div>
 
 
+      
       {payingRequest && (
-        <MpesaModal
-          requestId={payingRequest.id}
-          amount={payingRequest.amount}
-          onClose={() => setPayingRequest(null)}
-        />
+        <MpesaModal mode="request" targetId={payingRequest.id} amount={payingRequest.amount} onClose={() => setPayingRequest(null)} />
       )}
     </div>
   );

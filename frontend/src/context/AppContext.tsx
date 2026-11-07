@@ -49,8 +49,10 @@ interface AppContextType {
   matchPledge: (pledgeId: string, requestId?: string) => Promise<{ ok: boolean; reason?: string }>;
   closeMatchInterest: (id: string, status: 'contacted' | 'closed') => Promise<{ ok: boolean; reason?: string }>;
   expressInterest: (opportunityId: string, title: string) => void;
-  addDonorContribution: (amount: number, isAnonymous: boolean, optInLedger: boolean) => void;
-  addPledge: (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => void;
+  addDonorContribution: (amount: number, isAnonymous: boolean, optInLedger: boolean) => Promise<any>;
+  payDonation: (donationId: string, phone: string) => Promise<boolean>;
+  addPledge: (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => Promise<any>;
+  payPledge: (pledgeId: string, phone: string) => Promise<boolean>;
   downloadAuditCsv: () => Promise<boolean>;
   payPoolRequest: (requestId: string, phone: string) => Promise<boolean>;
 
@@ -283,6 +285,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [matchInterests, setMatchInterests] = useState<MatchInterest[]>([]);
 
   
+
+
+  const payPledge = useCallback(async (pledgeId: string, phone: string) => {
+    if (!donorHash) return false;
+    const res = await api.payPledge(donorHash, pledgeId, phone);
+    if (res && res.ok) {
+      await refetchAll();
+      return true;
+    }
+    return false;
+  }, [donorHash]);
+
+  const payDonation = useCallback(async (donationId: string, phone: string) => {
+    if (!donorHash) return false;
+    const res = await api.payDonation(donorHash, donationId, phone);
+    if (res && res.ok) {
+      await refetchAll();
+      return true;
+    }
+    return false;
+  }, [donorHash]);
+
   const payPoolRequest = useCallback(async (requestId: string, phone: string) => {
     if (!tokenHash) return false;
     const res = await api.payPoolRequest(tokenHash, requestId, phone);
@@ -297,7 +321,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const c = await api.listCampaigns();
     if (c) setCampaigns(mapCampaigns(c));
 
-    const r = await api.listPartnerRedemptions();
+    const r = await api.listFulfilmentRedemptions(sessionToken || '');
     if (r) setVoucherRedemptions(mapRedemptions(r));
 
     if (tokenHash) {
@@ -572,15 +596,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     (async () => { await api.expressMatchInterest(tokenHash, 'self', opportunityId, title); await refetchAll(); })().catch((e) => { console.error('[express-interest]', e); });
   };
 
-  const addDonorContribution = (amount: number, isAnonymous: boolean, optInLedger: boolean) => {
-    (async () => { await api.createDonation(donorHash, Math.round(amount * 100), isAnonymous, optInLedger); await refetchAll(); })().catch((e) => { console.error('[create-donation]', e); });
+  const addDonorContribution = async (amount: number, isAnonymous: boolean, optInLedger: boolean) => {
+    try {
+      const res = await api.createDonation(donorHash, Math.round(amount * 100), isAnonymous, optInLedger);
+      await refetchAll();
+      return res;
+    } catch (e) {
+      console.error('[create-donation]', e);
+      return null;
+    }
   };
 
-  const addPledge = (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => {
-    (async () => {
-      await api.createPledge(donorHash, type, description, locality, maxValue ? Math.round(maxValue * 100) : undefined);
+  const addPledge = async (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => {
+    try {
+      const res = await api.createPledge(donorHash, type, description, locality, maxValue ? Math.round(maxValue * 100) : undefined);
       await refetchAll();
-    })().catch((e) => { console.error('[add-pledge]', e); });
+      return res;
+    } catch (e) {
+      console.error('[add-pledge]', e);
+      return null;
+    }
   };
 
   const downloadAuditCsv = async (): Promise<boolean> => {
@@ -606,6 +641,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       routeFlagToTier4, clearFlagAsFalsePositive, matchPledge, closeMatchInterest, expressInterest,
       addDonorContribution, addPledge, downloadAuditCsv,
       payPoolRequest,
+      payDonation,
+      payPledge,
       refetchAll,
     }}>
       {children}

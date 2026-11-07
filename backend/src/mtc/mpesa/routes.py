@@ -117,6 +117,11 @@ async def stk_callback(
                 "UPDATE donor_contributions SET status = $1, mpesa_receipt = $2 WHERE id = $3",
                 new_status, parsed["receipt"], target_id,
             )
+        elif target_table == "pledges":
+            await conn.execute(
+                "UPDATE pledges SET status = $1 WHERE id = $2",
+                new_status, target_id,
+            )
         else:
             logger.error("Unknown target_table '%s' for checkout_id %s", target_table, checkout_id)
 

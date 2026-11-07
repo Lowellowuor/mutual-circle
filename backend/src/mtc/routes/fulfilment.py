@@ -170,3 +170,22 @@ async def staff_redeem(
         partner_name=body.partner_name,
         amount_pence=body.amount_pence,
     )
+
+
+@router.get("/redemptions")
+async def list_staff_redemptions(
+    session: dict = Depends(require_fulfilment),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Staff view of all redemptions (Bearer JWT)."""
+    rows = await conn.fetch(
+        """SELECT id, voucher_id, partner_name, amount_pence, status, created_at
+           FROM voucher_redemptions
+           ORDER BY created_at DESC LIMIT 100"""
+    )
+    return {"redemptions": [
+        {"id": str(r["id"]), "voucherId": str(r["voucher_id"]),
+         "partnerName": r["partner_name"], "amount_pence": r["amount_pence"],
+         "status": r["status"], "timestamp": r["created_at"].isoformat()}
+        for r in rows
+    ]}

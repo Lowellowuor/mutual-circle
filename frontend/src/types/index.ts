@@ -61,6 +61,8 @@ export interface Campaign {
 export interface DonorContribution {
   id: string;
   amount: number;
+  status?: 'pending' | 'paid' | 'failed';
+  mpesaReceipt?: string;
   isAnonymous: boolean;
   optInLedger: boolean;
   timestamp: string;
