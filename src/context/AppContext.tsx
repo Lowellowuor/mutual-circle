@@ -535,11 +535,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!r) return { ok: false, reason: 'Backend unavailable' };
     await refetchAll();
     return { ok: r.ok, reason: r.reason };
-  }> => {
-    const r = await api.redeemVoucher(pin, partnerName, amountPence);
-    if (!r) return { ok: false, reason: 'Backend unavailable' };
-    await refetchAll();
-    return { ok: r.ok, reason: r.reason };
   };
 
   const completeOcrCheck = async (requestId: string): Promise<{ ok: boolean; reason?: string }> => {
