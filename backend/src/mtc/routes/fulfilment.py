@@ -1,4 +1,4 @@
-﻿"""Fulfilment role endpoints."""
+"""Fulfilment role endpoints."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 

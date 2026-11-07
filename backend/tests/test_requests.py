@@ -1,4 +1,4 @@
-"""Day 3 tests â€” prove tier assignment, request persistence, rate limits, withdrawal."""
+"""Day 3 tests — prove tier assignment, request persistence, rate limits, withdrawal."""
 import asyncpg
 import pytest
 import pytest_asyncio

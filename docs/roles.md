@@ -1,4 +1,4 @@
-﻿# Roles
+# Roles
 
 Six users interact with Mutual Circle. Separate credentials, separate scope, separate data visibility. No role can escalate into another's view — enforced at the API layer.
 

@@ -1,4 +1,4 @@
-﻿# Contributing
+# Contributing
 
 This is a prototype in active development. Contributions are welcome
 under the terms in `LICENSE`.

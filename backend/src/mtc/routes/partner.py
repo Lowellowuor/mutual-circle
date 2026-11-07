@@ -1,4 +1,4 @@
-"""Partner till â€” public redemption endpoint (rate-limited by IP in production)."""
+"""Partner till — public redemption endpoint (rate-limited by IP in production)."""
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 

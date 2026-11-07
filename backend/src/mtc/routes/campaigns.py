@@ -1,4 +1,4 @@
-﻿"""Campaigns — public read, cohort-level giving."""
+"""Campaigns — public read, cohort-level giving."""
 import asyncpg
 from fastapi import APIRouter, Depends
 

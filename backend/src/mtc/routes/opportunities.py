@@ -1,4 +1,4 @@
-﻿"""The Match — opportunities surfaced to requester tokens."""
+"""The Match — opportunities surfaced to requester tokens."""
 import asyncpg
 from fastapi import APIRouter, Depends
 

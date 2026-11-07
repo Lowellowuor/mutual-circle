@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { AlertTriangle, RotateCcw, ArrowLeft } from 'lucide-react';
 
 interface Props { children: React.ReactNode; }

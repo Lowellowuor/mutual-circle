@@ -1,4 +1,4 @@
-﻿"""Public aggregate stats — driven entirely by database state.
+"""Public aggregate stats — driven entirely by database state.
 
 Every number here is computed from real tables. If the ledger is empty,
 returns zeros. If donations exist, sums reflect them. No mocks.

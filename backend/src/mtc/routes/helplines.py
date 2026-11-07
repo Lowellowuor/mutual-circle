@@ -1,4 +1,4 @@
-﻿"""Verified helpline numbers — Section 4.9 requires programme-team verification."""
+"""Verified helpline numbers — Section 4.9 requires programme-team verification."""
 import asyncpg
 from fastapi import APIRouter, Depends
 

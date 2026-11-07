@@ -1,0 +1,61 @@
+chore: sweep UTF-8 mojibake + BOMs across 17 files — C9 full close
+
+C9 originally scoped to requester.py and partner.py only. That was
+incomplete. A project-wide scan (find all C3A2 byte sequences + all
+UTF-8 BOMs) found 19 files with issues. The audit was right to flag
+corruption but the audit list itself was too narrow.
+
+Two classes of issue:
+
+1. C3A2 mojibake (2 files, real corruption):
+   - backend/src/mtc/routes/partner.py
+   - backend/tests/test_requests.py
+   
+   Same pattern as C9's requester.py: intended UTF-8 characters
+   (em-dashes, smart quotes, likely from copy-pasted comments) were
+   mangled through a Windows-1252 round-trip and re-saved as UTF-8
+   of the mangled characters. Fixed via iterative reverse:
+   decode-UTF-8 -> encode-cp1252, applied 2-3 times until the C3A2
+   marker no longer appears. Restored from original bytes if the
+   iterative fix failed to converge (no partial writes).
+
+2. UTF-8 BOM only (15 files, cosmetic):
+   - CONTRIBUTING.md, ROADMAP.md, docs/roles.md
+   - backend/alembic/versions/003_idempotency_keys.py,
+     backend/alembic/versions/004_pledge_request_link.py
+   - backend/src/mtc/routes/{admin,campaigns,fulfilment,helplines,
+     opportunities,stats}.py
+   - src/components/ErrorBoundary.tsx
+   - src/components/Architecture/ArchitectureView.tsx
+   - src/components/Requester/StatusTimeline.tsx
+   - src/services/auth.ts
+   
+   BOMs are harmless to Python/TypeScript/Markdown parsers, but they
+   are the signature of files that were written by PowerShell's
+   Set-Content/Add-Content (which adds BOM) rather than
+   [System.IO.File]::WriteAllText with UTF8Encoding($false). Fixed by
+   stripping the leading EF BB BF bytes.
+
+Deliberately skipped:
+- .env (gitignored, user's local config)
+- fix-history.ps1 (PowerShell scripts sometimes need BOM to correctly
+  interpret non-ASCII; not worth the risk)
+
+Verified (before/after byte scan):
+- Before: 2 files with C3A2, 17 files with BOM (19 total hits)
+- After:  0 files with C3A2, 0 files with BOM (17 files touched)
+- Python ast.parse passes partner.py and test_requests.py
+- npm run lint: 0 TS errors
+- npm run build: passes, no changes to bundle output
+- CI will re-verify on push
+
+Combined with the earlier C9 fix (requester.py, commit d4febfd), and
+the vite.config.ts fix in 14b59d1, this closes the encoding
+corruption class of issue across the entire project. Three commits
+total, six files with actual C3A2 corruption resolved.
+
+Reference: audit item C9. Scope correction: audit named 2 files,
+actual corruption was in 3 (requester.py, partner.py, and — 
+discovered during this session — vite.config.ts and test_requests.py,
+plus the 15 BOM-only cosmetic files). C9 fully closed at the project
+level, not just the file level the audit specified.

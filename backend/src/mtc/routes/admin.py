@@ -1,4 +1,4 @@
-﻿"""Admin — depot state, locker stock, dedup (staff roles only)."""
+"""Admin — depot state, locker stock, dedup (staff roles only)."""
 import asyncpg
 from fastapi import APIRouter, Depends
 

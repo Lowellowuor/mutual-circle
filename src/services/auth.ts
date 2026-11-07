@@ -1,4 +1,4 @@
-﻿// Mock staff credentials. In production these come from an IdP.
+// Mock staff credentials. In production these come from an IdP.
 export const STAFF_CREDS: Record<'enrolment' | 'fulfilment' | 'audit', { id: string; pin: string; label: string }> = {
   enrolment:  { id: 'ENROL-04', pin: '4821', label: 'Enrolment' },
   fulfilment: { id: 'FULF-08',  pin: '7355', label: 'Fulfilment' },
