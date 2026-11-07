@@ -1,4 +1,4 @@
-﻿"""Requester routes Ã¢â‚¬â€ token-authenticated via X-Token header."""
+"""Requester routes — token-authenticated via X-Token header."""
 from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel, Field
 
