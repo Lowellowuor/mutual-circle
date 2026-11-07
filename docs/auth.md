@@ -29,13 +29,21 @@ Header: Authorization: Bearer <jwt>
 - Signed with JWT_SECRET
 - Used by: /staff/*, /fulfilment/*, /audit/*, /admin/*
 
-## 4. Partner — X-Partner-Key
+## 4. Partner — X-Partner-Key (signed)
 
-Header: X-Partner-Key: <demo-key>
+Header: X-Partner-Key: <raw-key>.<hex-signature>
 
-- Static per-partner key (e.g. kplc-demo-key-2026)
-- NOT production-grade — a real deployment should issue partner JWTs
-- Used by: /partners/me*, /partners/me/confirm/*, /partners/me/statement.csv
+Signed format: HMAC-SHA256(PARTNER_HMAC_KEY, raw-key) appended after a
+dot. Server verifies before accepting the key.
+
+- Used by: /partner/redeem, /partner/redemptions
+- Development: unsigned keys accepted if PARTNER_HMAC_KEY is unset
+- Production: PARTNER_HMAC_KEY is required; unsigned keys rejected
+
+**Signing tool:** python -c "from mtc.auth.partner_signing import sign_partner_key; print(sign_partner_key('kplc-demo-key-2026'))"
+
+The `/partners/me*` endpoints (a different prefix) still accept unsigned
+keys for now — hardening those is a separate follow-up.
 
 ## Failure modes
 

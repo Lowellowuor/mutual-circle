@@ -32,7 +32,7 @@ logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
 
 
-_REQUIRED_SECRETS = ("JWT_SECRET", "LEDGER_HMAC_KEY", "TOKEN_HMAC_KEY_CURRENT")
+_REQUIRED_SECRETS = ("JWT_SECRET", "LEDGER_HMAC_KEY", "TOKEN_HMAC_KEY_CURRENT", "PARTNER_HMAC_KEY")
 
 
 def _validate_secrets() -> None:
@@ -50,6 +50,7 @@ def _validate_secrets() -> None:
         "JWT_SECRET": settings.jwt_secret,
         "LEDGER_HMAC_KEY": settings.ledger_hmac_key,
         "TOKEN_HMAC_KEY_CURRENT": settings.token_hmac_key_current,
+        "PARTNER_HMAC_KEY": settings.partner_hmac_key,
     }
     missing = [
         name for name in _REQUIRED_SECRETS

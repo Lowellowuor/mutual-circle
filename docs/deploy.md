@@ -43,6 +43,7 @@ Expected: Total: 47 / 47 passed.
 | TOKEN_HMAC_KEY_PREVIOUS | 64 hex chars | same |
 | MESSAGING_ENCRYPTION_KEY | 64 hex chars | same |
 | JWT_SECRET | 64 hex chars | same |
+| PARTNER_HMAC_KEY | 64 hex chars | same |
 | STAFF_*_PIN_HASH (3 vars) | bcrypt $2b$12$... | python -c "import bcrypt; print(bcrypt.hashpw(b'PIN', bcrypt.gensalt()).decode())" |
 
 ## Database (Neon)

@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     token_hmac_key_previous: str = ""
     messaging_encryption_key: str = ""
     jwt_secret: str = ""
+    partner_hmac_key: str = ""
 
     # Staff credentials
     staff_enrol_id: str = ""

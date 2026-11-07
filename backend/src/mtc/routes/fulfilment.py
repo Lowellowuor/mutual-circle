@@ -9,6 +9,7 @@ from mtc.auth.deps import require_role
 from mtc.db.main import get_conn
 from mtc.ledger.append import DuplicateObjectError
 from mtc.vouchers.issue import VoucherConflict, issue_voucher
+from mtc.vouchers.redeem import redeem_voucher
 
 router = APIRouter(prefix="/fulfilment", tags=["fulfilment"])
 require_fulfilment = require_role("fulfilment")
@@ -137,3 +138,35 @@ async def list_all_vouchers(session: dict = Depends(require_fulfilment), conn: a
          "expires_at": r["expires_at"].isoformat(), "created_at": r["created_at"].isoformat()}
         for r in rows
     ]}
+
+
+class StaffRedeemBody(BaseModel):
+    pin: str = Field(..., min_length=4, max_length=4)
+    partner_name: str = Field(..., min_length=1, max_length=80)
+    amount_pence: int = Field(..., gt=0, le=10_000_000)
+
+
+@router.post("/redeem")
+async def staff_redeem(
+    body: StaffRedeemBody,
+    session: dict = Depends(require_fulfilment),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Staff-initiated voucher redemption (Console Till).
+
+    Auth: Bearer JWT, fulfilment role. The partner_name comes from the
+    request body because staff are manually processing a walk-in
+    redemption on behalf of whichever partner they select. Contrast with
+    POST /partner/redeem where partner identity is derived from the
+    signed key, not the body.
+
+    Both this and /partner/redeem call the same underlying redeem_voucher.
+    The auth gate and where the partner identity comes from are the
+    only differences.
+    """
+    return await redeem_voucher(
+        conn,
+        pin=body.pin,
+        partner_name=body.partner_name,
+        amount_pence=body.amount_pence,
+    )

@@ -172,10 +172,14 @@ export const auditLog = (sessionToken: string, limit = 100) =>
   call<{ entries: any[] }>(`/audit/log?limit=${limit}`, { headers: { Authorization: `Bearer ${sessionToken}` } });
 
 // --- Partner / till ---
-export const redeemVoucher = (pin: string, partnerName: string, amountPence: number) =>
+export const redeemVoucher = (sessionToken: string, pin: string, partnerName: string, amountPence: number) =>
   call<{ ok: boolean; reason?: string; voucher_id?: string }>(
-    '/partner/redeem',
-    { method: 'POST', body: JSON.stringify({ pin, partner_name: partnerName, amount_pence: amountPence }) },
+    '/fulfilment/redeem',
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({ pin, partner_name: partnerName, amount_pence: amountPence }),
+    },
   );
 
 // --- Enrolment ---

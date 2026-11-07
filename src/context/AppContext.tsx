@@ -530,6 +530,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const redeemVoucher = async (pin: string, amountPence: number, partnerName: string): Promise<{ ok: boolean; reason?: string }> => {
+    if (!sessionToken) return { ok: false, reason: 'Session expired' };
+    const r = await api.redeemVoucher(sessionToken, pin, partnerName, amountPence);
+    if (!r) return { ok: false, reason: 'Backend unavailable' };
+    await refetchAll();
+    return { ok: r.ok, reason: r.reason };
+  }> => {
     const r = await api.redeemVoucher(pin, partnerName, amountPence);
     if (!r) return { ok: false, reason: 'Backend unavailable' };
     await refetchAll();
