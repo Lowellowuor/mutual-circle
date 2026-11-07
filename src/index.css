@@ -1,3 +1,15 @@
+/* Self-hosted Inter, loaded via @fontsource. Replaces system-ui as the
+   actual body font instead of the declared-but-never-loaded fallback.
+   Weights: 400 (body), 500 (medium labels), 600 (semibold), 700 (bold).
+   Cormorant Garamond (headings) and JetBrains Mono (numbers/mono) still
+   fall back to Georgia and system monospace — deliberate for v1 to keep
+   bundle size small for low-bandwidth users. Add @fontsource/cormorant-
+   garamond or @fontsource/jetbrains-mono later to self-host those too. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+
 @import "tailwindcss";
 @import "./theme/tokens.css";
 
