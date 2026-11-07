@@ -62,3 +62,40 @@ async def consume_quota(
                 count, total,
             )
         return RateState(request_count=count, total_value_pence=total)
+
+# --- A3-c: IP Rate Limiting ---
+
+MAX_IP_REQS_PER_DAY = {
+    "pay": 10,
+    "redeem": 50,
+}
+
+
+async def check_ip_rate_limit(
+    conn: asyncpg.Connection,
+    *,
+    ip_address: str,
+    endpoint: str,
+) -> None:
+    """Enforce per-IP rate limits. Raises RateLimitExceeded if breached."""
+    limit = MAX_IP_REQS_PER_DAY.get(endpoint, 100)
+    # We prefix with IP: so it doesn't collide with user token hashes
+    identifier = f"IP:{ip_address}:{endpoint}"
+
+    async with conn.transaction():
+        row = await conn.fetchrow(
+            """
+            INSERT INTO rate_counters (token_hash, day, request_count, total_value_pence)
+            VALUES ($1, CURRENT_DATE, 1, 0)
+            ON CONFLICT (token_hash, day) DO UPDATE
+            SET request_count = rate_counters.request_count + 1
+            RETURNING request_count
+            """,
+            identifier,
+        )
+        count = row["request_count"]
+        if count > limit:
+            raise RateLimitExceeded(
+                f"Daily rate limit ({limit}) reached for this IP on {endpoint}.",
+                count, 0,
+            )

@@ -44,7 +44,7 @@ async def issue_voucher(
         if req["status"] != "verified":
             raise VoucherConflict(f"Voucher requires status 'verified', got '{req['status']}'")
 
-        pin = f"{secrets.randbelow(10000):04d}"
+        pin = f"{secrets.randbelow(1000000):06d}"
         pin_hash = bcrypt.hashpw(pin.encode(), bcrypt.gensalt()).decode("utf-8")
         pin_last4 = pin[-4:]
         expires_at = datetime.now(timezone.utc) + timedelta(days=VOUCHER_VALID_DAYS)

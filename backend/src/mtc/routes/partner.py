@@ -17,6 +17,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from mtc.auth.partner_signing import verify_partner_key
+from mtc.rate_limit.counter import check_ip_rate_limit, RateLimitExceeded
+from fastapi import Request
 from mtc.db.main import get_conn
 from mtc.vouchers.redeem import redeem_voucher
 
@@ -52,13 +54,14 @@ async def require_partner_signed(
 
 
 class RedeemBody(BaseModel):
-    pin: str = Field(..., min_length=4, max_length=4)
+    pin: str = Field(..., min_length=6, max_length=6)
     amount_pence: int = Field(..., gt=0, le=10_000_000)
 
 
 @router.post("/redeem")
 async def redeem(
     body: RedeemBody,
+    request: Request,
     partner: dict = Depends(require_partner_signed),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
@@ -68,6 +71,11 @@ async def redeem(
     the request body. A caller cannot claim to be a different partner
     by changing a JSON field.
     """
+    try:
+        await check_ip_rate_limit(conn, ip_address=request.client.host, endpoint="redeem")
+    except RateLimitExceeded as e:
+        raise HTTPException(429, detail=e.reason)
+
     return await redeem_voucher(
         conn,
         pin=body.pin,

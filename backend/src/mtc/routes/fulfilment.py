@@ -141,7 +141,7 @@ async def list_all_vouchers(session: dict = Depends(require_fulfilment), conn: a
 
 
 class StaffRedeemBody(BaseModel):
-    pin: str = Field(..., min_length=4, max_length=4)
+    pin: str = Field(..., min_length=6, max_length=6)
     partner_name: str = Field(..., min_length=1, max_length=80)
     amount_pence: int = Field(..., gt=0, le=10_000_000)
 

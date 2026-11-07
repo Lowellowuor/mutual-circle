@@ -9,7 +9,8 @@ import asyncpg
 from mtc import idempotency
 from mtc.mpesa.client import initiate_stk_push
 from mtc.db.main import get_conn
-from mtc.rate_limit.counter import RateLimitExceeded, consume_quota
+from mtc.rate_limit.counter import RateLimitExceeded, consume_quota, check_ip_rate_limit
+from fastapi import Request
 from mtc.requests_.lifecycle import WithdrawNotAllowed, list_requests, withdraw_request
 from mtc.requests_.pool import create_pool
 from mtc.requests_.swap import create_swap
@@ -116,6 +117,7 @@ async def create_pool_route(
 async def pay_route(
     request_id: str,
     body: PayBody,
+    request: Request,
     token: str = Depends(require_token),
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     conn: asyncpg.Connection = Depends(get_conn),
@@ -145,6 +147,11 @@ async def pay_route(
       - DB write fails after STK -> logged with checkout_id; the payment
         went through on Daraja's side, reconciliation required
     """
+    try:
+        await check_ip_rate_limit(conn, ip_address=request.client.host, endpoint="pay")
+    except RateLimitExceeded as e:
+        raise HTTPException(429, detail=e.reason)
+
     cached = await idempotency.check_or_claim(conn, idempotency_key, "pool_pay", token)
     if cached is not None:
         return cached

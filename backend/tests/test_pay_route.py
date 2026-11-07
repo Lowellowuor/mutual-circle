@@ -28,6 +28,12 @@ def _row(payment_status: str = "n/a", amount_pence: int = 100000,
     }
 
 
+@pytest.fixture(autouse=True)
+def mock_rate_limit():
+    # Bypass the IP rate limiter for mock-based tests
+    with patch("mtc.routes.requester.check_ip_rate_limit", new_callable=AsyncMock) as m:
+        yield m
+
 @pytest.fixture
 def mock_conn():
     return AsyncMock()

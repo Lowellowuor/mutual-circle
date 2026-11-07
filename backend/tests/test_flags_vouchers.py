@@ -98,7 +98,7 @@ async def test_issue_voucher(client, clean_db):
     )
     assert r.status_code == 200
     body = r.json()
-    assert len(body["pin"]) == 4
+    assert len(body["pin"]) == 6
     assert body["pin"].isdigit()
     assert body["partner_name"] == "Naivas Kibera"
 
@@ -162,6 +162,26 @@ async def test_redeem_exceeds_value(client, clean_db):
     r = await client.post("/fulfilment/redeem", headers=h, json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 500000})
     assert r.json()["ok"] is False
 
+
+async def test_redeem_lockout(client, clean_db):
+    _, request_id = await _create_verified_pool(client)
+    h = await _fulf_headers(client)
+    issue = await client.post(
+        f"/fulfilment/requests/{request_id}/voucher",
+        headers=h, json={"partner_name": "Naivas Kibera", "partner_type": "retailer"},
+    )
+    pin = issue.json()["pin"]
+    wrong_pin = "99" + pin[2:]  # Ensure it targets the same voucher by matching pin_last4
+
+    # 3 failed attempts
+    for _ in range(3):
+        r = await client.post("/fulfilment/redeem", headers=h, json={"pin": wrong_pin, "partner_name": "Naivas Kibera", "amount_pence": 1000})
+        assert r.json()["ok"] is False
+
+    # 4th attempt with CORRECT PIN should fail because it's locked
+    r = await client.post("/fulfilment/redeem", headers=h, json={"pin": pin, "partner_name": "Naivas Kibera", "amount_pence": 1000})
+    assert r.json()["ok"] is False
+    assert "locked" in r.json()["reason"].lower()
 
 async def test_requester_lists_vouchers(client, clean_db):
     tok, request_id = await _create_verified_pool(client)

@@ -19,8 +19,8 @@ async def redeem_voucher(
     partner_name: str,
     amount_pence: int,
 ) -> dict:
-    if not pin.isdigit() or len(pin) != 4:
-        return {"ok": False, "reason": "PIN must be 4 digits"}
+    if not pin.isdigit() or len(pin) != 6:
+        return {"ok": False, "reason": "PIN must be 6 digits"}
     if amount_pence <= 0:
         return {"ok": False, "reason": "Amount must be positive"}
 
@@ -36,12 +36,40 @@ async def redeem_voucher(
         )
 
         matched = None
+        locked = False
         for v in candidates:
+            if v["locked_until"] and v["locked_until"] > datetime.now(timezone.utc):
+                locked = True
+                continue
+            
             if bcrypt.checkpw(pin.encode(), v["pin_hash"].encode()):
                 matched = v
                 break
 
         if matched is None:
+            if locked:
+                return {"ok": False, "reason": "Voucher is locked due to multiple failed attempts. Try again in 15 minutes."}
+
+            # A3-b: Increment failed_attempts for any active vouchers matching this pin_last4
+            # to prevent brute-forcing the full 6-digit PIN.
+            # If they hit 3, lock the voucher for 15 minutes.
+            candidates_to_lock = await conn.fetch(
+                "SELECT id, failed_attempts FROM vouchers WHERE partner_name = $1 AND pin_last4 = $2 AND status = 'active'",
+                partner_name, pin_last4
+            )
+            for v in candidates_to_lock:
+                new_attempts = v["failed_attempts"] + 1
+                if new_attempts >= 3:
+                    await conn.execute(
+                        "UPDATE vouchers SET failed_attempts = 0, locked_until = now() + interval '15 minutes' WHERE id = $1",
+                        v["id"]
+                    )
+                else:
+                    await conn.execute(
+                        "UPDATE vouchers SET failed_attempts = $1 WHERE id = $2",
+                        new_attempts, v["id"]
+                    )
+
             await conn.execute(
                 """INSERT INTO voucher_redemptions (voucher_id, partner_name, amount_pence, status)
                    SELECT id, $1, $2, 'invalid' FROM vouchers WHERE pin_last4 = $3 LIMIT 1""",
@@ -74,7 +102,7 @@ async def redeem_voucher(
             }
 
         await conn.execute(
-            "UPDATE vouchers SET status = 'redeemed' WHERE id = $1",
+            "UPDATE vouchers SET status = 'redeemed', failed_attempts = 0, locked_until = NULL WHERE id = $1",
             matched["id"],
         )
         await conn.execute(
