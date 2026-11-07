@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { AppProvider } from './context/AppContext';
 import { RequesterView } from './components/Requester/RequesterView';
-import { ConsoleView } from './components/Console/ConsoleView';
+const ConsoleView = React.lazy(() => import('./components/Console/ConsoleView').then(m => ({ default: m.ConsoleView })));
 import { DonorView } from './components/Donor/DonorView';
-import { ArchitectureView } from './components/Architecture/ArchitectureView';
-import { BenchView } from './components/Bench/BenchView';
-import { SmsSimulator } from './components/Requester/SmsSimulator';
-import { UssdSimulator } from './components/Requester/UssdSimulator';
-import { WhatsAppSimulator } from './components/Requester/WhatsAppSimulator';
+const ArchitectureView = React.lazy(() => import('./components/Architecture/ArchitectureView').then(m => ({ default: m.ArchitectureView })));
+const BenchView = React.lazy(() => import('./components/Bench/BenchView').then(m => ({ default: m.BenchView })));
+const SmsSimulator = React.lazy(() => import('./components/Requester/SmsSimulator').then(m => ({ default: m.SmsSimulator })));
+const UssdSimulator = React.lazy(() => import('./components/Requester/UssdSimulator').then(m => ({ default: m.UssdSimulator })));
+const WhatsAppSimulator = React.lazy(() => import('./components/Requester/WhatsAppSimulator').then(m => ({ default: m.WhatsAppSimulator })));
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BackendBanner } from './components/Shared/BackendBanner';
 import { ToastProvider } from './components/Shared/Toast';
@@ -64,7 +64,8 @@ function App() {
           </div>
 
           <div className="max-w-5xl mx-auto p-4 md:p-8">
-            {currentView === 'requester' && <RequesterView />}
+            <React.Suspense fallback={<div className="p-8 text-center text-xs text-[#111111]/50">Loading...</div>}>
+{currentView === 'requester' && <RequesterView />}
             {currentView === 'sms' && (
               <div className="space-y-4">
                 <div className="text-center space-y-1">
@@ -96,6 +97,7 @@ function App() {
             {currentView === 'donor' && <DonorView />}
             {currentView === 'architecture' && <ArchitectureView />}
             {currentView === 'bench' && <BenchView />}
+</React.Suspense>
           </div>
         </div>
         </ToastProvider>
