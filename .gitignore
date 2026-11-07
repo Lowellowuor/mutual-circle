@@ -45,3 +45,6 @@ commit-msg.txt
 
 # C1 diagnostic dumps (regenerable from live DB)
 _c1_dump/
+
+# Temp commit message files (all patterns)
+.commit-*.txt
