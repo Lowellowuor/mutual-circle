@@ -1,5 +1,7 @@
 # Mutual Circle
 
+[![CI](https://github.com/Lowellowuor/mutual-circle/actions/workflows/ci.yml/badge.svg)](https://github.com/Lowellowuor/mutual-circle/actions/workflows/ci.yml)
+
 **Resource-sharing network for Kenya.** Requesters submit a need — a food bundle or a bill to pay — and receive an outcome without ever being linked to a specific donor. Donors give to a blind pool, never to a person. Fulfilment staff settle requests with partner institutions. Every state change is on a public HMAC-chained ledger.
 
 **Status:** Functional prototype. Production-ready architecture; pilot-ready operations. Waiting on: real payment integration, SMS provider, partner authentication hardening, and the security items in `SECURITY.md` before public deployment.
