@@ -162,7 +162,6 @@ async def pay_route(
                FROM requests WHERE id = $1""",
             request_id,
         )
-        # 404 for both not-found and wrong-owner — do not leak existence
         if row is None or row["token_hash"] != token:
             raise HTTPException(404, "Request not found")
 
@@ -174,7 +173,6 @@ async def pay_route(
             raise HTTPException(409, "Request already paid")
         if current == "pending_payment":
             raise HTTPException(409, "Payment already in progress")
-        # Allowed: 'n/a' (fresh), 'payment_failed' (retry)
 
         account_ref = "REF-" + str(row["id"])[:8].upper()
 
@@ -200,19 +198,14 @@ async def pay_route(
             request_id, checkout_id, row["amount_pence"],
         )
 
-        # Persist AFTER STK succeeds. If this UPDATE fails, the payment is
-        # real but unreferenced in our DB — logger.exception in the outer
-        # except will include checkout_id via locals for reconciliation.
-        # Reverse order (persist first, then STK) would leave a request
-        # stuck in pending_payment with no callback ever arriving, which
-        # is unrecoverable without manual DB intervention.
         await conn.execute(
-            """UPDATE requests
-               SET payment_status = 'pending_payment',
-                   mpesa_checkout_request_id = $1,
-                   updated_at = now()
-               WHERE id = $2""",
-            checkout_id, row["id"],
+            """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id)
+               VALUES ($1, $2, 'requests', $3)""",
+            checkout_id, row["amount_pence"], row["id"]
+        )
+        await conn.execute(
+            "UPDATE requests SET payment_status = 'pending_payment', updated_at = now() WHERE id = $1",
+            row["id"],
         )
 
         response = {
@@ -287,7 +280,6 @@ async def express_interest(
         "created_at": row["created_at"].isoformat(),
     }
 
-# --- Household declaration (used to size bundles) ---
 
 class HouseholdBody(BaseModel):
     household_size: int = Field(..., ge=1, le=20)
@@ -332,10 +324,6 @@ async def get_household(
         "declared_at": row["declared_at"].isoformat(),
     }
 
-# ============================================================
-# Collection confirmation (Phase 2a)
-# Requester confirms physical collection of a swap request.
-# ============================================================
 from pydantic import BaseModel as _BaseModel
 
 class CollectBody(_BaseModel):
@@ -358,23 +346,18 @@ async def collect_route(
 
     req_dict = dict(req)
 
-    # Ownership — token_hash column confirmed via schema
     if req_dict["token_hash"] != token:
         raise HTTPException(403, "Not your request")
 
-    # Only swap requests have PINs and physical collection
     if req_dict["type"] != "swap":
         raise HTTPException(400, "Only swap requests can be collected")
 
-    # Status: reject only terminal states (permissive — swap can be
-    # verified, pending_check, reserved, dispatched, etc.)
     status = req_dict["status"]
     if status == "collected":
         raise HTTPException(409, "Already collected")
     if status in ("withdrawn", "rejected"):
         raise HTTPException(409, f"Cannot collect in status {status!r}")
 
-    # PIN verification — prefer pin_hash (bcrypt), fall back to pin
     import bcrypt
     metadata = req_dict["metadata"]
     if isinstance(metadata, str):
@@ -398,7 +381,6 @@ async def collect_route(
     elif stored_plain != body.pin:
         raise HTTPException(403, "Invalid PIN")
 
-    # Update + notify (transaction ensures pledge settles atomically)
     async with conn.transaction():
         await conn.execute(
             "UPDATE requests SET status = 'collected', updated_at = now() WHERE id = $1",
@@ -409,10 +391,6 @@ async def collect_route(
 
     return {"id": request_id, "status": "collected"}
 
-# ============================================================
-# PIN-only collection (for SMS/USSD/WhatsApp that don't persist
-# the request_id across sessions)
-# ============================================================
 class CollectByPinBody(_BaseModel):
     pin: str
 

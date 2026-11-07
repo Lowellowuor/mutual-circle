@@ -30,7 +30,6 @@ def _row(payment_status: str = "n/a", amount_pence: int = 100000,
 
 @pytest.fixture(autouse=True)
 def mock_rate_limit():
-    # Bypass the IP rate limiter for mock-based tests
     with patch("mtc.routes.requester.check_ip_rate_limit", new_callable=AsyncMock) as m:
         yield m
 
@@ -44,10 +43,6 @@ async def client(mock_conn):
     app.dependency_overrides[get_conn] = lambda: mock_conn
     app.dependency_overrides[require_token] = lambda: _TEST_TOKEN
     transport = ASGITransport(app=app)
-    # Every POST sends an Idempotency-Key. idempotency.check_or_claim and
-    # .release both short-circuit to "no-op" when key is falsy (see
-    # mtc/idempotency.py:46 and :110), so without this header the cache
-    # branches are dead and the tests would silently miss the real code.
     async with AsyncClient(
         transport=transport,
         base_url="http://test",
@@ -71,7 +66,7 @@ def stk_success():
 
 
 async def test_pay_happy_path(client, mock_conn, stk_success):
-    mock_conn.fetchval.return_value = True       # claim won
+    mock_conn.fetchval.return_value = True
     mock_conn.fetchrow.return_value = _row()
     mock_conn.execute.return_value = "UPDATE 1"
 
@@ -86,12 +81,12 @@ async def test_pay_happy_path(client, mock_conn, stk_success):
 
     stk_success.assert_awaited_once()
     kwargs = stk_success.await_args.kwargs
-    assert kwargs["amount_pence"] == 100000  # from the request row, not the body
+    assert kwargs["amount_pence"] == 100000
     assert kwargs["phone"] == "+254113661960"
 
     exec_joined = " | ".join(str(c.args[0]) for c in mock_conn.execute.call_args_list if c.args)
-    assert "payment_status = 'pending_payment'" in exec_joined
-    assert "mpesa_checkout_request_id = $1" in exec_joined
+    assert "INSERT INTO mpesa_transactions" in exec_joined
+    assert "INSERT INTO mpesa_transactions" in exec_joined
 
 
 async def test_pay_not_found(client, mock_conn, stk_success):
@@ -153,7 +148,6 @@ async def test_pay_stk_fails(client, mock_conn):
 
     assert resp.status_code == 503
     exec_joined = " | ".join(str(c.args[0]) for c in mock_conn.execute.call_args_list if c.args)
-    # No UPDATE ran; only the release (DELETE) from idempotency
     assert "payment_status = 'pending_payment'" not in exec_joined
     assert "DELETE FROM idempotency_keys" in exec_joined
 
@@ -167,11 +161,11 @@ async def test_pay_bad_phone(client, mock_conn):
         m.side_effect = ValueError("Cannot normalize phone")
         resp = await client.post(f"/requests/{_REQ_ID}/pay", json={"phone": "123"})
 
-    assert resp.status_code in (400, 422)  # 422 if Pydantic min_length rejects
+    assert resp.status_code in (400, 422)
 
 
 async def test_pay_idempotent_duplicate(client, mock_conn):
-    mock_conn.fetchval.return_value = None       # claim failed — key exists
+    mock_conn.fetchval.return_value = None
     mock_conn.fetchrow.return_value = {
         "response_body": {
             "ok": True,

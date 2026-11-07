@@ -67,10 +67,6 @@ async def stk_callback(
     try:
         cached = await idempotency.check_or_claim(conn, checkout_id, _SCOPE, _CALLER)
     except HTTPException as exc:
-        # 409 = another callback is in flight for this ID, OR the key
-        # exists with a different (scope, caller_id) — the latter is
-        # impossible in practice because CheckoutRequestIDs are unique.
-        # Either way: do not trigger Safaricom retry.
         logger.warning(
             "M-PESA callback: idempotency HTTP %s for checkout_id=%s: %s",
             exc.status_code, checkout_id, exc.detail,
@@ -85,12 +81,12 @@ async def stk_callback(
         return _ack(cached)
 
     try:
-        row = await conn.fetchrow(
-            "SELECT id, payment_status FROM requests WHERE mpesa_checkout_request_id = $1",
+        tx = await conn.fetchrow(
+            "SELECT target_table, target_id FROM mpesa_transactions WHERE checkout_request_id = $1",
             checkout_id,
         )
 
-        if row is None:
+        if tx is None:
             logger.error(
                 "M-PESA callback: unknown CheckoutRequestID=%s. "
                 "result_code=%s receipt=%s",
@@ -100,41 +96,42 @@ async def stk_callback(
             await idempotency.complete(conn, checkout_id, _SCOPE, _CALLER, response)
             return _ack(response)
 
-        if parsed["success"]:
+        target_table = tx["target_table"]
+        target_id = tx["target_id"]
+        new_status = "paid" if parsed["success"] else "payment_failed"
+
+        await conn.execute(
+            """UPDATE mpesa_transactions
+               SET status = $1, mpesa_receipt = $2, updated_at = now()
+               WHERE checkout_request_id = $3""",
+            new_status, parsed["receipt"], checkout_id,
+        )
+
+        if target_table == "requests":
             await conn.execute(
-                """UPDATE requests
-                   SET payment_status = 'paid',
-                       mpesa_receipt = $1,
-                       updated_at = now()
-                   WHERE id = $2""",
-                parsed["receipt"], row["id"],
+                "UPDATE requests SET payment_status = $1, mpesa_receipt = $2, updated_at = now() WHERE id = $3",
+                new_status, parsed["receipt"], target_id,
             )
-            response = {
-                "status": "paid",
-                "receipt": parsed["receipt"],
-                "amount_pence": parsed["amount_pence"],
-            }
-            logger.info(
-                "M-PESA callback: request %s paid, receipt=%s",
-                row["id"], parsed["receipt"],
+        elif target_table == "donor_contributions":
+            await conn.execute(
+                "UPDATE donor_contributions SET status = $1, mpesa_receipt = $2 WHERE id = $3",
+                new_status, parsed["receipt"], target_id,
             )
         else:
-            await conn.execute(
-                """UPDATE requests
-                   SET payment_status = 'payment_failed',
-                       updated_at = now()
-                   WHERE id = $1""",
-                row["id"],
-            )
-            response = {
-                "status": "payment_failed",
-                "result_code": parsed["result_code"],
-                "result_desc": parsed["result_desc"],
-            }
-            logger.warning(
-                "M-PESA callback: request %s failed: %s — %s",
-                row["id"], parsed["result_code"], parsed["result_desc"],
-            )
+            logger.error("Unknown target_table '%s' for checkout_id %s", target_table, checkout_id)
+
+        response = {
+            "status": new_status,
+            "target_table": target_table,
+            "target_id": str(target_id),
+        }
+        if parsed["success"]:
+            response["receipt"] = parsed["receipt"]
+            logger.info("M-PESA callback: %s %s paid, receipt=%s", target_table, target_id, parsed["receipt"])
+        else:
+            response["result_code"] = parsed["result_code"]
+            response["result_desc"] = parsed["result_desc"]
+            logger.warning("M-PESA callback: %s %s failed: %s", target_table, target_id, parsed["result_desc"])
 
         await idempotency.complete(conn, checkout_id, _SCOPE, _CALLER, response)
         return _ack(response)

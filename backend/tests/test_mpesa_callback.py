@@ -55,7 +55,7 @@ async def client(mock_conn):
 
 async def test_success_marks_request_paid(client, mock_conn):
     mock_conn.fetchval.return_value = True
-    mock_conn.fetchrow.return_value = {"id": "req-uuid-1", "payment_status": "pending_payment"}
+    mock_conn.fetchrow.return_value = {"target_table": "requests", "target_id": "req-uuid-1"}
     mock_conn.execute.return_value = "UPDATE 1"
 
     resp = await client.post("/mpesa/stk/callback", json=_success_payload())
@@ -65,13 +65,13 @@ async def test_success_marks_request_paid(client, mock_conn):
     assert resp.json()["detail"]["receipt"] == "RCPT123"
 
     all_exec = " | ".join(str(c.args[0]) for c in mock_conn.execute.call_args_list if c.args)
-    assert "payment_status = 'paid'" in all_exec
-    assert "mpesa_receipt = $1" in all_exec
+    assert "UPDATE mpesa_transactions" in all_exec
+    assert "UPDATE requests" in all_exec
 
 
 async def test_failure_marks_payment_failed(client, mock_conn):
     mock_conn.fetchval.return_value = True
-    mock_conn.fetchrow.return_value = {"id": "req-uuid-1", "payment_status": "pending_payment"}
+    mock_conn.fetchrow.return_value = {"target_table": "requests", "target_id": "req-uuid-1"}
     mock_conn.execute.return_value = "UPDATE 1"
 
     resp = await client.post("/mpesa/stk/callback", json=_fail_payload())
@@ -80,7 +80,7 @@ async def test_failure_marks_payment_failed(client, mock_conn):
     assert resp.json()["detail"]["result_code"] == 1032
 
     all_exec = " | ".join(str(c.args[0]) for c in mock_conn.execute.call_args_list if c.args)
-    assert "payment_status = 'payment_failed'" in all_exec
+    assert "UPDATE mpesa_transactions" in all_exec
 
 
 async def test_malformed_body_returns_200(client, mock_conn):
