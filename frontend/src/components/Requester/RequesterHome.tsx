@@ -1,8 +1,7 @@
-﻿import React from 'react';
-import { HeartHandshake, CheckCircle, X, Package, CreditCard, Users, MessageCircle, Trash2 } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import React from 'react';
+import { CheckCircle, X, Package, CreditCard, Users, MessageCircle } from 'lucide-react';
 import { StatusChip } from '../ui/StatusChip';
+import { ScreenHeader, StatDisplay } from '../../ui';
 
 interface RequesterHomeProps {
   tokenHash: string | null;
@@ -35,174 +34,271 @@ const mapStatus = (s: string, type: string): any => {
 
 export const RequesterHome: React.FC<RequesterHomeProps> = (props) => {
   const [showAll, setShowAll] = React.useState(false);
+  const remaining = Math.max(0, props.MAX_REQUESTS - props.rate.count);
+
+  const actionTiles = [
+    { id: 'swap' as const, Icon: Package, label: 'Reserve', sub: 'Food bundle' },
+    { id: 'pool' as const, Icon: CreditCard, label: 'Pool', sub: 'Bills & fees' },
+    { id: 'match' as const, Icon: Users, label: 'Match', sub: 'Opportunities' },
+    { id: 'bench' as const, Icon: MessageCircle, label: 'Bench', sub: 'Peer support' },
+  ];
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="relative overflow-hidden rounded-[22px] bg-pine p-6 text-white shadow-soft">
-        {/* Glass decoration */}
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <HeartHandshake className="w-6 h-6 text-lime mb-2 relative z-10" />
-        <h2 className="text-2xl font-bold leading-tight relative z-10">Welcome back</h2>
-        <p className="text-sm text-white/80 mt-1 relative z-10">Your private token:</p>
-        <p className="text-xs font-mono text-lime mt-1 truncate relative z-10">{props.tokenHash}</p>
-      </div>
+    <div className="relative pb-20 content-in">
+      {/* Ambient sage orb, drifts slowly */}
+      <div
+        className="absolute -top-16 -right-24 w-[280px] h-[280px] rounded-full blur-3xl pointer-events-none orb-drift"
+        style={{
+          background: 'radial-gradient(circle, rgba(220,232,224,0.65) 0%, rgba(220,232,224,0) 70%)',
+        }}
+        aria-hidden="true"
+      />
 
+      {/* 01 — Header */}
+      <ScreenHeader
+        number="01"
+        eyebrow="Home"
+        title="Welcome back"
+        subtitle="Reserve a bundle, pay a bill, or check on your requests."
+      />
+
+      {/* Redemption alert */}
       {props.unseenRedemptions.length > 0 && (
-        <Card variant="tile" className="border border-lime">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-2 text-sm font-semibold text-pine-deep">
-              <CheckCircle className="w-4 h-4" /> Voucher Redeemed
+        <div className="mb-6 rounded-2xl border border-lp-green/20 bg-lp-sage/30 px-4 py-3 flex items-start gap-3">
+          <CheckCircle className="w-4 h-4 text-lp-green mt-0.5 shrink-0" strokeWidth={2} />
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-green">
+              Voucher redeemed
             </div>
-            <button onClick={props.dismissRedemptions}><X className="w-4 h-4 text-muted" /></button>
+            {props.unseenRedemptions.slice(0, 2).map(({ redemption, voucher }: any) => (
+              <p key={redemption.id} className="text-sm text-lp-ink mt-1">
+                <span className="font-semibold">{voucher?.partnerName}</span>
+                <span className="text-lp-ink/50"> · {redemption.timestamp}</span>
+              </p>
+            ))}
           </div>
-          {props.unseenRedemptions.slice(0, 2).map(({ redemption, voucher }) => (
-            <p key={redemption.id} className="text-sm text-ink mt-2">
-              <span className="font-semibold">{voucher!.partnerName}</span> • {redemption.timestamp}
-            </p>
-          ))}
-        </Card>
+          <button
+            onClick={props.dismissRedemptions}
+            className="text-lp-ink/40 hover:text-lp-ink p-1 press-scale"
+            aria-label="Dismiss"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       )}
 
-      <Card>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted">Weekly Allowance</span>
-          <span className="text-xs font-semibold text-pine">{props.MAX_REQUESTS - props.rate.count} left</span>
+      {/* Collect error banner */}
+      {props.collectError && (
+        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 flex items-start gap-3">
+          <div className="flex-1 text-sm text-rose-700">{props.collectError}</div>
+          <button
+            onClick={() => props.setCollectError(null)}
+            className="text-rose-400 hover:text-rose-700 press-scale"
+            aria-label="Dismiss"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <div className="h-2 bg-canvas rounded-full overflow-hidden">
+      )}
+
+      {/* Weekly allowance */}
+      <div className="card-editorial rounded-2xl p-5 mb-6">
+        <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
+          Weekly allowance
+        </div>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="stat-display text-4xl text-lp-ink tabular-nums">
+            {String(remaining).padStart(2, '0')}
+          </span>
+          <span className="text-sm text-lp-ink/55">requests remaining</span>
+        </div>
+        <div className="mt-3 h-1.5 bg-lp-ink/8 rounded-full overflow-hidden">
           <div
-            className="h-full bg-pine transition-all"
+            className="h-full bg-lp-green rounded-full transition-all duration-500"
             style={{ width: `${(props.rate.count / props.MAX_REQUESTS) * 100}%` }}
           />
         </div>
-        <p className="text-xs text-muted mt-2">Resets Monday. {props.rate.count}/{props.MAX_REQUESTS} used.</p>
-      </Card>
+        <p className="text-xs text-lp-ink/50 mt-2">
+          Resets Monday · {props.rate.count}/{props.MAX_REQUESTS} used
+        </p>
+      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {([
-          { id: 'swap' as const, Icon: Package, l: 'Reserve', s: 'Food bundle' },
-          { id: 'pool' as const, Icon: CreditCard, l: 'Pool', s: 'Bills & fees' },
-          { id: 'match' as const, Icon: Users, l: 'Match', s: 'Opportunities' },
-          { id: 'bench' as const, Icon: MessageCircle, l: 'Bench', s: 'Peer support' }
-        ]).map(item => {
+      {/* Action tiles */}
+      <div className="grid grid-cols-2 gap-3 mb-8">
+        {actionTiles.map((item) => {
           const I = item.Icon;
+          const disabled = props.rateLimited && (item.id === 'swap' || item.id === 'pool');
           return (
             <button
               key={item.id}
+              type="button"
               onClick={() => props.goTab(item.id)}
-              disabled={props.rateLimited && (item.id === 'swap' || item.id === 'pool')}
-              className="group bg-surface p-4 rounded-[16px] border border-tile text-left hover:border-pine hover:shadow-soft hover:-translate-y-1 transition-all duration-200 disabled:opacity-50 disabled:hover:transform-none"
+              disabled={disabled}
+              className="card-editorial rounded-2xl p-4 text-left press-scale transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <I className="w-5 h-5 text-pine mb-2" />
-              <div className="text-sm font-semibold text-ink">{item.l}</div>
-              <div className="text-xs text-muted mt-0.5">{item.s}</div>
+              <div className="w-10 h-10 rounded-full bg-lp-sage flex items-center justify-center mb-3">
+                <I className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
+              </div>
+              <div className="text-sm font-semibold text-lp-ink">{item.label}</div>
+              <div className="text-xs text-lp-ink/55 mt-0.5">{item.sub}</div>
             </button>
           );
         })}
       </div>
 
+      {/* Session summary — stats */}
+      {props.sessionStats.total > 0 && (
+        <div className="card-editorial rounded-2xl p-5 mb-8 grid grid-cols-3 gap-4">
+          <StatDisplay label="Total" value={String(props.sessionStats.total).padStart(2, '0')} size="sm" />
+          <StatDisplay label="Ready" value={String(props.sessionStats.dispatched).padStart(2, '0')} size="sm" />
+          <StatDisplay label="Pending" value={String(props.sessionStats.pending).padStart(2, '0')} size="sm" />
+        </div>
+      )}
+
+      {/* Vouchers */}
       {props.myVouchers.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">My Vouchers</h3>
-          <div className="space-y-3">
-            {props.myVouchers.map(v => (
-              <Card key={v.id} className="border-l-4 border-l-pine">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-sm font-semibold text-ink">{v.partnerName}</div>
-                    <div className="text-xs text-muted">{v.description}</div>
+        <div className="mb-8">
+          <div className="eyebrow mb-3">Vouchers</div>
+          <div>
+            {props.myVouchers.map((v, i) => (
+              <div key={v.id} className="flex gap-4 py-4 border-b border-lp-ink/8 last:border-0">
+                <span className="stat-display text-xl text-lp-green/40 tabular-nums shrink-0 w-8">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-lp-ink">{v.partnerName}</div>
+                      <div className="text-xs text-lp-ink/55 mt-0.5">{v.description}</div>
+                    </div>
+                    <StatusChip status={v.status === 'active' ? 'Ready' : 'Collected'} />
                   </div>
-                  <StatusChip status={v.status === 'active' ? 'Ready' : 'Collected'} />
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-[10px] uppercase tracking-wider text-lp-ink/40 font-semibold">PIN</span>
+                    <span className="stat-display text-lg text-lp-green tabular-nums tracking-[0.2em]">{v.pin}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center mt-3 pt-3 border-t border-tile">
-                  <div className="text-sm font-semibold text-ink">PIN <span className="text-pine">{v.pin}</span></div>
-                </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
       )}
 
+      {/* Recent activity */}
       {props.mergedHistory.length > 0 && (
-        <div>
+        <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold text-muted uppercase tracking-wider">Recent Activity</h3>
+            <div className="eyebrow">Recent activity</div>
             {props.mergedHistory.length > 5 && (
-              <button onClick={() => setShowAll(!showAll)} className="text-xs font-semibold text-pine hover:underline">
+              <button
+                onClick={() => setShowAll(!showAll)}
+                className="text-xs font-semibold text-lp-green hover:underline press-scale"
+              >
                 {showAll ? 'Show less' : 'See all'}
               </button>
             )}
           </div>
-          <Card className="p-0 overflow-hidden">
-            {(showAll ? props.mergedHistory : props.mergedHistory.slice(0, 5)).map((r: any) => {
+          <div>
+            {(showAll ? props.mergedHistory : props.mergedHistory.slice(0, 5)).map((r: any, i: number) => {
               const isWithdrawn = r.status === 'withdrawn';
               const canWithdraw = r.type === 'swap' ? r.status === 'reserved' : (r.status === 'verified' || r.status === 'pending_check');
               const liveSwap: any = r.type === 'swap' ? props.swapRequests.find((s: any) => s.id === r.id) : null;
-              const resolvedPin: string | null = (liveSwap?.pin && String(liveSwap.pin) !== '----' && String(liveSwap.pin).length >= 3)
-                ? String(liveSwap.pin)
-                : (r.pin && String(r.pin) !== '----' && String(r.pin).length >= 3 ? String(r.pin) : null);
+              const resolvedPin: string | null =
+                liveSwap?.pin && String(liveSwap.pin) !== '----' && String(liveSwap.pin).length >= 3
+                  ? String(liveSwap.pin)
+                  : (r.pin && String(r.pin) !== '----' && String(r.pin).length >= 3 ? String(r.pin) : null);
               const canCollect = r.type === 'swap' && !isWithdrawn && !!resolvedPin && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status);
               const canSettle = r.type === 'pool' && r.status === 'fulfilled' && r.paymentStatus !== 'paid';
-              
+              const pinPending = r.type === 'swap' && !resolvedPin && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status);
+              const hasActions = canWithdraw || canCollect || canSettle || pinPending;
+
               return (
-                <div key={r.id} className="p-4 border-b border-tile last:border-0 space-y-3 hover:bg-tint/30 transition-colors">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-canvas flex items-center justify-center text-pine shrink-0">
-                        {r.type === 'swap' ? <Package className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-ink truncate">
-                          {r.type === 'swap' ? r.bundleCategory : r.category?.replace(/_/g, ' ')}
+                <div key={r.id} className="py-5 border-b border-lp-ink/8 last:border-0">
+                  <div className="flex gap-4">
+                    <span className="stat-display text-xl text-lp-green/40 tabular-nums shrink-0 w-8">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-lp-ink truncate">
+                            {r.type === 'swap' ? r.bundleCategory : r.category?.replace(/_/g, ' ')}
+                          </div>
+                          <div className="text-xs text-lp-ink/55 truncate mt-0.5">
+                            {r.type === 'swap' ? r.lockerLocation : 'Bill payment'}
+                            {resolvedPin && (
+                              <span className="ml-2">
+                                · PIN <span className="font-semibold text-lp-green">{resolvedPin}</span>
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted truncate mt-0.5">
-                          {r.type === 'swap' ? r.lockerLocation : 'Bill Payment'}
-                        </div>
+                        <StatusChip status={mapStatus(r.status, r.type)} />
                       </div>
+                      {hasActions && (
+                        <div className="flex items-center gap-4 mt-3">
+                          {canWithdraw && (
+                            <button
+                              type="button"
+                              onClick={() => props.handleWithdraw(r.id, r.type)}
+                              className="text-xs text-lp-ink/60 hover:text-rose-600 transition-colors press-scale"
+                            >
+                              Withdraw
+                            </button>
+                          )}
+                          {canCollect && (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!resolvedPin) return;
+                                await props.collectRequest(r.id, resolvedPin);
+                              }}
+                              className="text-xs font-semibold text-lp-green hover:underline press-scale"
+                            >
+                              Confirm pickup
+                            </button>
+                          )}
+                          {canSettle && (
+                            <button
+                              type="button"
+                              onClick={() => props.setPayingRequest({ id: r.id, amount: r.amount * 100 })}
+                              className="inline-flex items-center px-3 py-1.5 rounded-full bg-lp-green text-white text-xs font-semibold press-scale"
+                            >
+                              Settle
+                            </button>
+                          )}
+                          {pinPending && (
+                            <span className="text-xs italic text-lp-ink/40">PIN sent via SMS</span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <StatusChip status={mapStatus(r.status, r.type)} />
                   </div>
-                  
-                  {(canWithdraw || canCollect || canSettle || (r.type === 'swap' && !resolvedPin && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status))) && (
-                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-tile/50">
-                      {canWithdraw && (
-                        <Button variant="ghost" className="text-rose-600 px-2 py-1 text-xs h-8" onClick={() => props.handleWithdraw(r.id, r.type)}>
-                          <Trash2 className="w-3 h-3 mr-1" /> Withdraw
-                        </Button>
-                      )}
-                      {canCollect && (
-                        <Button variant="ghost" className="text-pine px-2 py-1 text-xs h-8" onClick={async () => {
-                          if (!resolvedPin) return;
-                          await props.collectRequest(r.id, resolvedPin);
-                        }}>
-                          <CheckCircle className="w-3 h-3 mr-1" /> Confirm Pickup
-                        </Button>
-                      )}
-                      {canSettle && (
-                        <Button variant="primary" className="px-2 py-1 text-xs h-8" onClick={() => props.setPayingRequest({ id: r.id, amount: r.amount * 100 })}>
-                          Settle
-                        </Button>
-                      )}
-                      {r.type === 'swap' && !resolvedPin && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status) && (
-                        <p className="text-xs text-muted italic">PIN sent via SMS</p>
-                      )}
-                    </div>
-                  )}
                 </div>
               );
             })}
-          </Card>
+          </div>
         </div>
       )}
 
-      {props.mergedHistory.length > 0 && (
-        <Card variant="tile">
-          <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">Session Summary</h3>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div><div className="text-xl font-bold text-ink">{props.sessionStats.total}</div><div className="text-xs text-muted">Requests</div></div>
-            <div className="border-l border-r border-tile"><div className="text-xl font-bold text-pine">{props.sessionStats.dispatched}</div><div className="text-xs text-muted">Ready</div></div>
-            <div><div className="text-xl font-bold text-ink">{props.sessionStats.pending}</div><div className="text-xs text-muted">Pending</div></div>
+      {/* Empty state */}
+      {props.mergedHistory.length === 0 && props.myVouchers.length === 0 && (
+        <div className="py-16 text-center">
+          <p className="display-serif text-3xl text-lp-ink">Nothing here yet.</p>
+          <p className="mt-3 text-sm text-lp-ink/55 max-w-xs mx-auto leading-relaxed">
+            Reserve a food bundle or pay a bill. Your activity will show up here.
+          </p>
+        </div>
+      )}
+
+      {/* Token footnote */}
+      {props.tokenHash && (
+        <div className="mt-12 pt-6 border-t border-lp-ink/8">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-lp-ink/40 font-semibold mb-2">
+            Your private token
           </div>
-        </Card>
+          <p className="text-xs font-mono text-lp-ink/50 truncate">{props.tokenHash}</p>
+        </div>
       )}
     </div>
   );
