@@ -1,18 +1,17 @@
-﻿import React from 'react';
-import { CheckCircle, Copy, Check, MapPin, Package, ScanLine, AlertCircle } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import React from 'react';
+import { CheckCircle, Copy, Check, MapPin, Package, AlertCircle } from 'lucide-react';
+import { Button } from '../../ui/Button';
+import { ScreenHeader } from '../../ui';
 
-// Assuming these are passed from the parent or defined in a shared constants file
 const BUNDLES = [
-  { id: 'Standard Pantry', name: 'Standard Pantry', desc: 'Maize flour, rice, oil, lentils.', Icon: Package, accent: 'text-pine bg-sage' },
-  { id: 'Hygiene Kit', name: 'Hygiene & Dignity', desc: 'Soap, sanitary pads, toothpaste.', Icon: Package, accent: 'text-blue-700 bg-blue-50' },
+  { id: 'Standard Pantry', name: 'Standard Pantry', desc: 'Maize flour, rice, oil, lentils.', Icon: Package },
+  { id: 'Hygiene Kit', name: 'Hygiene & Dignity', desc: 'Soap, sanitary pads, toothpaste.', Icon: Package },
 ];
 
 const LOCATIONS = [
-  { id: 'Kibera Hub', sub: '24/7 • 12 available' },
-  { id: 'Mathare Central', sub: '6am-10pm • 18 available' },
-  { id: 'Kawangware Station', sub: '24/7 • 4 available' },
+  { id: 'Kibera Hub', sub: '24/7 · 12 available' },
+  { id: 'Mathare Central', sub: '6am–10pm · 18 available' },
+  { id: 'Kawangware Station', sub: '24/7 · 4 available' },
 ];
 
 interface SwapFlowProps {
@@ -33,107 +32,130 @@ interface SwapFlowProps {
 }
 
 export const SwapFlow: React.FC<SwapFlowProps> = (props) => {
+  // ── Success bookend ──────────────────────────────────────────────────
   if (props.swapStep === 'success' && props.swapResult) {
     return (
-      <div className="space-y-4 pb-20">
-        <div className="text-center pt-6 space-y-2">
-          <div className="w-16 h-16 bg-lime text-pine rounded-full flex items-center justify-center mx-auto border border-tile animate-in zoom-in-50 duration-500">
-            <CheckCircle className="w-8 h-8" />
+      <div className="relative pb-20 content-in">
+        <div
+          className="absolute -top-16 -right-24 w-[280px] h-[280px] rounded-full blur-3xl pointer-events-none orb-drift"
+          style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.6) 0%, rgba(220,232,224,0) 70%)' }}
+          aria-hidden="true"
+        />
+
+        <div className="relative text-center pt-4 mb-8">
+          <div className="w-14 h-14 rounded-full bg-lp-sage flex items-center justify-center mx-auto mb-5">
+            <CheckCircle className="w-7 h-7 text-lp-green" strokeWidth={1.75} />
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-ink">Locker reserved</h2>
-            <p className="text-sm text-muted mt-1">Collect anytime.</p>
+          <span className="eyebrow">03 — Reserved</span>
+          <h2 className="display-serif mt-3 text-4xl text-lp-ink leading-tight">
+            Locker reserved.
+          </h2>
+          <p className="mt-3 text-sm text-lp-ink/55">
+            Collect any time. PIN sent via SMS.
+          </p>
+        </div>
+
+        <div className="relative card-editorial rounded-3xl p-6 text-center mb-8">
+          <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-lp-ink/40">
+            Collection PIN
+          </div>
+          <div className="stat-display text-5xl md:text-6xl text-lp-green tracking-[0.12em] mt-3 tabular-nums">
+            {props.swapResult.pin}
+          </div>
+          <button
+            onClick={props.copyPin}
+            className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-lp-ink/60 hover:text-lp-ink transition-colors press-scale"
+          >
+            {props.pinCopied ? (
+              <><Check className="w-3 h-3 text-lp-green" /> Copied</>
+            ) : (
+              <><Copy className="w-3 h-3" /> Copy PIN</>
+            )}
+          </button>
+        </div>
+
+        <div className="relative mb-8">
+          <div className="eyebrow mb-3">Details</div>
+          <div className="flex justify-between items-baseline py-3 border-b border-lp-ink/8">
+            <span className="text-sm text-lp-ink/55">Bundle</span>
+            <span className="text-sm font-semibold text-lp-ink">{props.swapResult.bundleCategory}</span>
+          </div>
+          <div className="flex justify-between items-baseline py-3 border-b border-lp-ink/8">
+            <span className="text-sm text-lp-ink/55">Locker</span>
+            <span className="text-sm font-semibold text-lp-ink">{props.swapResult.lockerLocation}</span>
+          </div>
+          <div className="flex justify-between items-baseline py-3">
+            <span className="text-sm text-lp-ink/55">Reference</span>
+            <span className="text-xs font-mono text-lp-ink/70">REF-{props.swapResult.id.slice(0, 8).toUpperCase()}</span>
           </div>
         </div>
 
-        <Card>
-          <div className="pb-3 border-b border-tile flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-muted">Reference</span>
-            <span className="font-mono text-sm font-bold text-ink">REF-{props.swapResult.id.slice(0, 8).toUpperCase()}</span>
-          </div>
-          
-          <div className="flex items-start justify-between gap-4 py-4 border-b border-tile">
-            <div>
-              <div className="text-xs font-semibold uppercase text-muted">Collection PIN</div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="font-mono text-4xl font-bold tracking-widest text-pine animate-in fade-in duration-700">{props.swapResult.pin}</span>
-                <button onClick={props.copyPin} className="p-2 rounded-full hover:bg-canvas text-muted transition-colors">
-                  {props.pinCopied ? <Check className="w-4 h-4 text-pine" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
+        <div className="relative mb-8">
+          <div className="eyebrow mb-3">How to collect</div>
+          {[
+            'Go to ' + props.swapResult.lockerLocation,
+            'Enter your PIN at the terminal',
+            'Take your bundle',
+          ].map((step, i) => (
+            <div key={i} className="flex gap-4 py-3 border-b border-lp-ink/8 last:border-0">
+              <span className="stat-display text-xl text-lp-green/40 tabular-nums shrink-0 w-8">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span className="text-sm text-lp-ink/70 leading-relaxed">{step}</span>
             </div>
-            {/* Placeholder for QR component */}
-            <div className="w-16 h-16 bg-canvas rounded border border-tile flex items-center justify-center text-xs text-muted">QR</div>
-          </div>
+          ))}
+        </div>
 
-          <div className="pt-3 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted">Bundle</span><span className="font-semibold text-ink">{props.swapResult.bundleCategory}</span></div>
-            <div className="flex justify-between"><span className="text-muted">Locker</span><span className="font-semibold text-ink">{props.swapResult.lockerLocation}</span></div>
-          </div>
-        </Card>
-
-        <Card variant="tile" className="border border-blue-100">
-          <div className="flex items-center gap-2 text-sm font-bold text-blue-900 mb-2">
-            <ScanLine className="w-4 h-4" /> How to collect
-          </div>
-          <ol className="text-sm text-blue-900/80 leading-relaxed list-decimal pl-5 space-y-1">
-            <li>Go to {props.swapResult.lockerLocation}</li>
-            <li>Enter PIN at the terminal</li>
-            <li>Take your bundle</li>
-          </ol>
-        </Card>
-
-        <Button variant="primary" fullWidth onClick={() => props.goTab('home')}>
+        <Button onClick={() => props.goTab('home')} fullWidth>
           Done
         </Button>
       </div>
     );
   }
 
+  // ── Form ────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-4 pb-20">
-      <div>
-        <h2 className="text-xl font-bold text-ink">The Swap</h2>
-        <p className="text-sm text-muted mt-1">Reserve a bundle. Collect any time.</p>
-      </div>
+    <div className="relative pb-20 content-in">
+      <div
+        className="absolute -top-16 -right-24 w-[280px] h-[280px] rounded-full blur-3xl pointer-events-none orb-drift"
+        style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.6) 0%, rgba(220,232,224,0) 70%)' }}
+        aria-hidden="true"
+      />
+
+      <ScreenHeader
+        number="02"
+        eyebrow="Swap"
+        title={props.swapStep === 'bundle' ? 'Choose a bundle.' : 'Choose a locker.'}
+        subtitle={props.swapStep === 'bundle' ? 'Pick what fits your household.' : 'Pick where you can collect.'}
+      />
 
       {props.rateLimited && (
-        <Card className="bg-rose-50 border-rose-200 flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
           <p className="text-sm text-rose-900">Daily limit reached. Try again tomorrow.</p>
-        </Card>
-      )}
-
-      {props.swapError && (
-        <Card className="bg-rose-50 border-rose-200 flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
-          <p className="text-sm text-rose-900">{props.swapError}</p>
-        </Card>
-      )}
-
-      <div className="mb-6">
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
-          Step {props.swapStep === 'bundle' ? '1' : '2'} of 2 — {props.swapStep === 'bundle' ? 'Choose bundle' : 'Choose location'}
         </div>
-        <div className="flex items-center gap-2">
-        {(['bundle', 'location'] as const).map((s, i) => {
-          const active = props.swapStep === s || (s === 'bundle' && props.swapStep !== 'bundle');
-          const done = s === 'bundle' && props.swapStep === 'location';
-          return (
-            <React.Fragment key={s}>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${active ? 'bg-pine text-white' : 'bg-canvas text-muted border border-tile'}`}>
-                {done ? <Check className="w-4 h-4" /> : i + 1}
-              </div>
-              {i < 1 && <div className={`flex-1 h-1 rounded-full ${done ? 'bg-pine' : 'bg-tile'}`} />}
-            </React.Fragment>
-          );
-        })}
+      )}
+      {props.swapError && (
+        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+          <p className="text-sm text-rose-900">{props.swapError}</p>
+        </div>
+      )}
+
+      <div className="mb-6 flex items-center gap-3">
+        <div className={'flex items-center gap-2 ' + (props.swapStep === 'bundle' ? 'text-lp-green' : 'text-lp-ink/40')}>
+          <span className="stat-display text-base tabular-nums">01</span>
+          <span className="text-[10px] uppercase tracking-[0.18em] font-semibold">Bundle</span>
+        </div>
+        <div className={'flex-1 h-px ' + (props.swapStep === 'location' ? 'bg-lp-green/40' : 'bg-lp-ink/10')} />
+        <div className={'flex items-center gap-2 ' + (props.swapStep === 'location' ? 'text-lp-green' : 'text-lp-ink/40')}>
+          <span className="stat-display text-base tabular-nums">02</span>
+          <span className="text-[10px] uppercase tracking-[0.18em] font-semibold">Location</span>
         </div>
       </div>
 
       {props.swapStep === 'bundle' && (
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-ink">1. Choose bundle</p>
           {BUNDLES.map(b => {
             const I = b.Icon;
             const selected = props.swapBundle === b.id;
@@ -141,42 +163,45 @@ export const SwapFlow: React.FC<SwapFlowProps> = (props) => {
               <button
                 key={b.id}
                 onClick={() => props.setSwapBundle(b.id)}
-                className={`w-full p-4 rounded-[16px] border-2 text-left flex items-start gap-3 transition-all ${selected ? 'border-pine bg-surface shadow-soft' : 'border-tile bg-canvas hover:border-pine/50 hover:shadow-soft'}`}
+                className={'w-full text-left card-editorial rounded-2xl p-4 flex items-start gap-3 press-scale transition-all ' + (selected ? 'ring-2 ring-lp-green' : '')}
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${b.accent}`}>
-                  <I className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-full bg-lp-sage flex items-center justify-center shrink-0">
+                  <I className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-ink">{b.name}</div>
-                  <div className="text-sm text-muted mt-1 leading-relaxed">{b.desc}</div>
+                  <div className="text-sm font-semibold text-lp-ink">{b.name}</div>
+                  <div className="text-xs text-lp-ink/55 mt-1 leading-relaxed">{b.desc}</div>
                 </div>
-                {selected && <CheckCircle className="w-5 h-5 text-pine shrink-0" />}
+                {selected && <CheckCircle className="w-5 h-5 text-lp-green shrink-0" strokeWidth={2} />}
               </button>
             );
           })}
-          <Button variant="primary" fullWidth onClick={() => props.setSwapStep('location')} disabled={!props.swapBundle}>
-            Continue
-          </Button>
+          <div className="pt-2">
+            <Button variant="primary" fullWidth onClick={() => props.setSwapStep('location')} disabled={!props.swapBundle}>
+              Continue
+            </Button>
+          </div>
         </div>
       )}
 
       {props.swapStep === 'location' && (
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-ink">2. Choose location</p>
           {LOCATIONS.map(l => {
             const selected = props.swapLocation === l.id;
             return (
               <button
                 key={l.id}
                 onClick={() => props.setSwapLocation(l.id)}
-                className={`w-full p-4 rounded-[16px] border-2 text-left flex items-center gap-3 transition-all ${selected ? 'border-pine bg-surface shadow-soft' : 'border-tile bg-canvas hover:border-pine/50 hover:shadow-soft'}`}
+                className={'w-full text-left card-editorial rounded-2xl p-4 flex items-center gap-3 press-scale transition-all ' + (selected ? 'ring-2 ring-lp-green' : '')}
               >
-                <MapPin className="w-5 h-5 text-pine shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-ink">{l.id}</div>
-                  <div className="text-xs text-muted mt-1">{l.sub}</div>
+                <div className="w-10 h-10 rounded-full bg-lp-sage flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
                 </div>
-                {selected && <CheckCircle className="w-5 h-5 text-pine shrink-0" />}
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-lp-ink">{l.id}</div>
+                  <div className="text-xs text-lp-ink/55 mt-0.5">{l.sub}</div>
+                </div>
+                {selected && <CheckCircle className="w-5 h-5 text-lp-green shrink-0" strokeWidth={2} />}
               </button>
             );
           })}
@@ -184,8 +209,13 @@ export const SwapFlow: React.FC<SwapFlowProps> = (props) => {
             <Button variant="secondary" fullWidth onClick={() => props.setSwapStep('bundle')}>
               Back
             </Button>
-            <Button variant="primary" fullWidth onClick={props.handleReserve} disabled={!props.swapLocation || props.swapping || props.rateLimited}>
-              {props.swapping ? 'Reserving...' : 'Reserve'}
+            <Button
+              variant="primary"
+              fullWidth
+              onClick={props.handleReserve}
+              disabled={!props.swapLocation || props.swapping || props.rateLimited}
+            >
+              {props.swapping ? 'Reserving…' : 'Reserve'}
             </Button>
           </div>
         </div>
