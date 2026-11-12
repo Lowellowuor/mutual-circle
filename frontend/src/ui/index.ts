@@ -4,4 +4,7 @@ export { IconTile } from './IconTile';
 export { Chip } from './Chip';
 export { Accordion } from './Accordion';
 export { Sheet } from './Sheet';
-export { LanguageToggle } from './LanguageToggle';
+export { EditorialRow } from './EditorialRow';
+export { ScreenHeader } from './ScreenHeader';
+export { StatDisplay } from './StatDisplay';
+export { SegmentedControl } from './SegmentedControl';

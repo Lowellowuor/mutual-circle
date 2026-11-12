@@ -1,21 +1,32 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import {
   HeartHandshake, Package, CreditCard, EyeOff, Lock, FileText,
-  Coins, Users, Hash, ClipboardList, ShieldCheck, MapPin, Droplet,
-  Zap, GraduationCap, Menu,
+  Coins, Users, Hash, ShieldCheck, Droplet,
+  Zap, GraduationCap, Menu, ArrowRight, Check,
 } from 'lucide-react';
 import { LanguageProvider, useLanguage } from '../i18n';
 import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
 import { IconTile } from '../ui/IconTile';
 import { Chip } from '../ui/Chip';
 import { Accordion } from '../ui/Accordion';
 import { Sheet } from '../ui/Sheet';
-import { LanguageToggle } from '../ui/LanguageToggle';
 
 const APP_URL = import.meta.env.BASE_URL + 'app';
+const DONOR_URL = import.meta.env.BASE_URL + 'donor';
 
-// ── Motion primitives (respect prefers-reduced-motion via CSS) ─────────────
+// Curated photography â€” served locally from frontend/public/images/landing/
+// (see ROLE.txt amendment 2026-11-13). No people, no partner logos.
+const BASE = import.meta.env.BASE_URL;
+const IMG = {
+  food: BASE + 'images/landing/food.jpg',
+  hygiene: BASE + 'images/landing/hygiene.jpg',
+  utility: BASE + 'images/landing/utility.jpg',
+  school: BASE + 'images/landing/school.jpg',
+  heroAccent: BASE + 'images/landing/hero-accent.jpg',
+  architecture: BASE + 'images/landing/architecture.jpg',
+};
+
+// â”€â”€ Reveal / scroll animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const useInView = <T extends HTMLElement>(ref: React.RefObject<T | null>) => {
   const [visible, setVisible] = useState(false);
@@ -23,12 +34,7 @@ const useInView = <T extends HTMLElement>(ref: React.RefObject<T | null>) => {
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
       { rootMargin: '0px 0px -80px 0px', threshold: 0.05 },
     );
     observer.observe(el);
@@ -38,9 +44,7 @@ const useInView = <T extends HTMLElement>(ref: React.RefObject<T | null>) => {
 };
 
 const Reveal: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({
-  children,
-  delay = 0,
-  className = '',
+  children, delay = 0, className = '',
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const visible = useInView(ref);
@@ -57,33 +61,43 @@ const Reveal: React.FC<{ children: React.ReactNode; delay?: number; className?: 
   );
 };
 
-// Decorative dot-grid background. Pure CSS, no images, mask-faded at edges.
+// â”€â”€ Ambient backdrop (subtle drifting orbs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const AmbientBackdrop: React.FC = () => (
+  <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
+    <div
+      className="absolute -top-32 -left-20 w-[500px] h-[500px] rounded-full blur-3xl orb-drift"
+      style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.55) 0%, rgba(220,232,224,0) 70%)' }}
+    />
+    <div
+      className="absolute -bottom-40 -right-24 w-[600px] h-[600px] rounded-full blur-3xl orb-drift-slow"
+      style={{ background: 'radial-gradient(circle, rgba(31,107,74,0.08) 0%, rgba(31,107,74,0) 70%)' }}
+    />
+  </div>
+);
+
+// â”€â”€ Shared decorative primitives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const Eyebrow: React.FC<{ children: React.ReactNode; number?: string }> = ({ children, number }) => (
+  <span className="eyebrow">
+    {number && <span className="mr-1.5 tabular-nums text-lp-green/60">{number}</span>}
+    {children}
+  </span>
+);
+
 const DotGrid: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div
     className={'absolute inset-0 pointer-events-none ' + className}
     style={{
       backgroundImage: 'radial-gradient(circle, rgba(31,107,74,0.14) 1px, transparent 1px)',
-      backgroundSize: '22px 22px',
-      maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
-      WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+      backgroundSize: '24px 24px',
+      maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
+      WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
     }}
     aria-hidden="true"
   />
 );
 
-// Soft sage radial glow. Slow drift for a "live" feel.
-const OrbGlow: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div
-    className={'absolute w-[420px] h-[420px] rounded-full pointer-events-none ' + className}
-    style={{
-      background: 'radial-gradient(circle, rgba(220,232,224,0.7) 0%, rgba(220,232,224,0) 70%)',
-      filter: 'blur(60px)',
-    }}
-    aria-hidden="true"
-  />
-);
-
-// Sage wave divider between major sections. Replaces the flat border at 2 transitions.
 const WaveDivider: React.FC = () => (
   <div className="w-full overflow-hidden -mt-px" aria-hidden="true">
     <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-10 md:h-14 block">
@@ -95,39 +109,170 @@ const WaveDivider: React.FC = () => (
   </div>
 );
 
-// ── Top bar ─────────────────────────────────────────────────────────────────
+// â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TopBar: React.FC = () => {
   const { t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [whatOpen, setWhatOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const whatItems = [
+    { label: t.navItems.food, href: '#what-you-can-get' },
+    { label: t.navItems.hygiene, href: '#what-you-can-get' },
+    { label: t.navItems.bills, href: '#what-you-can-get' },
+    { label: t.navItems.school, href: '#what-you-can-get' },
+  ];
+
   const navLinks = [
     { href: '#how-it-works', label: t.nav.howItWorks },
+    { href: '#inside-circle', label: t.nav.theCircle },
     { href: '#give', label: t.nav.give },
     { href: '#partners', label: t.nav.partners },
     { href: '#faq', label: t.nav.faq },
   ];
+
   return (
     <>
-      <header className="sticky top-0 z-40 bg-lp-canvas/85 backdrop-blur-md border-b border-lp-ink/10">
-        <div className="max-w-[1120px] mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="text-xl font-semibold text-lp-ink">{t.nav.brand}</span>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-lp-ink/70">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="hover:text-lp-ink transition-colors">
-                {link.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3">
-            <div className="hidden md:block"><LanguageToggle /></div>
-            <div className="hidden md:block"><Chip variant="prototype">{t.common.prototype}</Chip></div>
-            <div className="hidden md:block">
-              <Button onClick={() => { window.location.href = APP_URL; }}>{t.common.openApp}</Button>
+      <header className="sticky top-0 z-40">
+        {/* Persona bar (SC signature) — collapses on scroll */}
+        <div
+          className={
+            'hidden md:block overflow-hidden transition-all duration-300 ' +
+            (scrolled ? 'h-0 opacity-0' : 'h-9 opacity-100')
+          }
+        >
+          <div className="bg-lp-canvas border-b border-lp-ink/5">
+            <div className="max-w-[1120px] mx-auto px-6 h-9 flex items-center justify-between">
+              <div className="flex items-center gap-3 text-[11px]">
+                <span className="uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
+                  {t.persona.label}
+                </span>
+                <div className="flex items-center gap-1">
+                  <a
+                    href="#"
+                    onClick={(e) => e.preventDefault()}
+                    className="px-2.5 py-1 rounded-full bg-lp-green/10 text-lp-green font-semibold"
+                  >
+                    {t.persona.requester}
+                  </a>
+                  <a
+                    href={DONOR_URL}
+                    className="px-2.5 py-1 rounded-full text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/5 transition-colors"
+                  >
+                    {t.persona.donor}
+                  </a>
+                  <a
+                    href="#partners"
+                    className="px-2.5 py-1 rounded-full text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/5 transition-colors"
+                  >
+                    {t.persona.partner}
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-[11px]">
+                <a
+                  href={APP_URL}
+                  className="text-lp-ink/70 hover:text-lp-ink font-medium transition-colors"
+                >
+                  {t.persona.signIn} →
+                </a>
+                <span className="w-px h-3 bg-lp-ink/15" aria-hidden="true" />
+                <a
+                  href="https://lumierecore.org"
+                  className="text-lp-ink/40 hover:text-lp-ink/70 transition-colors"
+                >
+                  {t.persona.parentLabel} →
+                </a>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Main bar */}
+        <div className="bg-white/70 backdrop-blur-xl border-b border-white/50">
+          <div className="max-w-[1120px] mx-auto px-6 h-16 md:h-[72px] flex items-center justify-between">
+            <a href="#" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-lg bg-lp-green flex items-center justify-center shadow-lg shadow-lp-green/20 group-hover:scale-105 transition-transform">
+                <HeartHandshake className="w-4 h-4 text-white" strokeWidth={2.5} />
+              </div>
+              <span className="text-lg font-semibold text-lp-ink tracking-tight">{t.nav.brand}</span>
+            </a>
+
+            <nav className="hidden md:flex items-center gap-1">
+              <a href="#how-it-works" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
+                {t.nav.howItWorks}
+              </a>
+
+              {/* Mega nav: What you get dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setWhatOpen(true)}
+                onMouseLeave={() => setWhatOpen(false)}
+              >
+                <button
+                  type="button"
+                  className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all flex items-center gap-1"
+                  aria-expanded={whatOpen}
+                >
+                  {t.navItems.whatYouGetLabel}
+                  <svg width="10" height="10" viewBox="0 0 10 10" className={'transition-transform ' + (whatOpen ? 'rotate-180' : '')} aria-hidden="true">
+                    <path d="M2 4L5 7L8 4" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                  </svg>
+                </button>
+                {whatOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-56 glass rounded-xl p-2 shadow-xl">
+                    {whatItems.map((it) => (
+                      <a
+                        key={it.label}
+                        href={it.href}
+                        className="block px-3 py-2 text-sm text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/5 rounded-lg transition-colors"
+                      >
+                        {it.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <a href="#inside-circle" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
+                {t.nav.theCircle}
+              </a>
+              <a href="#partners" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
+                {t.nav.partners}
+              </a>
+              <a href="#faq" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
+                {t.nav.faq}
+              </a>
+            </nav>
+
+            <div className="hidden md:flex items-center gap-2">
+              <Button
+                variant="glass"
+                onClick={() => { window.location.href = DONOR_URL; }}
+                className="!h-10 !px-4 !text-sm"
+              >
+                {t.common.give}
+              </Button>
+              <Button
+                onClick={() => { window.location.href = APP_URL; }}
+                className="!h-10 !px-4 !text-sm"
+              >
+                {t.common.getHelp}
+              </Button>
+            </div>
+
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="md:hidden p-2 rounded-lg hover:bg-lp-sage/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green"
+              className="md:hidden p-2 rounded-lg hover:bg-lp-ink/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green"
               aria-label={t.common.menu}
             >
               <Menu className="w-5 h-5 text-lp-ink" />
@@ -135,6 +280,7 @@ const TopBar: React.FC = () => {
           </div>
         </div>
       </header>
+
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t.nav.brand}>
         <div className="flex flex-col gap-1">
           {navLinks.map((link) => (
@@ -147,11 +293,28 @@ const TopBar: React.FC = () => {
               {link.label}
             </a>
           ))}
-          <div className="pt-4 mt-2"><LanguageToggle /></div>
-          <div className="pt-2">
-            <Button fullWidth onClick={() => { window.location.href = APP_URL; }}>
-              {t.common.openApp}
-            </Button>
+          <div className="pt-4 text-[11px] uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
+            {t.navItems.whatYouGetLabel}
+          </div>
+          <div className="flex flex-col gap-0.5 mt-1">
+            {whatItems.map((it) => (
+              <a
+                key={it.label}
+                href={it.href}
+                onClick={() => setMenuOpen(false)}
+                className="pl-4 text-sm text-lp-ink/70 py-2"
+              >
+                {it.label}
+              </a>
+            ))}
+          </div>
+          <div className="pt-4">
+            <a
+              href={APP_URL}
+              className="block text-sm font-medium text-lp-ink py-2"
+            >
+              {t.persona.signIn} →
+            </a>
           </div>
         </div>
       </Sheet>
@@ -159,22 +322,23 @@ const TopBar: React.FC = () => {
   );
 };
 
-// ── Phone mockup ────────────────────────────────────────────────────────────
-
 const PhoneMockup: React.FC = () => {
   const { t } = useLanguage();
   return (
-    <div className="relative mx-auto w-[280px] md:w-[300px] rounded-[2.5rem] bg-lp-ink p-2 shadow-2xl">
-      <div className="rounded-[2rem] bg-lp-canvas overflow-hidden flex flex-col" style={{ height: '580px' }}>
-        <div className="text-center text-[10px] pt-2 pb-1 text-lp-ink/40 font-medium">9:41</div>
-        <div className="px-4 py-3 flex items-center gap-2 border-b border-lp-ink/5">
-          <div className="w-7 h-7 rounded-lg bg-lp-green flex items-center justify-center">
-            <HeartHandshake className="w-3.5 h-3.5 text-white" strokeWidth={2} />
+    <div className="relative mx-auto w-[290px] md:w-[320px] rounded-[2.75rem] bg-gradient-to-br from-lp-ink via-[#232b26] to-lp-ink p-[3px] shadow-[0_40px_80px_-20px_rgba(17,17,17,0.45)]">
+      <div className="rounded-[2.6rem] bg-lp-canvas overflow-hidden flex flex-col" style={{ height: '620px' }}>
+        <div className="text-center text-[10px] pt-3 pb-1 text-lp-ink/40 font-medium">9:41</div>
+        <div className="px-4 py-3 flex items-center justify-between border-b border-lp-ink/5">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-lp-green flex items-center justify-center">
+              <HeartHandshake className="w-3.5 h-3.5 text-white" strokeWidth={2} />
+            </div>
+            <span className="text-xs font-semibold text-lp-ink">{t.phoneMockup.header}</span>
           </div>
-          <span className="text-xs font-semibold text-lp-ink">{t.phoneMockup.header}</span>
+          <div className="w-6 h-6 rounded-full bg-lp-sage/60" />
         </div>
         <div className="p-3 space-y-2">
-          <div className="p-3 rounded-xl bg-lp-green text-white space-y-1">
+          <div className="p-3 rounded-xl bg-lp-green text-white space-y-1 shadow-lg shadow-lp-green/25">
             <Package className="w-4 h-4" strokeWidth={2} />
             <div className="text-xs font-semibold">{t.phoneMockup.reserve}</div>
             <div className="text-[10px] text-white/70">{t.phoneMockup.reserveSub}</div>
@@ -213,74 +377,281 @@ const PhoneMockup: React.FC = () => {
   );
 };
 
-// ── Hero ────────────────────────────────────────────────────────────────────
+// â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Hero: React.FC = () => {
   const { t } = useLanguage();
   return (
-    <section className="relative py-14 md:py-24 overflow-hidden">
-      <DotGrid className="opacity-60" />
-      <OrbGlow className="-top-20 -right-20 md:top-10 md:right-10 animate-glow" />
-      <div className="relative max-w-[1120px] mx-auto px-6 grid md:grid-cols-2 gap-12 items-center animate-fade-up">
-        <div>
-          <h1
-            className="text-[40px] md:text-[56px] leading-[1.05] text-lp-ink"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
+    <section className="relative overflow-hidden mesh-hero">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-32 -left-20 w-[460px] h-[460px] rounded-full bg-lp-sage/60 blur-3xl orb-drift" />
+        <div className="absolute -top-32 right-0 w-[560px] h-[560px] rounded-full bg-lp-green/10 blur-3xl orb-drift-slow" />
+      </div>
+      <DotGrid className="opacity-40" />
+
+      <div className="relative max-w-[1120px] mx-auto px-6 min-h-[80vh] md:min-h-[calc(100vh-6.5rem)] py-16 md:py-24 grid md:grid-cols-12 gap-12 items-center">
+        <div className="md:col-span-6 animate-fade-up">
+          <Eyebrow>{t.hero.eyebrow}</Eyebrow>
+          <h1 className="display-serif mt-6 text-[44px] md:text-[64px] lg:text-[76px] leading-[0.98] text-lp-ink">
             {t.hero.h1}
           </h1>
-          <p className="mt-6 text-lg md:text-xl text-lp-ink/70 leading-relaxed">{t.hero.sub}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button onClick={() => { window.location.href = APP_URL; }}>{t.common.openApp}</Button>
+          <p className="mt-8 text-lg md:text-xl text-lp-ink/65 max-w-lg leading-relaxed">
+            {t.hero.sub}
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Button onClick={() => { window.location.href = APP_URL; }}>
+              {t.common.openApp}
+              <ArrowRight className="w-4 h-4 ml-1.5" />
+            </Button>
             <Button
-              variant="secondary"
+              variant="glass"
               onClick={() => { document.getElementById('partners')?.scrollIntoView({ behavior: 'smooth' }); }}
             >
               {t.common.partnerWithUs}
             </Button>
           </div>
-          <div className="mt-8"><Chip>{t.hero.chip}</Chip></div>
+          <div className="mt-10 md:hidden inline-flex items-center gap-2 rounded-full glass px-4 py-2">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+            </span>
+            <span className="text-xs font-medium text-lp-ink/80">{t.hero.chip}</span>
+          </div>
         </div>
-        <div><PhoneMockup /></div>
+
+        <div className="md:col-span-6 relative">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-[420px] h-[420px] rounded-full bg-gradient-to-br from-lp-green/25 via-lp-sage/40 to-transparent blur-3xl" />
+          </div>
+
+          <div className="absolute top-6 -left-4 glass rounded-2xl px-4 py-3 float-slow hidden md:flex items-center gap-2.5 shadow-xl">
+            <div className="w-8 h-8 rounded-full bg-lp-green/15 flex items-center justify-center">
+              <Check className="w-4 h-4 text-lp-green" strokeWidth={2.5} />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-lp-ink/50 font-medium">Ready</div>
+              <div className="text-xs font-semibold text-lp-ink">Bundle reserved</div>
+            </div>
+          </div>
+
+          <div className="absolute bottom-16 -right-6 float-medium hidden md:block shadow-2xl rounded-2xl overflow-hidden w-[170px] border-[6px] border-white bg-lp-sage/40">
+            <img
+              src={IMG.heroAccent}
+              alt={t.hero.accentAlt}
+              className="w-full h-full object-cover aspect-square"
+              loading="lazy"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.3'; }}
+            />
+          </div>
+
+          <div className="relative float-slow"><PhoneMockup /></div>
+        </div>
       </div>
     </section>
   );
 };
 
-// ── How it works ────────────────────────────────────────────────────────────
+// â”€â”€ Promise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const Promise: React.FC = () => {
+  const { t } = useLanguage();
+  return (
+    <section className="relative overflow-hidden py-20 md:py-32 bg-lp-canvas border-t border-lp-ink/5">
+      <AmbientBackdrop />
+      <div className="max-w-4xl mx-auto px-6 text-center">
+        <Eyebrow number={t.promise.number}>{t.promise.eyebrow}</Eyebrow>
+        <h2 className="display-serif mt-6 text-[36px] md:text-[56px] lg:text-[64px] leading-[1.05] text-lp-ink">
+          {t.promise.headline}
+        </h2>
+        <p className="mt-8 text-lg md:text-xl text-lp-ink/60 max-w-2xl mx-auto leading-relaxed">
+          {t.promise.body}
+        </p>
+      </div>
+    </section>
+  );
+};
+
+// â”€â”€ How it works â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const InsideTheCircle: React.FC = () => {
+  const { t } = useLanguage();
+  return (
+    <section
+      id="inside-circle"
+      className="relative py-20 md:py-32 mesh-navy overflow-hidden text-white"
+    >
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-[420px] h-[420px] rounded-full bg-lp-green/30 blur-3xl orb-drift" />
+        <div className="absolute bottom-10 right-10 w-[380px] h-[380px] rounded-full bg-lp-green/20 blur-3xl orb-drift-slow" />
+      </div>
+
+      <div className="relative max-w-[1120px] mx-auto px-6">
+        <Reveal>
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="eyebrow-dark"><span className="mr-1.5 tabular-nums text-emerald-400/70">{t.insideCircle.number}</span>{t.insideCircle.eyebrow}</span>
+            <h2 className="display-serif mt-5 text-[44px] md:text-[72px] leading-[1.0] text-white">
+              {t.insideCircle.headline}
+            </h2>
+            <p className="mt-6 text-base md:text-lg text-white/60 leading-relaxed">
+              {t.insideCircle.body}
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay={100}>
+          <div className="mt-16 grid md:grid-cols-2 gap-8 md:gap-20">
+            <div>
+              <div className="glass-dark rounded-3xl p-7 md:p-8">
+                <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-emerald-400 mb-5">
+                  {t.insideCircle.requestLabel}
+                </div>
+                <div className="space-y-4 text-sm">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-white/50">{t.insideCircle.requestBill}</span>
+                    <span className="display-serif text-2xl md:text-[28px] leading-none text-white tabular-nums">KES 850</span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-white/50">{t.insideCircle.requestRef}</span>
+                    <span className="font-mono text-white">541234567</span>
+                  </div>
+                </div>
+                <div className="mt-6 pt-5 border-t border-white/10">
+                  <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-white/30 mb-1.5">
+                    Status
+                  </div>
+                  <div className="text-sm font-medium text-emerald-400">
+                    {t.insideCircle.requestStatus}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 text-[10px] uppercase tracking-[0.2em] text-white/25 text-center font-medium">
+                {t.insideCircle.example}
+              </div>
+            </div>
+
+            <div>
+              <div className="glass-dark rounded-3xl p-7 md:p-8">
+                <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-emerald-400 mb-5">
+                  {t.insideCircle.giftLabel}
+                </div>
+                <div className="space-y-4 text-sm">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-white/50">{t.insideCircle.giftAmount}</span>
+                    <span className="display-serif text-2xl md:text-[28px] leading-none text-white tabular-nums">KES 850</span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-white/50">{t.insideCircle.giftDonor}</span>
+                    <span className="text-white">{t.insideCircle.giftDonorValue}</span>
+                  </div>
+                </div>
+                <div className="mt-6 pt-5 border-t border-white/10">
+                  <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-white/30 mb-1.5">
+                    Status
+                  </div>
+                  <div className="text-sm font-medium text-emerald-400">
+                    {t.insideCircle.giftStatus}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 text-[10px] uppercase tracking-[0.2em] text-white/25 text-center font-medium">
+                {t.insideCircle.example}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+};
 
 const HowItWorks: React.FC = () => {
   const { t } = useLanguage();
-  const steps = [
-    { Icon: ClipboardList, title: t.howItWorks.step1Title, body: t.howItWorks.step1Body },
-    { Icon: ShieldCheck, title: t.howItWorks.step2Title, body: t.howItWorks.step2Body },
-    { Icon: MapPin, title: t.howItWorks.step3Title, body: t.howItWorks.step3Body },
-  ];
+  const [flow, setFlow] = useState<'need' | 'give'>('need');
+
+  const renderFlow = (steps: { title: string; body: string }[]) => (
+    <div>
+      {steps.map((step, i) => (
+        <div
+          key={i}
+          className="py-10 md:py-14 border-b border-lp-ink/8 last:border-0"
+        >
+          <div className="md:hidden">
+            <span className="display-serif text-[48px] leading-none text-lp-green/25 tabular-nums block mb-3">
+              0{i + 1}
+            </span>
+            <h3 className="text-lg font-semibold text-lp-ink">{step.title}</h3>
+            <p className="mt-2 text-base text-lp-ink/60 leading-relaxed">{step.body}</p>
+          </div>
+          <div className="hidden md:grid grid-cols-[auto_1fr] gap-10 items-baseline">
+            <span className="display-serif text-[96px] leading-none text-lp-green/25 tabular-nums">
+              0{i + 1}
+            </span>
+            <div>
+              <h3 className="text-2xl font-semibold text-lp-ink">{step.title}</h3>
+              <p className="mt-2 text-base text-lp-ink/60 leading-relaxed">{step.body}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
-    <section id="how-it-works" className="py-14 md:py-24">
-      <WaveDivider />
-      <div className="max-w-[1120px] mx-auto px-6 mt-8 md:mt-12">
+    <section id="how-it-works" className="relative overflow-hidden py-20 md:py-32">
+      <AmbientBackdrop />
+      <div className="max-w-[1120px] mx-auto px-6">
         <Reveal>
-          <h2
-            className="text-3xl md:text-4xl text-lp-ink text-center mb-12 md:mb-16"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
-            {t.howItWorks.title}
-          </h2>
+          <div className="max-w-2xl">
+            <Eyebrow number={t.howItWorks.number}>{t.howItWorks.eyebrow}</Eyebrow>
+            <h2 className="display-serif mt-4 text-[40px] md:text-[56px] leading-[1.02] text-lp-ink">
+              {t.howItWorks.title}
+            </h2>
+          </div>
         </Reveal>
+
+        <div className="md:hidden mt-10">
+          <div className="inline-flex rounded-full border border-lp-ink/10 p-1">
+            <button
+              type="button"
+              onClick={() => setFlow('need')}
+              className={
+                'px-5 py-2 text-sm font-medium rounded-full transition-colors ' +
+                (flow === 'need' ? 'bg-lp-green text-white' : 'text-lp-ink/60')
+              }
+            >
+              {t.howItWorks.needLabel}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFlow('give')}
+              className={
+                'px-5 py-2 text-sm font-medium rounded-full transition-colors ' +
+                (flow === 'give' ? 'bg-lp-green text-white' : 'text-lp-ink/60')
+              }
+            >
+              {t.howItWorks.giveLabel}
+            </button>
+          </div>
+        </div>
+
+        <div className="md:hidden mt-4">
+          {renderFlow(flow === 'need' ? t.howItWorks.needSteps : t.howItWorks.giveSteps)}
+        </div>
+
         <Reveal delay={100}>
-          <div className="relative grid md:grid-cols-3 gap-10 md:gap-12">
-            <div
-              className="hidden md:block absolute top-6 left-[16.66%] right-[16.66%] border-t border-dashed border-lp-green/25 pointer-events-none"
-              aria-hidden="true"
-            />
-            {steps.map((step, i) => (
-              <div key={i} className="text-center relative">
-                <div className="flex justify-center relative z-10"><IconTile Icon={step.Icon} /></div>
-                <h3 className="mt-4 text-lg font-semibold text-lp-ink">{step.title}</h3>
-                <p className="mt-2 text-base text-lp-ink/60 leading-relaxed max-w-xs mx-auto">{step.body}</p>
+          <div className="hidden md:grid md:grid-cols-2 gap-16 lg:gap-20 mt-16">
+            <div>
+              <div className="pb-6 text-[11px] uppercase tracking-[0.22em] font-semibold text-lp-green">
+                {t.howItWorks.needLabel}
               </div>
-            ))}
+              {renderFlow(t.howItWorks.needSteps)}
+            </div>
+            <div>
+              <div className="pb-6 text-[11px] uppercase tracking-[0.22em] font-semibold text-lp-green">
+                {t.howItWorks.giveLabel}
+              </div>
+              {renderFlow(t.howItWorks.giveSteps)}
+            </div>
           </div>
         </Reveal>
       </div>
@@ -288,44 +659,112 @@ const HowItWorks: React.FC = () => {
   );
 };
 
-// ── What you can get ────────────────────────────────────────────────────────
+// â”€â”€ What you can get â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const WhatYouCanGet: React.FC = () => {
   const { t } = useLanguage();
+  const [active, setActive] = useState(0);
   const items = [
-    { Icon: Package, title: t.whatYouCanGet.item1Title, body: t.whatYouCanGet.item1Body },
-    { Icon: Droplet, title: t.whatYouCanGet.item2Title, body: t.whatYouCanGet.item2Body },
-    { Icon: Zap, title: t.whatYouCanGet.item3Title, body: t.whatYouCanGet.item3Body },
-    { Icon: GraduationCap, title: t.whatYouCanGet.item4Title, body: t.whatYouCanGet.item4Body },
+    { Icon: Package, title: t.whatYouCanGet.item1Title, body: t.whatYouCanGet.item1Body, img: IMG.food, alt: t.whatYouCanGet.item1Alt },
+    { Icon: Droplet, title: t.whatYouCanGet.item2Title, body: t.whatYouCanGet.item2Body, img: IMG.hygiene, alt: t.whatYouCanGet.item2Alt },
+    { Icon: Zap, title: t.whatYouCanGet.item3Title, body: t.whatYouCanGet.item3Body, img: IMG.utility, alt: t.whatYouCanGet.item3Alt },
+    { Icon: GraduationCap, title: t.whatYouCanGet.item4Title, body: t.whatYouCanGet.item4Body, img: IMG.school, alt: t.whatYouCanGet.item4Alt },
   ];
+
   return (
-    <section id="what-you-can-get" className="py-14 md:py-24 border-t border-lp-ink/10">
+    <section id="what-you-can-get" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
+      <AmbientBackdrop />
       <div className="max-w-[1120px] mx-auto px-6">
         <Reveal>
-          <h2
-            className="text-3xl md:text-4xl text-lp-ink text-center mb-12 md:mb-16"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
-            {t.whatYouCanGet.title}
-          </h2>
-        </Reveal>
-        <Reveal delay={100}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {items.map((item, i) => (
-              <Card key={i} className="space-y-3 lift-hover">
-                <IconTile Icon={item.Icon} />
-                <h3 className="text-base font-semibold text-lp-ink">{item.title}</h3>
-                <p className="text-sm text-lp-ink/60 leading-relaxed">{item.body}</p>
-              </Card>
-            ))}
+          <div className="max-w-2xl">
+            <Eyebrow number={t.whatYouCanGet.number}>{t.whatYouCanGet.eyebrow}</Eyebrow>
+            <h2 className="display-serif mt-4 text-[40px] md:text-[56px] leading-[1.02] text-lp-ink">
+              {t.whatYouCanGet.title}
+            </h2>
           </div>
         </Reveal>
+
+        <div className="mt-14 grid md:grid-cols-12 gap-10 md:gap-14 items-center">
+          <div className="md:col-span-5">
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl">
+              {items.map((item, i) => (
+                <img
+                  key={i}
+                  src={item.img}
+                  alt={item.alt}
+                  className={
+                    'absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ' +
+                    (i === active ? 'opacity-100' : 'opacity-0')
+                  }
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="md:col-span-7">
+            {items.map((item, i) => (
+              <button
+                key={i}
+                type="button"
+                onMouseEnter={() => setActive(i)}
+                onFocus={() => setActive(i)}
+                onClick={() => setActive(i)}
+                className={
+                  'w-full text-left flex gap-5 py-5 border-b border-lp-ink/8 last:border-0 transition-colors ' +
+                  (i === active ? 'bg-lp-green/[0.05]' : 'hover:bg-lp-ink/[0.02]')
+                }
+              >
+                <span
+                  className={
+                    'display-serif text-3xl md:text-4xl tabular-nums w-12 shrink-0 transition-colors ' +
+                    (i === active ? 'text-lp-green' : 'text-lp-ink/15')
+                  }
+                >
+                  0{i + 1}
+                </span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <item.Icon className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
+                    <h3 className="text-lg font-semibold text-lp-ink">{item.title}</h3>
+                  </div>
+                  <p className="mt-1.5 text-sm text-lp-ink/60 leading-relaxed">{item.body}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
 };
 
-// ── Private by design ───────────────────────────────────────────────────────
+// â”€â”€ Private by design â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const PhotoBreak: React.FC = () => {
+  const { t } = useLanguage();
+  return (
+    <section className="relative overflow-hidden">
+      <div className="relative h-[70vh] md:h-[85vh] min-h-[500px] max-h-[800px]">
+        <img
+          src={IMG.architecture}
+          alt={t.photoBreak.alt}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-lp-ink/85 via-lp-ink/30 to-lp-ink/40" />
+        <div className="relative z-10 h-full max-w-[1120px] mx-auto px-6 flex items-end pb-16 md:pb-24">
+          <div className="max-w-3xl">
+            <span className="eyebrow-dark">{t.photoBreak.eyebrow}</span>
+            <p className="display-serif mt-5 text-[36px] md:text-[56px] lg:text-[64px] leading-[1.05] text-white">
+              {t.photoBreak.quote}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const Private: React.FC = () => {
   const { t } = useLanguage();
@@ -335,75 +774,101 @@ const Private: React.FC = () => {
     { Icon: FileText, body: t.private.point3 },
   ];
   return (
-    <section id="private" className="relative py-14 md:py-24 border-t border-lp-ink/10 overflow-hidden">
-      <DotGrid className="opacity-30" />
+    <section id="private" className="relative py-16 md:py-28 overflow-hidden mesh-sage">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 right-10 w-[420px] h-[420px] rounded-full bg-lp-green/10 blur-3xl orb-drift" />
+      </div>
       <div className="relative max-w-[1120px] mx-auto px-6">
         <Reveal>
-          <h2
-            className="text-3xl md:text-4xl text-lp-ink text-center mb-12 md:mb-16"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
-            {t.private.title}
-          </h2>
-        </Reveal>
-        <Reveal delay={100}>
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12 max-w-4xl mx-auto">
-            {points.map((point, i) => (
-              <div key={i} className="text-center">
-                <div className="flex justify-center"><IconTile Icon={point.Icon} /></div>
-                <p className="mt-4 text-base text-lp-ink leading-relaxed">{point.body}</p>
-              </div>
-            ))}
+          <div className="text-center max-w-2xl mx-auto">
+            <Eyebrow number={t.private.number}>{t.private.eyebrow}</Eyebrow>
+            <h2 className="display-serif mt-3 text-3xl md:text-5xl text-lp-ink">
+              {t.private.title}
+            </h2>
           </div>
         </Reveal>
-        <Reveal delay={200}>
-          <p className="mt-12 text-sm text-lp-ink/50 text-center max-w-2xl mx-auto leading-relaxed">
-            {t.private.line}
-          </p>
+        <Reveal delay={100}>
+          <div className="mt-14 max-w-4xl mx-auto rounded-3xl glass p-8 md:p-12">
+            <div className="grid md:grid-cols-3 gap-8 md:gap-10">
+              {points.map((point, i) => (
+                <div key={i} className="text-center">
+                  <div className="flex justify-center"><IconTile Icon={point.Icon} /></div>
+                  <p className="mt-4 text-base text-lp-ink leading-relaxed">{point.body}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-10 pt-8 border-t border-lp-ink/10">
+              <p className="text-sm text-lp-ink/60 text-center max-w-2xl mx-auto leading-relaxed">
+                {t.private.line}
+              </p>
+            </div>
+          </div>
         </Reveal>
       </div>
     </section>
   );
 };
 
-// ── For givers ──────────────────────────────────────────────────────────────
+// â”€â”€ For givers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Givers: React.FC = () => {
   const { t } = useLanguage();
-  const points = [
-    { Icon: HeartHandshake, body: t.givers.point1 },
-    { Icon: Coins, body: t.givers.point2 },
-    { Icon: Users, body: t.givers.point3 },
-    { Icon: Hash, body: t.givers.point4 },
+  const principles = [
+    { title: t.givers.p1Title, body: t.givers.p1Body },
+    { title: t.givers.p2Title, body: t.givers.p2Body },
+    { title: t.givers.p3Title, body: t.givers.p3Body },
+    { title: t.givers.p4Title, body: t.givers.p4Body },
   ];
   return (
-    <section id="give" className="py-14 md:py-24 border-t border-lp-ink/10">
-      <div className="max-w-[1120px] mx-auto px-6">
+    <section id="give" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
+      <AmbientBackdrop />
+      <div className="relative max-w-[1120px] mx-auto px-6">
         <Reveal>
-          <h2
-            className="text-3xl md:text-4xl text-lp-ink text-center mb-12 md:mb-16"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
-            {t.givers.title}
-          </h2>
+          <div className="max-w-3xl">
+            <Eyebrow number={t.givers.number}>{t.givers.eyebrow}</Eyebrow>
+            <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
+              {t.givers.headline}
+            </h2>
+            <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
+              {t.givers.body}
+            </p>
+          </div>
         </Reveal>
+
         <Reveal delay={100}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto">
-            {points.map((point, i) => (
+          <div className="mt-16 md:mt-20 max-w-3xl">
+            {principles.map((p, i) => (
               <div
                 key={i}
-                className="text-center p-5 rounded-2xl border border-lp-ink/10 bg-lp-surface lift-hover"
+                className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-10 items-baseline"
               >
-                <div className="flex justify-center"><IconTile Icon={point.Icon} /></div>
-                <p className="mt-3 text-sm text-lp-ink leading-relaxed">{point.body}</p>
+                <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
+                  0{i + 1}
+                </span>
+                <div className="md:flex md:gap-8 md:items-baseline">
+                  <h3 className="text-base md:text-lg font-semibold text-lp-ink md:w-40 shrink-0">
+                    {p.title}
+                  </h3>
+                  <p className="mt-1 md:mt-0 text-sm md:text-base text-lp-ink/60 leading-relaxed">
+                    {p.body}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </Reveal>
+
         <Reveal delay={200}>
-          <p className="mt-12 text-base font-medium text-lp-green text-center">{t.givers.line}</p>
-          <div className="mt-6 text-center">
-            <Button onClick={() => { window.location.href = APP_URL + '/donor'; }}>{t.givers.cta}</Button>
+          <div className="mt-20 md:mt-28 max-w-3xl">
+            <p className="display-serif text-[32px] md:text-[48px] leading-[1.1] text-lp-green">
+              {t.givers.line}
+            </p>
+            <div className="mt-8">
+              <Button onClick={() => { window.location.href = DONOR_URL; }}>
+                {t.givers.cta}
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </div>
           </div>
         </Reveal>
       </div>
@@ -411,7 +876,7 @@ const Givers: React.FC = () => {
   );
 };
 
-// ── For partners ────────────────────────────────────────────────────────────
+// â”€â”€ For partners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Partners: React.FC = () => {
   const { t } = useLanguage();
@@ -424,40 +889,66 @@ const Partners: React.FC = () => {
     window.setTimeout(() => { setSheetOpen(false); setSubmitted(false); }, 1800);
   };
 
-  const points = [t.partners.point1, t.partners.point2, t.partners.point3];
+  const principles = [
+    { title: t.partners.p1Title, body: t.partners.p1Body },
+    { title: t.partners.p2Title, body: t.partners.p2Body },
+    { title: t.partners.p3Title, body: t.partners.p3Body },
+  ];
 
   return (
-    <section id="partners" className="py-14 md:py-24 border-t border-lp-ink/10">
-      <div className="max-w-[1120px] mx-auto px-6">
+    <section id="partners" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
+      <AmbientBackdrop />
+      <div className="relative max-w-[1120px] mx-auto px-6">
         <Reveal>
-          <h2
-            className="text-3xl md:text-4xl text-lp-ink text-center mb-6"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
-            {t.partners.title}
-          </h2>
-          <p className="text-base md:text-lg text-lp-ink/70 text-center mb-12 max-w-2xl mx-auto leading-relaxed">
-            {t.partners.line}
-          </p>
+          <div className="max-w-3xl">
+            <Eyebrow number={t.partners.number}>{t.partners.eyebrow}</Eyebrow>
+            <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
+              {t.partners.headline}
+            </h2>
+            <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
+              {t.partners.body}
+            </p>
+          </div>
         </Reveal>
+
         <Reveal delay={100}>
-          <div className="grid md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto mb-10">
-            {points.map((point, i) => (
+          <div className="mt-16 md:mt-20 max-w-3xl">
+            {principles.map((p, i) => (
               <div
                 key={i}
-                className="text-center p-6 rounded-2xl border border-lp-ink/10 bg-lp-surface lift-hover"
+                className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-10 items-baseline"
               >
-                <p className="text-base text-lp-ink leading-relaxed">{point}</p>
+                <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
+                  0{i + 1}
+                </span>
+                <div className="md:flex md:gap-8 md:items-baseline">
+                  <h3 className="text-base md:text-lg font-semibold text-lp-ink md:w-40 shrink-0">
+                    {p.title}
+                  </h3>
+                  <p className="mt-1 md:mt-0 text-sm md:text-base text-lp-ink/60 leading-relaxed">
+                    {p.body}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </Reveal>
+
         <Reveal delay={200}>
-          <div className="text-center">
-            <Button onClick={() => setSheetOpen(true)}>{t.partners.cta}</Button>
+          <div className="mt-20 md:mt-28 max-w-3xl">
+            <p className="display-serif text-[32px] md:text-[48px] leading-[1.1] text-lp-green">
+              {t.partners.line}
+            </p>
+            <div className="mt-8">
+              <Button onClick={() => setSheetOpen(true)}>
+                {t.partners.cta}
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </div>
           </div>
         </Reveal>
       </div>
+
       <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title={t.partners.formTitle}>
         {submitted ? (
           <div className="py-12 text-center">
@@ -470,41 +961,26 @@ const Partners: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldOrg}</label>
-              <input
-                type="text"
-                required
-                placeholder={t.partners.fieldOrgPlaceholder}
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent"
-              />
+              <input type="text" required placeholder={t.partners.fieldOrgPlaceholder}
+                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent" />
             </div>
             <div>
               <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldType}</label>
-              <select
-                required
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent"
-              >
-                <option value="">—</option>
-                {t.partners.typeOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
+              <select required
+                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent">
+                <option value="">â€”</option>
+                {t.partners.typeOptions.map((opt) => (<option key={opt} value={opt}>{opt}</option>))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldEmail}</label>
-              <input
-                type="email"
-                required
-                placeholder={t.partners.fieldEmailPlaceholder}
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent"
-              />
+              <input type="email" required placeholder={t.partners.fieldEmailPlaceholder}
+                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent" />
             </div>
             <div>
               <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldMessage}</label>
-              <textarea
-                rows={3}
-                placeholder={t.partners.fieldMessagePlaceholder}
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent resize-none"
-              />
+              <textarea rows={3} placeholder={t.partners.fieldMessagePlaceholder}
+                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent resize-none" />
             </div>
             <Button type="submit" fullWidth>{t.partners.submit}</Button>
           </form>
@@ -514,46 +990,9 @@ const Partners: React.FC = () => {
   );
 };
 
-// ── Where we are ────────────────────────────────────────────────────────────
+// â”€â”€ Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const Status: React.FC = () => {
-  const { t } = useLanguage();
-  const steps = [t.status.step1, t.status.step2, t.status.step3, t.status.step4];
-  return (
-    <section id="status" className="py-14 md:py-24 border-t border-lp-ink/10">
-      <div className="max-w-[1120px] mx-auto px-6">
-        <Reveal>
-          <h2
-            className="text-3xl md:text-4xl text-lp-ink text-center mb-6"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
-            {t.status.title}
-          </h2>
-          <p className="text-base md:text-lg text-lp-ink/70 text-center mb-12 max-w-2xl mx-auto">
-            {t.status.current}
-          </p>
-        </Reveal>
-        <Reveal delay={100}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto">
-            {steps.map((step, i) => (
-              <div key={i} className="text-center">
-                <div className="w-10 h-10 mx-auto rounded-full bg-lp-sage text-lp-green flex items-center justify-center text-sm font-semibold">
-                  {i + 1}
-                </div>
-                <div className="mt-3 text-sm md:text-base text-lp-ink font-medium">{step}</div>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-        <Reveal delay={200}>
-          <p className="mt-12 text-sm text-lp-ink/50 text-center max-w-2xl mx-auto">{t.status.line}</p>
-        </Reveal>
-      </div>
-    </section>
-  );
-};
 
-// ── FAQ ─────────────────────────────────────────────────────────────────────
 
 const Faq: React.FC = () => {
   const { t } = useLanguage();
@@ -565,71 +1004,154 @@ const Faq: React.FC = () => {
     { id: 'q5', question: t.faq.q5, answer: t.faq.a5 },
   ];
   return (
-    <section id="faq" className="py-14 md:py-24">
+    <section id="faq" className="relative overflow-hidden py-16 md:py-28">
       <WaveDivider />
-      <div className="max-w-[800px] mx-auto px-6 mt-8 md:mt-12">
+      <AmbientBackdrop />
+      <div className="max-w-[840px] mx-auto px-6 mt-6 md:mt-10">
         <Reveal>
-          <h2
-            className="text-3xl md:text-4xl text-lp-ink text-center mb-12"
-            style={{ fontFamily: 'var(--font-lp-serif)' }}
-          >
-            {t.faq.title}
-          </h2>
+          <div className="text-center">
+            <Eyebrow number={t.faq.number}>{t.faq.eyebrow}</Eyebrow>
+            <h2 className="display-serif mt-3 text-3xl md:text-5xl text-lp-ink">
+              {t.faq.title}
+            </h2>
+          </div>
         </Reveal>
-        <Reveal delay={100}><Accordion items={items} /></Reveal>
+        <Reveal delay={100}>
+          <div className="mt-12 rounded-3xl glass p-2 md:p-4">
+            <Accordion items={items} />
+          </div>
+        </Reveal>
       </div>
     </section>
   );
 };
 
-// ── Footer ──────────────────────────────────────────────────────────────────
+// â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Footer: React.FC = () => {
   const { t } = useLanguage();
   return (
-    <footer className="border-t border-lp-ink/10 py-12 bg-lp-sage/20">
-      <div className="max-w-[1120px] mx-auto px-6 grid md:grid-cols-3 gap-8">
-        <div>
-          <div className="text-lg font-semibold text-lp-ink">{t.footer.brand}</div>
-          <div className="mt-2 text-sm text-lp-ink/60">{t.footer.tagline}</div>
-        </div>
-        <div className="text-sm space-y-1.5">
-          <div><a href={'https://' + t.footer.website} className="text-lp-ink/70 hover:text-lp-ink transition-colors">{t.footer.website}</a></div>
-          <div><a href={'mailto:' + t.footer.email1} className="text-lp-ink/70 hover:text-lp-ink transition-colors">{t.footer.email1}</a></div>
-          <div><a href={'mailto:' + t.footer.email2} className="text-lp-ink/70 hover:text-lp-ink transition-colors">{t.footer.email2}</a></div>
-          <div className="text-lp-ink/70">{t.footer.phone}</div>
-        </div>
-        <div className="flex flex-col md:items-end gap-3">
-          <LanguageToggle />
-          <div className="flex gap-4 text-sm text-lp-ink/60">
-            <a href="#" className="hover:text-lp-ink transition-colors">{t.footer.privacy}</a>
-            <a href="#" className="hover:text-lp-ink transition-colors">{t.footer.terms}</a>
+    <footer className="relative overflow-hidden mesh-navy text-white mt-16">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[420px] h-[420px] rounded-full bg-lp-green/20 blur-3xl orb-drift" />
+        <div className="absolute bottom-0 right-1/4 w-[420px] h-[420px] rounded-full bg-lp-green/10 blur-3xl orb-drift-slow" />
+      </div>
+
+      <div className="relative max-w-[1120px] mx-auto px-6 pt-20 md:pt-28 pb-16 md:pb-20">
+
+        {/* Statement - the whole footer message in one line */}
+        <div className="max-w-3xl">
+          <p className="display-serif text-[44px] md:text-[64px] lg:text-[72px] leading-[1.0] text-white">
+            {t.footer.tagline}
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-white/40 font-semibold">
+            <span>{t.footer.brand}</span>
+            <span className="w-1 h-1 rounded-full bg-white/25" aria-hidden="true" />
+            <span>{t.footer.city}</span>
           </div>
         </div>
-      </div>
-      <div className="max-w-[1120px] mx-auto px-6 mt-10 pt-6 border-t border-lp-ink/10 text-xs text-lp-ink/40 text-center">
-        {t.footer.copyright}
+
+        {/* Three columns, compact */}
+        <div className="mt-20 md:mt-28 grid md:grid-cols-3 gap-10 md:gap-16">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-5 font-semibold">
+              {t.footer.product}
+            </div>
+            <ul className="space-y-3 text-sm">
+              <li><a href="#how-it-works" className="text-white/70 hover:text-white transition-colors">{t.footer.linkHowItWorks}</a></li>
+              <li><a href="#inside-circle" className="text-white/70 hover:text-white transition-colors">{t.footer.linkTheCircle}</a></li>
+              <li><a href="#give" className="text-white/70 hover:text-white transition-colors">{t.footer.linkGive}</a></li>
+              <li><a href="#partners" className="text-white/70 hover:text-white transition-colors">{t.footer.linkPartners}</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-5 font-semibold">
+              {t.footer.company}
+            </div>
+            <ul className="space-y-3 text-sm">
+              <li><a href="https://lumierecore.org" className="text-white/70 hover:text-white transition-colors">{t.footer.linkParent}</a></li>
+              <li><a href="#status" className="text-white/70 hover:text-white transition-colors">{t.footer.linkRoadmap}</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-5 font-semibold">
+              {t.footer.contact}
+            </div>
+            <ul className="space-y-3 text-sm">
+              <li><a href={'https://' + t.footer.website} className="text-white/70 hover:text-white transition-colors">{t.footer.website}</a></li>
+              <li><a href={'mailto:' + t.footer.email1} className="text-white/70 hover:text-white transition-colors">{t.footer.email1}</a></li>
+              <li><a href={'mailto:' + t.footer.email2} className="text-white/70 hover:text-white transition-colors">{t.footer.email2}</a></li>
+              <li><span className="text-white/70">{t.footer.phone}</span></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Legal strip - one row, quiet */}
+        <div className="mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs text-white/40">
+          <div>{t.footer.copyright}</div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <a href={'mailto:' + t.footer.email2 + '?subject=Privacy%20policy%20request'} className="hover:text-white transition-colors">{t.footer.privacy}</a>
+            <a href={'mailto:' + t.footer.email2 + '?subject=Terms%20of%20service%20request'} className="hover:text-white transition-colors">{t.footer.terms}</a>
+            <a href={'mailto:' + t.footer.email2 + '?subject=Data%20protection%20policy%20request'} className="hover:text-white transition-colors">{t.footer.linkDataProtection}</a>
+          </div>
+        </div>
       </div>
     </footer>
   );
 };
 
-// ── Page root ───────────────────────────────────────────────────────────────
+
+// â”€â”€ Mobile dock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const MobileDock: React.FC = () => {
+  const { t } = useLanguage();
+  return (
+    <div
+      className="fixed inset-x-0 bottom-0 z-30 md:hidden"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div className="bg-white/95 backdrop-blur-xl border-t border-lp-ink/10 px-4 pt-3 pb-3">
+        <div className="flex gap-2">
+          <Button
+            variant="glass"
+            onClick={() => { window.location.href = DONOR_URL; }}
+            className="!h-11 flex-1"
+          >
+            {t.common.give}
+          </Button>
+          <Button
+            onClick={() => { window.location.href = APP_URL; }}
+            className="!h-11 flex-[1.4]"
+          >
+            {t.common.getHelp}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// â”€â”€ Page root â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const LandingInner: React.FC = () => (
   <>
     <TopBar />
     <main>
       <Hero />
+      <Promise />
+      <InsideTheCircle />
       <HowItWorks />
       <WhatYouCanGet />
+      <PhotoBreak />
       <Private />
       <Givers />
       <Partners />
-      <Status />
       <Faq />
     </main>
     <Footer />
+    <MobileDock />
   </>
 );
 
