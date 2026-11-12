@@ -5,13 +5,14 @@ const PitchHarness = React.lazy(() => import('./apps/PitchHarness'));
 const RequesterApp = React.lazy(() => import('./apps/RequesterApp'));
 const DonorApp = React.lazy(() => import('./apps/DonorApp'));
 const ConsoleApp = React.lazy(() => import('./apps/ConsoleApp'));
+const Landing = React.lazy(() => import('./pages/Landing'));
 const SmsSimulatorApp = React.lazy(() => import('./apps/SmsSimulatorApp'));
 const UssdSimulatorApp = React.lazy(() => import('./apps/UssdSimulatorApp'));
 const WhatsAppSimulatorApp = React.lazy(() => import('./apps/WhatsAppSimulatorApp'));
 const BenchApp = React.lazy(() => import('./apps/BenchApp'));
 const ArchitectureApp = React.lazy(() => import('./apps/ArchitectureApp'));
 
-type Route = 'pitch' | 'donor' | 'admin' | 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'bench' | 'architecture';
+type Route = 'landing' | 'pitch' | 'donor' | 'admin' | 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'bench' | 'architecture';
 
 function getRoute(): Route {
   // Vite base path is /mutual-circle/, so pathname comes in as
@@ -28,7 +29,8 @@ function getRoute(): Route {
   if (last === 'whatsapp') return 'whatsapp';
   if (last === 'bench') return 'bench';
   if (last === 'architecture') return 'architecture';
-  return 'requester';
+  if (last === 'app' || last === 'requester') return 'requester';
+  return 'landing';
 }
 
 function App() {
@@ -37,6 +39,7 @@ function App() {
     <ErrorBoundary>
           <React.Suspense fallback={<div className="p-8 text-center text-sm text-muted">Loading...</div>}>
             {route === 'pitch' && <PitchHarness />}
+            {route === 'landing' && <Landing />}
             {route === 'donor' && <DonorApp />}
             {route === 'admin' && <ConsoleApp />}
             {route === 'requester' && <RequesterApp />}

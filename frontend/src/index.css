@@ -3,6 +3,10 @@
 @import "@fontsource/inter/latin-500.css";
 @import "@fontsource/inter/latin-600.css";
 @import "@fontsource/inter/latin-700.css";
+@import "@fontsource/cormorant-garamond/latin-400.css";
+@import "@fontsource/cormorant-garamond/latin-500.css";
+@import "@fontsource/cormorant-garamond/latin-600.css";
+@import "@fontsource/cormorant-garamond/latin-700.css";
 
 @import "tailwindcss";
 
@@ -17,6 +21,14 @@
   --color-muted: #5F655E;
   --color-pine: #1E4D3A;
   --color-pine-deep: #143828;
+  /* Landing page tokens (ROLE.txt spec) - separate from app tokens */
+  --font-lp-serif: 'Cormorant Garamond', Georgia, serif;
+  --color-lp-canvas: #FAF8F4;
+  --color-lp-surface: #FFFFFF;
+  --color-lp-ink: #111111;
+  --color-lp-green: #1F6B4A;
+  --color-lp-sage: #DCE8E0;
+  --color-lp-amber: #B45309;
   --color-lime: #D5E8B0;
   --color-tint: #E6EEDD;
   --color-green-ramp: #4E9B6B;
@@ -57,3 +69,70 @@ input, textarea {
 .overscroll-contain {
   overscroll-behavior: contain;
 }
+
+/* ─── Landing motion + polish (ROLE.txt: calm, respects reduced motion) ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50%      { transform: translate(24px, -12px) scale(1.08); opacity: 0.85; }
+}
+
+.animate-fade-up {
+  animation: fadeUp 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-glow {
+  animation: floatGlow 22s ease-in-out infinite;
+}
+
+/* Scroll-triggered reveal. Base state below, visible state via data-visible. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+[data-reveal][data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lift-hover {
+  transition:
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lift-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px -8px rgba(17, 17, 17, 0.10);
+  border-color: rgba(31, 107, 74, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-glow {
+    animation: none;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+  .lift-hover,
+  .lift-hover:hover {
+    transform: none;
+    transition: none;
+    box-shadow: none;
+  }
+}
+
