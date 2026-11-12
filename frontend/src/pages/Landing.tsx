@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import {
-  HeartHandshake, Package, CreditCard, EyeOff, Lock, FileText,
+  HeartHandshake, Package, CreditCard, FileText,
   Coins, Users, Hash, ShieldCheck, Droplet,
   Zap, GraduationCap, Menu, ArrowRight, Check,
 } from 'lucide-react';
@@ -949,48 +949,64 @@ const PhotoBreak: React.FC = () => {
 
 const Private: React.FC = () => {
   const { t } = useLanguage();
-  const points = [
-    { Icon: EyeOff, body: t.private.point1 },
-    { Icon: Lock, body: t.private.point2 },
-    { Icon: FileText, body: t.private.point3 },
+  const principles = [
+    { title: t.private.p1Title, body: t.private.p1Body },
+    { title: t.private.p2Title, body: t.private.p2Body },
+    { title: t.private.p3Title, body: t.private.p3Body },
   ];
   return (
     <section id="private" className="relative py-16 md:py-28 overflow-hidden mesh-sage">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-10 right-10 w-[420px] h-[420px] rounded-full bg-lp-green/10 blur-3xl orb-drift" />
+        <div className="absolute bottom-10 left-10 w-[380px] h-[380px] rounded-full bg-lp-sage/60 blur-3xl orb-drift-slow" />
       </div>
       <div className="relative max-w-[1120px] mx-auto px-6">
         <Reveal>
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="max-w-3xl">
             <Eyebrow number={t.private.number}>{t.private.eyebrow}</Eyebrow>
-            <h2 className="display-serif mt-3 text-3xl md:text-5xl text-lp-ink">
-              {t.private.title}
+            <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
+              {t.private.headline}
             </h2>
+            <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
+              {t.private.body}
+            </p>
           </div>
         </Reveal>
+
         <Reveal delay={100}>
-          <div className="mt-14 max-w-4xl mx-auto rounded-3xl glass p-8 md:p-12">
-            <div className="grid md:grid-cols-3 gap-8 md:gap-10">
-              {points.map((point, i) => (
-                <div key={i} className="text-center">
-                  <div className="flex justify-center"><IconTile Icon={point.Icon} /></div>
-                  <p className="mt-4 text-base text-lp-ink leading-relaxed">{point.body}</p>
+          <div className="mt-16 md:mt-20 max-w-3xl">
+            {principles.map((p, i) => (
+              <div
+                key={i}
+                className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-10 items-baseline"
+              >
+                <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="md:flex md:gap-8 md:items-baseline">
+                  <h3 className="text-base md:text-lg font-semibold text-lp-ink md:w-40 shrink-0">
+                    {p.title}
+                  </h3>
+                  <p className="mt-1 md:mt-0 text-sm md:text-base text-lp-ink/60 leading-relaxed">
+                    {p.body}
+                  </p>
                 </div>
-              ))}
-            </div>
-            <div className="mt-10 pt-8 border-t border-lp-ink/10">
-              <p className="text-sm text-lp-ink/60 text-center max-w-2xl mx-auto leading-relaxed">
-                {t.private.line}
-              </p>
-            </div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal delay={200}>
+          <div className="mt-20 md:mt-28 max-w-3xl">
+            <p className="display-serif text-[32px] md:text-[48px] leading-[1.1] text-lp-green">
+              {t.private.line}
+            </p>
           </div>
         </Reveal>
       </div>
     </section>
   );
 };
-
-// â”€â”€ For givers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Givers: React.FC = () => {
   const { t } = useLanguage();

@@ -123,10 +123,14 @@ export const en = {
   private: {
     eyebrow: 'Privacy',
     number: '05',
-    title: 'Private by design',
-    point1: 'No names or addresses stored.',
-    point2: 'A private token staff never see.',
-    point3: 'Hospital payments: invoice and amount only.',
+    headline: "What we don't know.",
+    body: 'Privacy is what we do not collect. Not a policy, not a promise. The shape of the product.',
+    p1Title: 'No names',
+    p1Body: 'Addresses are not stored either.',
+    p2Title: 'Private token',
+    p2Body: 'Staff never see it.',
+    p3Title: 'Hospital payments',
+    p3Body: 'Invoice number and amount only.',
     line: 'M-Pesa wallets are registered to verified identity.',
   },
   givers: {
