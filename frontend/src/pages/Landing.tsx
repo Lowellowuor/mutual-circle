@@ -116,88 +116,52 @@ const TopBar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [whatOpen, setWhatOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+  const closeTimer = React.useRef<number | undefined>(undefined);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+  React.useEffect(() => {
+    const sectionIds = ['how-it-works', 'inside-circle', 'what-you-can-get', 'give', 'partners', 'faq'];
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      let current = '';
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top < 130) current = id;
+      }
+      setActiveSection(current);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const whatItems = [
-    { label: t.navItems.food, href: '#what-you-can-get' },
-    { label: t.navItems.hygiene, href: '#what-you-can-get' },
-    { label: t.navItems.bills, href: '#what-you-can-get' },
-    { label: t.navItems.school, href: '#what-you-can-get' },
+    { label: t.navItems.food, href: '#what-you-can-get', Icon: Package, sub: 'Standardised pantry bundle' },
+    { label: t.navItems.hygiene, href: '#what-you-can-get', Icon: Droplet, sub: 'Soap, sanitary, cleaning' },
+    { label: t.navItems.bills, href: '#what-you-can-get', Icon: Zap, sub: 'Power and water' },
+    { label: t.navItems.school, href: '#what-you-can-get', Icon: GraduationCap, sub: 'Paid to the school' },
   ];
 
   const navLinks = [
-    { href: '#how-it-works', label: t.nav.howItWorks },
-    { href: '#inside-circle', label: t.nav.theCircle },
-    { href: '#give', label: t.nav.give },
-    { href: '#partners', label: t.nav.partners },
-    { href: '#faq', label: t.nav.faq },
+    { href: '#how-it-works', label: t.nav.howItWorks, slug: 'how-it-works' },
+    { href: '#inside-circle', label: t.nav.theCircle, slug: 'inside-circle' },
+    { href: '#partners', label: t.nav.partners, slug: 'partners' },
+    { href: '#faq', label: t.nav.faq, slug: 'faq' },
   ];
+
+  const openWhat = () => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    setWhatOpen(true);
+  };
+  const scheduleCloseWhat = () => {
+    closeTimer.current = window.setTimeout(() => setWhatOpen(false), 150);
+  };
 
   return (
     <>
-      <header className="sticky top-0 z-40">
-        {/* Persona bar (SC signature) — collapses on scroll */}
-        <div
-          className={
-            'hidden md:block overflow-hidden transition-all duration-300 ' +
-            (scrolled ? 'h-0 opacity-0' : 'h-9 opacity-100')
-          }
-        >
-          <div className="bg-lp-canvas border-b border-lp-ink/5">
-            <div className="max-w-[1120px] mx-auto px-6 h-9 flex items-center justify-between">
-              <div className="flex items-center gap-3 text-[11px]">
-                <span className="uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
-                  {t.persona.label}
-                </span>
-                <div className="flex items-center gap-1">
-                  <a
-                    href="#"
-                    onClick={(e) => e.preventDefault()}
-                    className="px-2.5 py-1 rounded-full bg-lp-green/10 text-lp-green font-semibold"
-                  >
-                    {t.persona.requester}
-                  </a>
-                  <a
-                    href={DONOR_URL}
-                    className="px-2.5 py-1 rounded-full text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/5 transition-colors"
-                  >
-                    {t.persona.donor}
-                  </a>
-                  <a
-                    href="#partners"
-                    className="px-2.5 py-1 rounded-full text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/5 transition-colors"
-                  >
-                    {t.persona.partner}
-                  </a>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 text-[11px]">
-                <a
-                  href={APP_URL}
-                  className="text-lp-ink/70 hover:text-lp-ink font-medium transition-colors"
-                >
-                  {t.persona.signIn} →
-                </a>
-                <span className="w-px h-3 bg-lp-ink/15" aria-hidden="true" />
-                <a
-                  href="https://lumierecore.org"
-                  className="text-lp-ink/40 hover:text-lp-ink/70 transition-colors"
-                >
-                  {t.persona.parentLabel} →
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main bar */}
-        <div className="bg-white/70 backdrop-blur-xl border-b border-white/50">
+      <header className={'sticky top-0 z-40 ' + (scrolled ? 'shadow-sm' : '')}>
+        {/* Main bar - 72px desktop, 64px mobile */}
+        <div className="relative bg-white/70 backdrop-blur-xl border-b border-white/50">
           <div className="max-w-[1120px] mx-auto px-6 h-16 md:h-[72px] flex items-center justify-between">
             <a href="#" className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-lg bg-lp-green flex items-center justify-center shadow-lg shadow-lp-green/20 group-hover:scale-105 transition-transform">
@@ -206,51 +170,62 @@ const TopBar: React.FC = () => {
               <span className="text-lg font-semibold text-lp-ink tracking-tight">{t.nav.brand}</span>
             </a>
 
-            <nav className="hidden md:flex items-center gap-1">
-              <a href="#how-it-works" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
-                {t.nav.howItWorks}
-              </a>
-
-              {/* Mega nav: What you get dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => setWhatOpen(true)}
-                onMouseLeave={() => setWhatOpen(false)}
+            <nav className="hidden md:flex items-center gap-0.5">
+              <a
+                href="#how-it-works"
+                className={
+                  'relative px-3 py-2 text-sm font-medium rounded-full transition-all ' +
+                  (activeSection === 'how-it-works'
+                    ? 'text-lp-ink'
+                    : 'text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/[0.04]')
+                }
               >
-                <button
-                  type="button"
-                  className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all flex items-center gap-1"
-                  aria-expanded={whatOpen}
-                >
-                  {t.navItems.whatYouGetLabel}
-                  <svg width="10" height="10" viewBox="0 0 10 10" className={'transition-transform ' + (whatOpen ? 'rotate-180' : '')} aria-hidden="true">
-                    <path d="M2 4L5 7L8 4" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-                  </svg>
-                </button>
-                {whatOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-56 glass rounded-xl p-2 shadow-xl">
-                    {whatItems.map((it) => (
-                      <a
-                        key={it.label}
-                        href={it.href}
-                        className="block px-3 py-2 text-sm text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/5 rounded-lg transition-colors"
-                      >
-                        {it.label}
-                      </a>
-                    ))}
-                  </div>
+                {t.nav.howItWorks}
+                {activeSection === 'how-it-works' && (
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-lp-green" aria-hidden="true" />
                 )}
-              </div>
+              </a>
 
-              <a href="#inside-circle" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
-                {t.nav.theCircle}
-              </a>
-              <a href="#partners" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
-                {t.nav.partners}
-              </a>
-              <a href="#faq" className="px-3 py-2 text-sm font-medium text-lp-ink/70 hover:text-lp-ink hover:bg-lp-ink/[0.04] rounded-full transition-all">
-                {t.nav.faq}
-              </a>
+              <button
+                type="button"
+                onMouseEnter={openWhat}
+                onMouseLeave={scheduleCloseWhat}
+                onClick={() => setWhatOpen(o => !o)}
+                aria-expanded={whatOpen}
+                aria-haspopup="true"
+                className={
+                  'relative px-3 py-2 text-sm font-medium rounded-full transition-all flex items-center gap-1 ' +
+                  (activeSection === 'what-you-can-get'
+                    ? 'text-lp-ink'
+                    : 'text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/[0.04]')
+                }
+              >
+                {t.navItems.whatYouGetLabel}
+                <svg width="10" height="10" viewBox="0 0 10 10" className={'transition-transform ' + (whatOpen ? 'rotate-180' : '')} aria-hidden="true">
+                  <path d="M2 4L5 7L8 4" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                </svg>
+                {activeSection === 'what-you-can-get' && (
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-lp-green" aria-hidden="true" />
+                )}
+              </button>
+
+              {navLinks.slice(1).map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={
+                    'relative px-3 py-2 text-sm font-medium rounded-full transition-all ' +
+                    (activeSection === link.slug
+                      ? 'text-lp-ink'
+                      : 'text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/[0.04]')
+                  }
+                >
+                  {link.label}
+                  {activeSection === link.slug && (
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-lp-green" aria-hidden="true" />
+                  )}
+                </a>
+              ))}
             </nav>
 
             <div className="hidden md:flex items-center gap-2">
@@ -266,6 +241,7 @@ const TopBar: React.FC = () => {
                 className="!h-10 !px-4 !text-sm"
               >
                 {t.common.getHelp}
+                <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </div>
 
@@ -278,6 +254,59 @@ const TopBar: React.FC = () => {
               <Menu className="w-5 h-5 text-lp-ink" />
             </button>
           </div>
+
+          {/* Mega menu - full-width, drops from main bar */}
+          {whatOpen && (
+            <div
+              onMouseEnter={openWhat}
+              onMouseLeave={scheduleCloseWhat}
+              className="absolute left-0 right-0 top-full bg-white border-t border-lp-ink/8 shadow-2xl z-50 content-in"
+              role="region"
+              aria-label={t.navItems.whatYouGetLabel}
+            >
+              <div className="max-w-[1120px] mx-auto px-6 py-6 grid grid-cols-[1fr_1fr_260px] gap-6">
+                <div className="col-span-2 grid grid-cols-2 gap-1">
+                  {whatItems.map((item) => {
+                    const I = item.Icon;
+                    return (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        onClick={() => setWhatOpen(false)}
+                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-lp-sage/30 transition-colors press-scale"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-lp-sage flex items-center justify-center shrink-0">
+                          <I className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-lp-ink">{item.label}</div>
+                          <div className="text-xs text-lp-ink/55 mt-0.5">{item.sub}</div>
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+                <div className="bg-[#020B43] rounded-xl p-5 flex flex-col text-white">
+                  <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-emerald-400 mb-3">
+                    The principle
+                  </div>
+                  <p className="display-serif text-base text-white leading-tight">
+                    Every gift enters the pool. Every request leaves from the pool.
+                  </p>
+                  <p className="text-xs text-white/60 mt-2 leading-relaxed flex-1">
+                    No line between giver and receiver.
+                  </p>
+                  <a
+                    href="#inside-circle"
+                    onClick={() => setWhatOpen(false)}
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+                  >
+                    Inside the circle <ArrowRight className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -293,26 +322,29 @@ const TopBar: React.FC = () => {
               {link.label}
             </a>
           ))}
-          <div className="pt-4 text-[11px] uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
+          <div className="pt-4 text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
             {t.navItems.whatYouGetLabel}
           </div>
-          <div className="flex flex-col gap-0.5 mt-1">
-            {whatItems.map((it) => (
-              <a
-                key={it.label}
-                href={it.href}
-                onClick={() => setMenuOpen(false)}
-                className="pl-4 text-sm text-lp-ink/70 py-2"
-              >
-                {it.label}
-              </a>
-            ))}
+          <div className="flex flex-col gap-1 mt-1">
+            {whatItems.map((it) => {
+              const I = it.Icon;
+              return (
+                <a
+                  key={it.label}
+                  href={it.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 text-sm text-lp-ink/70 py-2 px-1 press-scale"
+                >
+                  <div className="w-7 h-7 rounded-full bg-lp-sage/60 flex items-center justify-center shrink-0">
+                    <I className="w-3.5 h-3.5 text-lp-green" strokeWidth={1.75} />
+                  </div>
+                  {it.label}
+                </a>
+              );
+            })}
           </div>
           <div className="pt-4">
-            <a
-              href={APP_URL}
-              className="block text-sm font-medium text-lp-ink py-2"
-            >
+            <a href={APP_URL} className="block text-sm font-medium text-lp-ink py-2">
               {t.persona.signIn} →
             </a>
           </div>
@@ -410,7 +442,7 @@ const Hero: React.FC = () => {
               {t.common.partnerWithUs}
             </Button>
           </div>
-          <div className="mt-10 md:hidden inline-flex items-center gap-2 rounded-full glass px-4 py-2">
+          <div className="mt-10 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
@@ -660,6 +692,155 @@ const HowItWorks: React.FC = () => {
 };
 
 // â”€â”€ What you can get â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+// ── Interactive demo ─────────────────────────────────────────────────────────
+
+const DEMO_TABS = [
+  {
+    id: 'request' as const,
+    number: '01',
+    label: 'Request',
+    subtitle: 'Choose what you need.',
+    header: 'What do you need?',
+    items: [
+      { Icon: Package, label: 'Food bundle', sub: 'Reserved in seconds' },
+      { Icon: CreditCard, label: 'Pay a bill', sub: 'Utility, school, hospital' },
+      { Icon: Users, label: 'Match', sub: 'Opt-in opportunities' },
+    ],
+  },
+  {
+    id: 'verify' as const,
+    number: '02',
+    label: 'Verify',
+    subtitle: 'We check the bill, not you.',
+    header: 'Upload your bill',
+    items: [
+      { Icon: FileText, label: 'Photo of bill', sub: 'JPEG, PNG, or PDF' },
+      { Icon: ShieldCheck, label: 'Verified by staff', sub: 'Under review' },
+      { Icon: Check, label: 'Approved', sub: 'Funds go to the institution' },
+    ],
+  },
+  {
+    id: 'collect' as const,
+    number: '03',
+    label: 'Collect',
+    subtitle: 'PIN. Collect. Done.',
+    header: 'Locker reserved',
+    items: [
+      { Icon: Hash, label: 'PIN 4712', sub: 'Sent by SMS' },
+      { Icon: Package, label: 'Food bundle', sub: 'Standard Pantry' },
+      { Icon: Check, label: 'Ready to collect', sub: 'Kibera Hub' },
+    ],
+  },
+];
+
+const DemoPhone: React.FC<{ tab: typeof DEMO_TABS[number] }> = ({ tab }) => (
+  <div className="relative mx-auto w-[290px] md:w-[320px] rounded-[2.75rem] bg-gradient-to-br from-lp-ink via-[#232b26] to-lp-ink p-[3px] shadow-[0_40px_80px_-20px_rgba(17,17,17,0.45)]">
+    <div className="rounded-[2.6rem] bg-lp-canvas overflow-hidden flex flex-col" style={{ height: '620px' }}>
+      <div className="text-center text-[10px] pt-3 pb-1 text-lp-ink/40 font-medium">9:41</div>
+      <div className="px-4 py-3 flex items-center gap-2 border-b border-lp-ink/5">
+        <div className="w-7 h-7 rounded-lg bg-lp-green flex items-center justify-center">
+          <HeartHandshake className="w-3.5 h-3.5 text-white" strokeWidth={2} />
+        </div>
+        <span className="text-xs font-semibold text-lp-ink">{tab.header}</span>
+      </div>
+      <div className="p-4 space-y-3 flex-1">
+        {tab.items.map((item, i) => (
+          <div
+            key={i}
+            className="p-3 rounded-xl bg-lp-surface border border-lp-ink/8 space-y-1 content-in"
+            style={{ animationDelay: i * 80 + 'ms' }}
+          >
+            <item.Icon className="w-4 h-4 text-lp-green" strokeWidth={2} />
+            <div className="text-xs font-semibold text-lp-ink">{item.label}</div>
+            <div className="text-[10px] text-lp-ink/50">{item.sub}</div>
+          </div>
+        ))}
+      </div>
+      <div className="border-t border-lp-ink/10 bg-lp-surface grid grid-cols-3 py-2">
+        {[
+          { label: 'Home', active: true },
+          { label: 'Activity', active: false },
+          { label: 'Settings', active: false },
+        ].map((item) => (
+          <div key={item.label} className="text-center">
+            <div className={'w-4 h-4 mx-auto rounded-sm ' + (item.active ? 'bg-lp-green' : 'bg-lp-ink/20')} />
+            <div className={'text-[8px] mt-0.5 ' + (item.active ? 'text-lp-green font-medium' : 'text-lp-ink/40')}>
+              {item.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const InteractiveDemo: React.FC = () => {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = setInterval(() => setActive(a => (a + 1) % DEMO_TABS.length), 6000);
+    return () => clearInterval(timer);
+  }, [paused]);
+
+  return (
+    <section className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
+      <AmbientBackdrop />
+      <div className="relative max-w-[1120px] mx-auto px-6">
+        <Reveal>
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <Eyebrow>See it in action</Eyebrow>
+            <h2 className="display-serif mt-4 text-[40px] md:text-[56px] leading-[1.05] text-lp-ink">
+              Three actions. One screen.
+            </h2>
+          </div>
+        </Reveal>
+
+        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+          <Reveal delay={100}>
+            <div className="order-2 md:order-1">
+              {DEMO_TABS.map((tab, i) => {
+                const isActive = i === active;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => { setActive(i); setPaused(true); }}
+                    className={
+                      'w-full text-left flex gap-5 py-5 border-b border-lp-ink/8 last:border-0 press-scale transition-all ' +
+                      (isActive ? 'bg-lp-green/[0.04]' : 'row-lift')
+                    }
+                  >
+                    <span
+                      className={
+                        'display-serif text-3xl md:text-4xl tabular-nums w-14 shrink-0 transition-colors ' +
+                        (isActive ? 'text-lp-green' : 'text-lp-ink/15')
+                      }
+                    >
+                      {tab.number}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-lg font-semibold text-lp-ink">{tab.label}</div>
+                      <div className="text-sm text-lp-ink/55 mt-1">{tab.subtitle}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Reveal>
+
+          <Reveal delay={200}>
+            <div className="order-1 md:order-2 flex justify-center">
+              <DemoPhone tab={DEMO_TABS[active]} />
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const WhatYouCanGet: React.FC = () => {
   const { t } = useLanguage();
@@ -1143,6 +1324,7 @@ const LandingInner: React.FC = () => (
       <Promise />
       <InsideTheCircle />
       <HowItWorks />
+      <InteractiveDemo />
       <WhatYouCanGet />
       <PhotoBreak />
       <Private />

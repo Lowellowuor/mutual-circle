@@ -6,7 +6,7 @@
 export const en = {
   common: {
     openApp: 'Open the app',
-    getHelp: 'Get help',
+    getHelp: 'Get started',
     give: 'Give',
     prototype: 'Prototype',
     partnerWithUs: 'Partner with us',
@@ -14,9 +14,9 @@ export const en = {
     menu: 'Menu',
   },
   nav: {
-    brand: 'LumiereCore',
+    brand: 'Mutual Circle',
     howItWorks: 'How it works',
-    theCircle: 'The circle',
+    theCircle: 'Inside the circle',
     give: 'Give',
     partners: 'Partners',
     faq: 'FAQ',
@@ -41,7 +41,7 @@ export const en = {
     parentLabel: 'Part of LumiereCore CLG',
   },
   navItems: {
-    whatYouGetLabel: 'What you get',
+    whatYouGetLabel: "What's covered",
     food: 'Food bundles',
     hygiene: 'Hygiene',
     bills: 'Bills',
