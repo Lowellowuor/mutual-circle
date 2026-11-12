@@ -1054,6 +1054,39 @@ const Private: React.FC = () => {
   );
 };
 
+// ── Section arrow (SC .m-benefits pattern) ──────────────────────────────
+// Thin sage dashed line + chevron pointing from the photo toward the benefits
+// it introduces. Only on md+. Lives inside the sticky photo column so it
+// moves with the image as the user scrolls the numbered rows.
+
+const SectionArrow: React.FC<{ direction: 'left' | 'right'; className?: string }> = ({ direction, className = '' }) => (
+  <div
+    className={'hidden md:block absolute pointer-events-none text-lp-green/40 ' + className}
+    aria-hidden="true"
+  >
+    <svg width="48" height="32" viewBox="0 0 48 32" fill="none">
+      <line
+        x1={direction === 'left' ? 44 : 4}
+        y1="16"
+        x2={direction === 'left' ? 8 : 40}
+        y2="16"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeDasharray="2 4"
+        strokeLinecap="round"
+      />
+      <polyline
+        points={direction === 'left' ? '12,8 4,16 12,24' : '36,8 44,16 36,24'}
+        stroke="currentColor"
+        strokeWidth="1.5"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+);
+
 const Givers: React.FC = () => {
   const { t } = useLanguage();
   const principles = [
@@ -1119,8 +1152,9 @@ const Givers: React.FC = () => {
           </div>
 
           {/* Photo column */}
-          <Reveal delay={150}>
-            <div className="md:col-span-2 md:sticky md:top-28">
+          <Reveal delay={150} className="md:col-span-2">
+            <div className="md:sticky md:top-28 relative">
+              <SectionArrow direction="left" className="-left-14 top-32" />
               <figure className="relative">
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
                   <img
@@ -1174,8 +1208,9 @@ const Partners: React.FC = () => {
       <div className="relative max-w-[1120px] mx-auto px-6">
         <div className="grid md:grid-cols-5 gap-12 md:gap-16 items-start">
           {/* Photo column (left on desktop) */}
-          <Reveal delay={150}>
-            <div className="md:col-span-2 md:sticky md:top-28 md:order-1">
+          <Reveal delay={150} className="md:col-span-2 md:order-1">
+            <div className="md:sticky md:top-28 relative">
+              <SectionArrow direction="right" className="-right-14 top-32" />
               <figure className="relative">
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
                   <img
