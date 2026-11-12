@@ -1200,21 +1200,75 @@ const Faq: React.FC = () => {
     { id: 'q4', question: t.faq.q4, answer: t.faq.a4 },
     { id: 'q5', question: t.faq.q5, answer: t.faq.a5 },
   ];
+  const [active, setActive] = useState(0);
+  const current = items[active] ?? items[0];
+
   return (
     <section id="faq" className="relative overflow-hidden py-16 md:py-28">
       <WaveDivider />
       <AmbientBackdrop />
-      <div className="max-w-[840px] mx-auto px-6 mt-6 md:mt-10">
+      <div className="max-w-[1120px] mx-auto px-6 mt-6 md:mt-10">
         <Reveal>
           <div className="text-center">
             <Eyebrow number={t.faq.number}>{t.faq.eyebrow}</Eyebrow>
-            <h2 className="display-serif mt-3 text-3xl md:text-5xl text-lp-ink">
+            <h2 className="display-serif mt-3 text-4xl md:text-5xl text-lp-ink">
               {t.faq.title}
             </h2>
           </div>
         </Reveal>
+
+        {/* Desktop: two-column swap. Questions left, answer right. */}
         <Reveal delay={100}>
-          <div className="mt-12 rounded-3xl glass p-2 md:p-4">
+          <div className="hidden md:grid grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 mt-14 items-start">
+            <div>
+              {items.map((item, i) => {
+                const isActive = i === active;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActive(i)}
+                    aria-pressed={isActive}
+                    className={
+                      'w-full text-left flex items-start gap-4 py-4 border-b border-lp-ink/8 last:border-0 press-scale transition-colors ' +
+                      (isActive ? 'text-lp-ink' : 'text-lp-ink/55 hover:text-lp-ink row-lift')
+                    }
+                  >
+                    <span
+                      className={
+                        'display-serif text-xl tabular-nums shrink-0 w-8 transition-colors ' +
+                        (isActive ? 'text-lp-green' : 'text-lp-ink/20')
+                      }
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-base font-medium leading-snug flex-1">
+                      {item.question}
+                    </span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-lp-green shrink-0 mt-2" aria-hidden="true" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="card-editorial rounded-3xl p-8 md:p-10 min-h-[220px]" key={active}>
+              <div className="content-in">
+                <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-lp-green mb-4">
+                  Answer
+                </div>
+                <p className="text-base md:text-lg text-lp-ink leading-relaxed">
+                  {current.answer}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Mobile: accordion (unchanged from before) */}
+        <Reveal delay={100}>
+          <div className="md:hidden mt-10">
             <Accordion items={items} />
           </div>
         </Reveal>
@@ -1222,8 +1276,6 @@ const Faq: React.FC = () => {
     </section>
   );
 };
-
-// â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Footer: React.FC = () => {
   const { t } = useLanguage();
