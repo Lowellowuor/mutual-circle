@@ -1,7 +1,6 @@
-﻿import React from 'react';
+import React from 'react';
 import { ShieldCheck, Smartphone, ArrowRight, Loader2 } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
+import { Button } from '../../ui/Button';
 
 interface RequesterIntakeProps {
   intakeStep: 'phone' | 'otp';
@@ -22,49 +21,60 @@ interface RequesterIntakeProps {
 
 export const RequesterIntake: React.FC<RequesterIntakeProps> = (props) => {
   return (
-    <div className="min-h-[70vh] flex items-center justify-center w-full animate-in fade-in zoom-in-95 duration-500">
-      <div className="w-full max-w-md space-y-8">
-        
-        {/* Branding / Hero */}
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 bg-pine text-white rounded-2xl flex items-center justify-center mx-auto shadow-soft mb-6 rotate-3">
-            <ShieldCheck className="w-8 h-8" />
+    <div className="relative min-h-[80vh] flex items-center justify-center w-full content-in px-4">
+      <div
+        className="absolute -top-16 -right-24 w-[320px] h-[320px] rounded-full blur-3xl pointer-events-none orb-drift"
+        style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.65) 0%, rgba(220,232,224,0) 70%)' }}
+        aria-hidden="true"
+      />
+
+      <div className="relative w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="w-14 h-14 rounded-full bg-lp-sage flex items-center justify-center mx-auto mb-5">
+            <ShieldCheck className="w-6 h-6 text-lp-green" strokeWidth={1.75} />
           </div>
-          <h1 className="text-3xl font-bold text-ink tracking-tight">
-            {props.intakeStep === 'phone' ? 'Welcome to Mutual Circle' : 'Verify your phone'}
+          <span className="eyebrow">{props.intakeStep === 'phone' ? '01 — Sign in' : '02 — Verify'}</span>
+          <h1 className="display-serif mt-3 text-4xl text-lp-ink leading-tight">
+            {props.intakeStep === 'phone' ? 'Get your token.' : 'Enter the code.'}
           </h1>
-          <p className="text-sm text-muted leading-relaxed max-w-[280px] mx-auto">
-            {props.intakeStep === 'phone' 
-              ? 'Enter your phone number to receive an anonymous token. No names, no addresses.' 
-              : `We sent a 4-digit code to ${props.phone}.`}
+          <p className="mt-3 text-sm text-lp-ink/55 leading-relaxed max-w-xs mx-auto">
+            {props.intakeStep === 'phone'
+              ? 'Your phone number becomes an anonymous token. No name, no address.'
+              : 'We sent a 4-digit code to ' + props.phone + '.'}
           </p>
         </div>
 
-        {/* Form */}
         {props.intakeStep === 'phone' ? (
           <form onSubmit={props.handleSendOtp} className="space-y-4">
-            <Card className="p-2 border-tile shadow-soft">
-              <div className="relative flex items-center">
-                <Smartphone className="w-5 h-5 text-muted ml-3 shrink-0" />
+            <div className="card-editorial rounded-2xl p-5">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-lp-sage flex items-center justify-center shrink-0">
+                  <Smartphone className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
+                </div>
                 <input
                   type="tel"
                   value={props.phone}
                   onChange={e => props.setPhone(e.target.value)}
                   placeholder="+254 700 000 000"
-                  className="w-full bg-transparent border-none px-4 py-4 text-lg font-semibold text-ink focus:ring-0 outline-none placeholder:text-muted/50"
+                  className="flex-1 bg-transparent border-0 outline-none p-0 stat-display text-2xl text-lp-ink placeholder:text-lp-ink/20 tabular-nums"
                   autoFocus
                 />
               </div>
-            </Card>
-            {props.phoneError && <p className="text-sm text-rose-600 text-center">{props.phoneError}</p>}
-            
-            <Button type="submit" variant="primary" fullWidth className="py-4 text-base">
-              Get my token <ArrowRight className="w-5 h-5 ml-2" />
+            </div>
+
+            {props.phoneError && (
+              <p className="text-sm text-rose-600 text-center">{props.phoneError}</p>
+            )}
+
+            <Button type="submit" variant="primary" fullWidth className="!h-12">
+              Continue
+              <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </form>
         ) : (
           <form onSubmit={props.handleVerifyOtp} className="space-y-4">
-            <Card className="p-2 border-tile shadow-soft">
+            <div className="card-editorial rounded-2xl p-5 text-center">
               <input
                 type="text"
                 inputMode="numeric"
@@ -72,38 +82,39 @@ export const RequesterIntake: React.FC<RequesterIntakeProps> = (props) => {
                 value={props.otpInput}
                 onChange={e => props.setOtpInput(e.target.value.replace(/\D/g, ''))}
                 placeholder="0000"
-                className="w-full bg-transparent border-none px-4 py-4 text-center text-3xl font-mono tracking-[0.5em] font-bold text-ink focus:ring-0 outline-none placeholder:text-muted/20"
+                className="w-full bg-transparent border-0 outline-none p-0 stat-display text-5xl text-lp-ink placeholder:text-lp-ink/15 tracking-[0.4em] tabular-nums text-center"
                 autoFocus
               />
-            </Card>
-            {props.otpError && <p className="text-sm text-rose-600 text-center">{props.otpError}</p>}
-            
-            {/* DEV MODE: show the generated OTP in local builds only.
-                Vite's import.meta.env.DEV is true under `npm run dev`
-                and false under `npm run build`, so this block disappears
-                from production bundles automatically. */}
-            {import.meta.env.DEV && (
-              <div className="text-center">
-                <p className="text-xs text-muted">
-                  Dev mode — your OTP is:{' '}
-                  <span className="font-mono font-bold text-pine text-base tracking-widest">{props.generatedOtp}</span>
-                </p>
-              </div>
+            </div>
+
+            {props.otpError && (
+              <p className="text-sm text-rose-600 text-center">{props.otpError}</p>
             )}
 
-            <Button type="submit" variant="primary" fullWidth className="py-4 text-base" disabled={props.otpInput.length < 4 || props.otpProcessing}>
-              {props.otpProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify & Continue'}
+            {import.meta.env.DEV && (
+              <p className="text-center text-xs text-lp-ink/50">
+                Dev — OTP:{' '}
+                <span className="font-mono font-semibold text-lp-green text-base tracking-widest">{props.generatedOtp}</span>
+              </p>
+            )}
+
+            <Button type="submit" variant="primary" fullWidth className="!h-12" disabled={props.otpInput.length < 4 || props.otpProcessing}>
+              {props.otpProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify'}
             </Button>
 
-            <div className="flex items-center justify-between pt-2">
-              <button type="button" onClick={props.handleBackToPhone} className="text-sm font-semibold text-muted hover:text-ink">
+            <div className="flex items-center justify-between pt-2 text-xs">
+              <button
+                type="button"
+                onClick={props.handleBackToPhone}
+                className="text-lp-ink/50 hover:text-lp-ink font-medium transition-colors press-scale"
+              >
                 Change number
               </button>
-              <button 
-                type="button" 
-                onClick={props.handleResend} 
+              <button
+                type="button"
+                onClick={props.handleResend}
                 disabled={props.resendCooldown > 0}
-                className="text-sm font-semibold text-pine hover:underline disabled:opacity-50"
+                className="text-lp-green font-semibold hover:underline disabled:opacity-40 press-scale"
               >
                 {props.resendCooldown > 0 ? `Resend in ${props.resendCooldown}s` : 'Resend code'}
               </button>
@@ -111,11 +122,9 @@ export const RequesterIntake: React.FC<RequesterIntakeProps> = (props) => {
           </form>
         )}
 
-        {/* Privacy Note */}
-        <p className="text-center text-xs text-muted leading-relaxed px-4">
+        <p className="mt-8 text-center text-xs text-lp-ink/40 leading-relaxed px-4">
           Your phone number is hashed into a secure token and immediately discarded. We never store your raw number, name, or location.
         </p>
-
       </div>
     </div>
   );

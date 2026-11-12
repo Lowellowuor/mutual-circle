@@ -18,29 +18,40 @@ export const StatusTimeline: React.FC<{ steps: TimelineStep[] }> = ({ steps }) =
         <div key={s.key} className="flex gap-3">
           <div className="flex flex-col items-center">
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 shrink-0 ${
-                done
-                  ? 'bg-[#1F6B4A] border-[#1F6B4A] text-white'
+              className={
+                'w-6 h-6 rounded-full flex items-center justify-center border-2 shrink-0 ' +
+                (done
+                  ? 'bg-lp-green border-lp-green text-white'
                   : current
-                  ? 'bg-white border-[#1F6B4A] text-[#1F6B4A]'
-                  : 'bg-white border-[#111111]/20'
-              }`}
+                  ? 'bg-white border-lp-green text-lp-green'
+                  : 'bg-white border-lp-ink/20')
+              }
             >
               {done ? (
-                <Check className="w-3 h-3" />
+                <Check className="w-3 h-3" strokeWidth={3} />
               ) : current ? (
-                <div className="w-2 h-2 rounded-full bg-[#1F6B4A]" />
+                <div className="w-2 h-2 rounded-full bg-lp-green" />
               ) : null}
             </div>
             {!isLast && (
-              <div className={`w-0.5 flex-1 min-h-[24px] ${done ? 'bg-[#1F6B4A]' : 'bg-[#111111]/15'}`} />
+              <div
+                className={'w-0.5 flex-1 min-h-[24px] ' + (done ? 'bg-lp-green' : 'bg-lp-ink/15')}
+                aria-hidden="true"
+              />
             )}
           </div>
           <div className="pb-4 min-w-0 flex-1">
-            <div className={`text-[12px] font-semibold ${done || current ? 'text-[#111111]' : 'text-[#111111]/40'}`}>
+            <div
+              className={
+                'text-xs font-semibold ' +
+                (done || current ? 'text-lp-ink' : 'text-lp-ink/40')
+              }
+            >
               {s.label}
             </div>
-            {s.time && <div className="text-[10px] font-mono text-[#111111]/50 mt-0.5">{s.time}</div>}
+            {s.time && (
+              <div className="text-[10px] font-mono text-lp-ink/50 mt-0.5">{s.time}</div>
+            )}
           </div>
         </div>
       );
