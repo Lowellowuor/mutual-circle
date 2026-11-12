@@ -24,6 +24,8 @@ const IMG = {
   school: BASE + 'images/landing/school.jpg',
   heroAccent: BASE + 'images/landing/hero-accent.jpg',
   architecture: BASE + 'images/landing/architecture.jpg',
+  giving: BASE + 'images/landing/giving.jpg',
+  institutions: BASE + 'images/landing/institutions.jpg',
 };
 
 // â”€â”€ Reveal / scroll animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -357,7 +359,10 @@ const TopBar: React.FC = () => {
 const PhoneMockup: React.FC = () => {
   const { t } = useLanguage();
   return (
-    <div className="relative mx-auto w-[290px] md:w-[320px] rounded-[2.75rem] bg-gradient-to-br from-lp-ink via-[#232b26] to-lp-ink p-[3px] shadow-[0_40px_80px_-20px_rgba(17,17,17,0.45)]">
+    <div
+      className="relative mx-auto w-[290px] md:w-[320px] rounded-[2.75rem] bg-gradient-to-br from-lp-ink via-[#232b26] to-lp-ink p-[3px] shadow-[0_60px_100px_-20px_rgba(17,17,17,0.55),0_20px_40px_-10px_rgba(31,107,74,0.15)]"
+      style={{ transform: 'rotateY(-8deg) rotateX(2deg)', transformStyle: 'preserve-3d' }}
+    >
       <div className="rounded-[2.6rem] bg-lp-canvas overflow-hidden flex flex-col" style={{ height: '620px' }}>
         <div className="text-center text-[10px] pt-3 pb-1 text-lp-ink/40 font-medium">9:41</div>
         <div className="px-4 py-3 flex items-center justify-between border-b border-lp-ink/5">
@@ -456,27 +461,57 @@ const Hero: React.FC = () => {
             <div className="w-[420px] h-[420px] rounded-full bg-gradient-to-br from-lp-green/25 via-lp-sage/40 to-transparent blur-3xl" />
           </div>
 
-          <div className="absolute top-6 -left-4 glass rounded-2xl px-4 py-3 float-slow hidden md:flex items-center gap-2.5 shadow-xl">
-            <div className="w-8 h-8 rounded-full bg-lp-green/15 flex items-center justify-center">
-              <Check className="w-4 h-4 text-lp-green" strokeWidth={2.5} />
+          <div
+            className="absolute top-2 -left-6 md:-left-10 w-[190px] rounded-2xl bg-lp-canvas p-4 shadow-[0_30px_60px_-15px_rgba(17,17,17,0.32)] border border-lp-ink/8 float-slow hidden md:block"
+            style={{ transform: 'rotate(-3deg)' }}
+          >
+            <div className="flex items-center gap-1.5 mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[9px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50">
+                Reserved
+              </span>
             </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-wider text-lp-ink/50 font-medium">Ready</div>
-              <div className="text-xs font-semibold text-lp-ink">Bundle reserved</div>
+            <div className="text-xs font-semibold text-lp-ink">Standard Pantry</div>
+            <div className="text-[10px] text-lp-ink/55 mt-0.5">Kibera Hub</div>
+            <div className="mt-3 pt-3 border-t border-lp-ink/8 flex justify-between items-baseline">
+              <span className="text-[9px] uppercase tracking-[0.18em] text-lp-ink/40">PIN</span>
+              <span className="display-serif text-xl text-lp-green tracking-[0.1em] tabular-nums">
+                4712
+              </span>
             </div>
           </div>
 
-          <div className="absolute bottom-16 -right-6 float-medium hidden md:block shadow-2xl rounded-2xl overflow-hidden w-[170px] border-[6px] border-white bg-lp-sage/40">
-            <img
-              src={IMG.heroAccent}
-              alt={t.hero.accentAlt}
-              className="w-full h-full object-cover aspect-square"
-              loading="lazy"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.3'; }}
+          <div
+            className="absolute bottom-16 -right-6 float-medium hidden md:block shadow-2xl rounded-2xl overflow-hidden w-[170px] border-[6px] border-white bg-lp-sage/40 ring-1 ring-lp-ink/8"
+            style={{ transform: 'rotate(4deg)' }}
+          >
+            <div className="relative">
+              <img
+                src={IMG.heroAccent}
+                alt={t.hero.accentAlt}
+                className="w-full h-full object-cover aspect-square"
+                loading="lazy"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.3'; }}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.05) 0%, transparent 40%, rgba(17,17,17,0.10) 100%)' }}
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+
+          <div className="relative float-slow" style={{ perspective: '1400px' }}>
+            <PhoneMockup />
+            <div
+              className="absolute left-1/2 -translate-x-1/2 -bottom-8 w-[260px] h-[28px] pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse at center, rgba(17,17,17,0.25) 0%, transparent 70%)',
+                filter: 'blur(8px)',
+              }}
+              aria-hidden="true"
             />
           </div>
-
-          <div className="relative float-slow"><PhoneMockup /></div>
         </div>
       </div>
     </section>
@@ -867,19 +902,25 @@ const WhatYouCanGet: React.FC = () => {
 
         <div className="mt-14 grid md:grid-cols-12 gap-10 md:gap-14 items-center">
           <div className="md:col-span-5">
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl">
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
               {items.map((item, i) => (
                 <img
                   key={i}
                   src={item.img}
                   alt={item.alt}
                   className={
-                    'absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ' +
-                    (i === active ? 'opacity-100' : 'opacity-0')
+                    'absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 ease-out ' +
+                    (i === active ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.03]')
                   }
                   loading="lazy"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15'; }}
                 />
               ))}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.05) 0%, transparent 30%, transparent 70%, rgba(17,17,17,0.15) 100%)' }}
+                aria-hidden="true"
+              />
             </div>
           </div>
 
@@ -930,8 +971,13 @@ const PhotoBreak: React.FC = () => {
         <img
           src={IMG.architecture}
           alt={t.photoBreak.alt}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover object-center"
           loading="lazy"
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.10) 0%, transparent 40%)' }}
+          aria-hidden="true"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-lp-ink/85 via-lp-ink/30 to-lp-ink/40" />
         <div className="relative z-10 h-full max-w-[1120px] mx-auto px-6 flex items-end pb-16 md:pb-24">
@@ -1014,66 +1060,96 @@ const Givers: React.FC = () => {
     { title: t.givers.p1Title, body: t.givers.p1Body },
     { title: t.givers.p2Title, body: t.givers.p2Body },
     { title: t.givers.p3Title, body: t.givers.p3Body },
-    { title: t.givers.p4Title, body: t.givers.p4Body },
   ];
   return (
     <section id="give" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
       <AmbientBackdrop />
       <div className="relative max-w-[1120px] mx-auto px-6">
-        <Reveal>
-          <div className="max-w-3xl">
-            <Eyebrow number={t.givers.number}>{t.givers.eyebrow}</Eyebrow>
-            <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
-              {t.givers.headline}
-            </h2>
-            <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
-              {t.givers.body}
-            </p>
-          </div>
-        </Reveal>
+        <div className="grid md:grid-cols-5 gap-12 md:gap-16 items-start">
+          {/* Text column */}
+          <div className="md:col-span-3">
+            <Reveal>
+              <div>
+                <Eyebrow number={t.givers.number}>{t.givers.eyebrow}</Eyebrow>
+                <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
+                  {t.givers.headline}
+                </h2>
+                <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
+                  {t.givers.body}
+                </p>
+              </div>
+            </Reveal>
 
-        <Reveal delay={100}>
-          <div className="mt-16 md:mt-20 max-w-3xl">
-            {principles.map((p, i) => (
-              <div
-                key={i}
-                className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-10 items-baseline"
-              >
-                <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
-                  0{i + 1}
-                </span>
-                <div className="md:flex md:gap-8 md:items-baseline">
-                  <h3 className="text-base md:text-lg font-semibold text-lp-ink md:w-40 shrink-0">
-                    {p.title}
-                  </h3>
-                  <p className="mt-1 md:mt-0 text-sm md:text-base text-lp-ink/60 leading-relaxed">
-                    {p.body}
-                  </p>
+            <Reveal delay={100}>
+              <div className="mt-12 md:mt-16">
+                {principles.map((p, i) => (
+                  <div
+                    key={i}
+                    className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-8 items-baseline"
+                  >
+                    <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
+                      0{i + 1}
+                    </span>
+                    <div>
+                      <h3 className="text-base md:text-lg font-semibold text-lp-ink">
+                        {p.title}
+                      </h3>
+                      <p className="mt-1 text-sm md:text-base text-lp-ink/60 leading-relaxed">
+                        {p.body}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+
+            <Reveal delay={200}>
+              <div className="mt-14 md:mt-20">
+                <p className="display-serif text-[28px] md:text-[44px] leading-[1.1] text-lp-green">
+                  {t.givers.line}
+                </p>
+                <div className="mt-8">
+                  <Button onClick={() => { window.location.href = DONOR_URL; }}>
+                    {t.givers.cta}
+                    <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Button>
                 </div>
               </div>
-            ))}
+            </Reveal>
           </div>
-        </Reveal>
 
-        <Reveal delay={200}>
-          <div className="mt-20 md:mt-28 max-w-3xl">
-            <p className="display-serif text-[32px] md:text-[48px] leading-[1.1] text-lp-green">
-              {t.givers.line}
-            </p>
-            <div className="mt-8">
-              <Button onClick={() => { window.location.href = DONOR_URL; }}>
-                {t.givers.cta}
-                <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
+          {/* Photo column */}
+          <Reveal delay={150}>
+            <div className="md:col-span-2 md:sticky md:top-28">
+              <figure className="relative">
+                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
+                  <img
+                    src={IMG.giving}
+                    alt={t.givers.photoAlt}
+                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-[1.03]"
+                    loading="lazy"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15'; }}
+                  />
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.06) 0%, rgba(31,107,74,0.02) 50%, rgba(17,17,17,0.18) 100%)' }}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-emerald-300 mb-1">
+                      The pool
+                    </div>
+                    <div className="display-serif text-xl leading-tight">Where gifts gather.</div>
+                  </div>
+                </div>
+              </figure>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
 };
-
-// â”€â”€ For partners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const Partners: React.FC = () => {
   const { t } = useLanguage();
@@ -1096,54 +1172,87 @@ const Partners: React.FC = () => {
     <section id="partners" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
       <AmbientBackdrop />
       <div className="relative max-w-[1120px] mx-auto px-6">
-        <Reveal>
-          <div className="max-w-3xl">
-            <Eyebrow number={t.partners.number}>{t.partners.eyebrow}</Eyebrow>
-            <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
-              {t.partners.headline}
-            </h2>
-            <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
-              {t.partners.body}
-            </p>
-          </div>
-        </Reveal>
+        <div className="grid md:grid-cols-5 gap-12 md:gap-16 items-start">
+          {/* Photo column (left on desktop) */}
+          <Reveal delay={150}>
+            <div className="md:col-span-2 md:sticky md:top-28 md:order-1">
+              <figure className="relative">
+                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
+                  <img
+                    src={IMG.institutions}
+                    alt={t.partners.photoAlt}
+                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-[1.03]"
+                    loading="lazy"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15'; }}
+                  />
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.06) 0%, rgba(31,107,74,0.02) 50%, rgba(17,17,17,0.22) 100%)' }}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-emerald-300 mb-1">
+                      The settle
+                    </div>
+                    <div className="display-serif text-xl leading-tight">Where bills get paid.</div>
+                  </div>
+                </div>
+              </figure>
+            </div>
+          </Reveal>
 
-        <Reveal delay={100}>
-          <div className="mt-16 md:mt-20 max-w-3xl">
-            {principles.map((p, i) => (
-              <div
-                key={i}
-                className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-10 items-baseline"
-              >
-                <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
-                  0{i + 1}
-                </span>
-                <div className="md:flex md:gap-8 md:items-baseline">
-                  <h3 className="text-base md:text-lg font-semibold text-lp-ink md:w-40 shrink-0">
-                    {p.title}
-                  </h3>
-                  <p className="mt-1 md:mt-0 text-sm md:text-base text-lp-ink/60 leading-relaxed">
-                    {p.body}
-                  </p>
+          {/* Text column (right on desktop) */}
+          <div className="md:col-span-3 md:order-2">
+            <Reveal>
+              <div>
+                <Eyebrow number={t.partners.number}>{t.partners.eyebrow}</Eyebrow>
+                <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
+                  {t.partners.headline}
+                </h2>
+                <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
+                  {t.partners.body}
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={100}>
+              <div className="mt-12 md:mt-16">
+                {principles.map((p, i) => (
+                  <div
+                    key={i}
+                    className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-8 items-baseline"
+                  >
+                    <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
+                      0{i + 1}
+                    </span>
+                    <div>
+                      <h3 className="text-base md:text-lg font-semibold text-lp-ink">
+                        {p.title}
+                      </h3>
+                      <p className="mt-1 text-sm md:text-base text-lp-ink/60 leading-relaxed">
+                        {p.body}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+
+            <Reveal delay={200}>
+              <div className="mt-14 md:mt-20">
+                <p className="display-serif text-[28px] md:text-[44px] leading-[1.1] text-lp-green">
+                  {t.partners.line}
+                </p>
+                <div className="mt-8">
+                  <Button onClick={() => setSheetOpen(true)}>
+                    {t.partners.cta}
+                    <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Button>
                 </div>
               </div>
-            ))}
+            </Reveal>
           </div>
-        </Reveal>
-
-        <Reveal delay={200}>
-          <div className="mt-20 md:mt-28 max-w-3xl">
-            <p className="display-serif text-[32px] md:text-[48px] leading-[1.1] text-lp-green">
-              {t.partners.line}
-            </p>
-            <div className="mt-8">
-              <Button onClick={() => setSheetOpen(true)}>
-                {t.partners.cta}
-                <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
-            </div>
-          </div>
-        </Reveal>
+        </div>
       </div>
 
       <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title={t.partners.formTitle}>
@@ -1165,7 +1274,7 @@ const Partners: React.FC = () => {
               <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldType}</label>
               <select required
                 className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent">
-                <option value="">â€”</option>
+                <option value="">Select</option>
                 {t.partners.typeOptions.map((opt) => (<option key={opt} value={opt}>{opt}</option>))}
               </select>
             </div>
@@ -1186,10 +1295,6 @@ const Partners: React.FC = () => {
     </section>
   );
 };
-
-// â”€â”€ Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-
 
 const Faq: React.FC = () => {
   const { t } = useLanguage();
