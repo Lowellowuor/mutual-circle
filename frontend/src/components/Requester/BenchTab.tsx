@@ -1,6 +1,6 @@
-﻿import React from 'react';
+import React from 'react';
 import { ShieldCheck, Phone } from 'lucide-react';
-import { Card } from '../ui/Card';
+import { ScreenHeader } from '../../ui';
 
 interface Helpline {
   id: string;
@@ -15,40 +15,56 @@ interface BenchTabProps {
 
 export const BenchTab: React.FC<BenchTabProps> = (props) => {
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-bold text-ink">The Bench</h2>
-        <p className="text-sm text-muted mt-1">Peer chat coming soon. Direct helplines available now.</p>
+    <div className="relative pb-20 content-in">
+      <div
+        className="absolute -top-16 -right-24 w-[280px] h-[280px] rounded-full blur-3xl pointer-events-none orb-drift"
+        style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.6) 0%, rgba(220,232,224,0) 70%)' }}
+        aria-hidden="true"
+      />
+
+      <ScreenHeader
+        number="05"
+        eyebrow="Bench"
+        title="Someone to talk to."
+        subtitle="Isolated from your account. No identifiers shared."
+      />
+
+      <div className="mb-8 rounded-2xl border border-lp-green/20 bg-lp-sage/30 px-4 py-3 flex items-start gap-3">
+        <ShieldCheck className="w-4 h-4 text-lp-green shrink-0 mt-0.5" strokeWidth={2} />
+        <div>
+          <div className="text-sm font-semibold text-lp-green">Isolated from your account</div>
+          <p className="text-xs text-lp-ink/55 mt-1 leading-relaxed">
+            No shared identifiers with Swap or Pool. Peer chat is launching soon — the helplines below are available today.
+          </p>
+        </div>
       </div>
 
-      <Card className="bg-purple-50 border-purple-200 space-y-2">
-        <div className="flex items-center gap-2 text-sm font-semibold text-purple-900">
-          <ShieldCheck className="w-4 h-4" /> Isolated from your account
-        </div>
-        <p className="text-sm text-purple-900/70 leading-relaxed">
-          No shared identifiers with Swap/Pool. Peer chat is launching soon — the helplines below are available today.
-        </p>
-      </Card>
-
-      <Card className="space-y-3">
-        <div className="text-xs font-semibold uppercase text-muted">Reach out directly</div>
-        {props.helplines.map(h => (
+      <div className="eyebrow mb-3">Reach out directly</div>
+      <div>
+        {props.helplines.map((h, i) => (
           <a
             key={h.id}
             href={`tel:${h.number.replace(/\s/g, '')}`}
-            className="flex items-center justify-between py-3 border-b border-tile last:border-0 hover:bg-tint/30 -mx-4 px-4 transition-colors rounded-lg"
+            className="flex gap-4 py-5 border-b border-lp-ink/8 last:border-0 press-scale row-lift -mx-2 px-2 rounded-lg"
           >
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted font-semibold">{h.name}</div>
-              <div className="text-base font-bold text-ink mt-1">{h.number}</div>
-              <div className="text-xs text-muted mt-0.5">{h.sub}</div>
+            <span className="stat-display text-xl text-lp-green/40 tabular-nums shrink-0 w-8">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
+                {h.name}
+              </div>
+              <div className="stat-display text-2xl text-lp-ink mt-1 tabular-nums">
+                {h.number}
+              </div>
+              <div className="text-xs text-lp-ink/55 mt-1">{h.sub}</div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-              <Phone className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-full bg-lp-sage flex items-center justify-center shrink-0 self-center">
+              <Phone className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
             </div>
           </a>
         ))}
-      </Card>
+      </div>
     </div>
   );
 };

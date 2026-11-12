@@ -1,6 +1,6 @@
-﻿import React from 'react';
+import React from 'react';
 import { ShieldCheck, Eye, EyeOff, RotateCcw } from 'lucide-react';
-import { Card } from '../ui/Card';
+import { ScreenHeader } from '../../ui';
 
 interface SettingsTabProps {
   tokenHash: string | null;
@@ -31,76 +31,93 @@ const SPEC_COVERAGE = [
 
 export const SettingsTab: React.FC<SettingsTabProps> = (props) => {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-ink">Settings</h2>
-          <p className="text-sm text-muted mt-1">Account and privacy</p>
-        </div>
-        <button onClick={props.onBack} className="text-sm font-semibold text-pine hover:underline">
-          Back
-        </button>
-      </div>
+    <div className="relative pb-20 content-in">
+      <div
+        className="absolute -top-16 -right-24 w-[280px] h-[280px] rounded-full blur-3xl pointer-events-none orb-drift"
+        style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.6) 0%, rgba(220,232,224,0) 70%)' }}
+        aria-hidden="true"
+      />
 
-      <Card className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-pine" /> Server View
-          </h3>
+      <ScreenHeader
+        number="07"
+        eyebrow="Settings"
+        title="Your account."
+        subtitle="Privacy state, server view, session control."
+        action={
+          <button onClick={props.onBack} className="text-sm font-semibold text-lp-green hover:underline press-scale">
+            Back
+          </button>
+        }
+      />
+
+      <div className="card-editorial rounded-2xl p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-lp-green" strokeWidth={2} />
+            <span className="text-sm font-semibold text-lp-ink">Server view</span>
+          </div>
           <button
             onClick={() => props.setShowServer(!props.showServer)}
-            className="text-xs font-semibold text-pine hover:underline flex items-center gap-1"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-lp-green hover:underline press-scale"
           >
             {props.showServer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
             {props.showServer ? 'Hide' : 'Reveal'}
           </button>
         </div>
-        <div className="space-y-2 pt-3 border-t border-tile text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted">Token (HMAC)</span>
-            <span className="text-pine font-semibold truncate ml-2">{props.tokenHash}</span>
+
+        <div className="space-y-3">
+          <div className="flex justify-between items-baseline pb-3 border-b border-lp-ink/8">
+            <span className="text-sm text-lp-ink/55">Token (HMAC)</span>
+            <span className="text-xs font-mono text-lp-green truncate ml-2 max-w-[60%]">{props.tokenHash}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted">Raw phone</span>
-            <span className="text-rose-600 font-semibold">{props.showServer ? 'NOT STORED' : '••••••'}</span>
+          <div className="flex justify-between items-baseline pb-3 border-b border-lp-ink/8">
+            <span className="text-sm text-lp-ink/55">Raw phone</span>
+            <span className="text-xs font-semibold text-rose-600 uppercase tracking-wider">
+              {props.showServer ? 'NOT STORED' : '••••••'}
+            </span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted">Name</span>
-            <span className="text-rose-600 font-semibold">NONE</span>
+          <div className="flex justify-between items-baseline pb-3 border-b border-lp-ink/8">
+            <span className="text-sm text-lp-ink/55">Name</span>
+            <span className="text-xs font-semibold text-rose-600 uppercase tracking-wider">NONE</span>
           </div>
-          <div className="flex justify-between border-t border-tile pt-2 mt-2">
-            <span className="text-muted">Rate (per token)</span>
-            <span className="text-ink">{props.rate.count} / {props.MAX_REQUESTS}</span>
+          <div className="flex justify-between items-baseline pb-3 border-b border-lp-ink/8">
+            <span className="text-sm text-lp-ink/55">Rate (per token)</span>
+            <span className="text-sm text-lp-ink tabular-nums">{props.rate.count} / {props.MAX_REQUESTS}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted">Value (per token)</span>
-            <span className="text-ink">KES {props.rate.value.toLocaleString()} / {props.MAX_VALUE.toLocaleString()}</span>
+          <div className="flex justify-between items-baseline pb-3 border-b border-lp-ink/8">
+            <span className="text-sm text-lp-ink/55">Value (per token)</span>
+            <span className="text-sm text-lp-ink tabular-nums">KES {props.rate.value.toLocaleString()} / {props.MAX_VALUE.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted">Persisted history</span>
-            <span className="text-ink">{props.historyCount} records</span>
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm text-lp-ink/55">Persisted history</span>
+            <span className="text-sm text-lp-ink tabular-nums">{props.historyCount} records</span>
           </div>
         </div>
-        {props.showServer && (
-          <Card className="bg-rose-50 border-rose-200 text-xs text-rose-800 leading-relaxed mt-2">
-            <strong>Invariant:</strong> phone number is hashed on verification and immediately discarded. Rate limits and history are keyed to the HMAC token, not the session.
-          </Card>
-        )}
-      </Card>
 
-      <Card variant="tile" className="space-y-2">
-        <h4 className="text-xs font-bold text-ink uppercase tracking-wider">Spec Coverage</h4>
-        {SPEC_COVERAGE.map(f => (
-          <div key={f} className="flex items-center gap-2 text-sm text-muted">
-            <div className="w-1.5 h-1.5 rounded-full bg-pine" />
-            {f}
+        {props.showServer && (
+          <div className="mt-4 rounded-xl bg-rose-50 border border-rose-200 px-3 py-2 text-xs text-rose-800 leading-relaxed">
+            <strong>Invariant:</strong> phone number hashed on verification, discarded immediately. Rate limits and history keyed to the HMAC token, not the session.
           </div>
-        ))}
-      </Card>
+        )}
+      </div>
+
+      <div className="mb-6">
+        <div className="eyebrow mb-3">Spec coverage</div>
+        <div>
+          {SPEC_COVERAGE.map((f, i) => (
+            <div key={f} className="flex gap-4 py-3 border-b border-lp-ink/8 last:border-0">
+              <span className="stat-display text-base text-lp-green/40 tabular-nums shrink-0 w-7">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span className="text-sm text-lp-ink/70 leading-relaxed">{f}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <button
         onClick={props.onReset}
-        className="w-full py-3 text-sm text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-[16px] bg-surface flex items-center justify-center gap-2"
+        className="w-full card-editorial rounded-2xl py-3.5 text-sm font-semibold text-rose-600 hover:bg-rose-50/60 flex items-center justify-center gap-2 press-scale"
       >
         <RotateCcw className="w-4 h-4" /> Reset session
       </button>
