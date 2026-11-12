@@ -310,3 +310,8 @@ input, textarea {
   .content-in { animation: none; }
   .press-scale:active { transform: none; }
 }
+
+/* Anchor scroll offset for sticky header (72px main + 32px persona + 8px gap) */
+section[id] {
+  scroll-margin-top: 88px;
+}
