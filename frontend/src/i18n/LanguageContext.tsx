@@ -1,32 +1,19 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { en, type Strings } from './en';
-import { sw } from './sw';
-
-export type Lang = 'en' | 'sw';
 
 interface LanguageCtx {
-  lang: Lang;
-  setLang: (l: Lang) => void;
   t: Strings;
 }
 
 const Ctx = createContext<LanguageCtx | null>(null);
 
 /**
- * In-memory language provider. ROLE.txt: no localStorage/sessionStorage.
- * Language resets to EN on refresh - expected for a marketing page.
+ * English-only language provider. Kept as a provider (rather than direct
+ * imports of `en`) so a future second language can be reintroduced here
+ * without touching any consumer component.
  */
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [lang, setLangState] = useState<Lang>('en');
-
-  const setLang = (l: Lang) => {
-    setLangState(l);
-    document.documentElement.lang = l;
-  };
-
-  const t = lang === 'en' ? en : sw;
-
-  return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ t: en }}>{children}</Ctx.Provider>;
 };
 
 export const useLanguage = (): LanguageCtx => {
