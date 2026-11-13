@@ -1,0 +1,10 @@
+export { default as TopBar } from './TopBar';
+export { default as Hero } from './Hero';
+export { default as ThreeDoors } from './ThreeDoors';
+export { default as HowItWorks } from './HowItWorks';
+export { default as Private } from './Private';
+export { default as ThePool } from './ThePool';
+export { default as Partners } from './Partners';
+export { default as Faq } from './Faq';
+export { default as Footer } from './Footer';
+export { default as MobileDock } from './MobileDock';
