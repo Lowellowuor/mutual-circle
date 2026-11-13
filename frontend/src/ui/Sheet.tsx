@@ -27,11 +27,11 @@ export const Sheet: React.FC<SheetProps> = ({ open, onClose, children, title }) 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
       <div
-        className="absolute inset-0 bg-lp-ink/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-lp-ink/60 backdrop-blur-md"
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="absolute inset-x-0 bottom-0 bg-lp-surface rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+      <div className="absolute inset-x-0 bottom-0 bg-lp-surface rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto overscroll-contain animate-in slide-in-from-bottom duration-300">
         {title && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-lp-ink">{title}</h2>

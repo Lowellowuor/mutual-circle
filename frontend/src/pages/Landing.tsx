@@ -635,31 +635,50 @@ const HowItWorks: React.FC = () => {
   const { t } = useLanguage();
   const [flow, setFlow] = useState<'need' | 'give'>('need');
 
-  const renderFlow = (steps: { title: string; body: string }[]) => (
+  const needIcons: typeof Package[] = [Package, ShieldCheck, FileText];
+  const giveIcons: typeof Package[] = [Coins, CreditCard, HeartHandshake];
+
+  const renderFlow = (
+    steps: { title: string; body: string }[],
+    icons: typeof Package[],
+    ctaLabel: string,
+    ctaHref: string,
+  ) => (
     <div>
-      {steps.map((step, i) => (
-        <div
-          key={i}
-          className="py-10 md:py-14 border-b border-lp-ink/8 last:border-0"
-        >
-          <div className="md:hidden">
-            <span className="display-serif text-[48px] leading-none text-lp-green/25 tabular-nums block mb-3">
-              0{i + 1}
-            </span>
-            <h3 className="text-lg font-semibold text-lp-ink">{step.title}</h3>
-            <p className="mt-2 text-base text-lp-ink/60 leading-relaxed">{step.body}</p>
-          </div>
-          <div className="hidden md:grid grid-cols-[auto_1fr] gap-10 items-baseline">
-            <span className="display-serif text-[96px] leading-none text-lp-green/25 tabular-nums">
-              0{i + 1}
-            </span>
-            <div>
-              <h3 className="text-2xl font-semibold text-lp-ink">{step.title}</h3>
-              <p className="mt-2 text-base text-lp-ink/60 leading-relaxed">{step.body}</p>
+      {steps.map((step, i) => {
+        const Icon = icons[i];
+        const isLast = i === steps.length - 1;
+        return (
+          <div key={i} className="relative flex items-start gap-5 pb-10 last:pb-0">
+            {!isLast && (
+              <div
+                className="absolute left-6 top-12 bottom-0 w-px bg-gradient-to-b from-lp-green/30 via-lp-green/15 to-transparent"
+                aria-hidden="true"
+              />
+            )}
+            <div className="relative shrink-0">
+              <div className="w-12 h-12 rounded-full bg-lp-sage flex items-center justify-center transition-transform duration-300 hover:scale-105">
+                <span className="display-serif text-lg text-lp-green tabular-nums">
+                  0{i + 1}
+                </span>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 pt-2">
+              <div className="flex items-center gap-2">
+                <Icon className="w-4 h-4 text-lp-green shrink-0" strokeWidth={1.75} />
+                <h3 className="text-base md:text-lg font-semibold text-lp-ink">{step.title}</h3>
+              </div>
+              <p className="mt-1.5 text-sm md:text-base text-lp-ink/60 leading-relaxed">{step.body}</p>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
+      <div className="mt-8 pl-[68px]">
+        <Button onClick={() => { window.location.href = ctaHref; }}>
+          {ctaLabel}
+          <ArrowRight className="w-4 h-4 ml-1.5" />
+        </Button>
+      </div>
     </div>
   );
 
@@ -701,23 +720,25 @@ const HowItWorks: React.FC = () => {
           </div>
         </div>
 
-        <div className="md:hidden mt-4">
-          {renderFlow(flow === 'need' ? t.howItWorks.needSteps : t.howItWorks.giveSteps)}
+        <div className="md:hidden mt-8">
+          {flow === 'need'
+            ? renderFlow(t.howItWorks.needSteps, needIcons, t.howItWorks.needCta, APP_URL)
+            : renderFlow(t.howItWorks.giveSteps, giveIcons, t.howItWorks.giveCta, DONOR_URL)}
         </div>
 
         <Reveal delay={100}>
           <div className="hidden md:grid md:grid-cols-2 gap-16 lg:gap-20 mt-16">
             <div>
-              <div className="pb-6 text-[11px] uppercase tracking-[0.22em] font-semibold text-lp-green">
+              <div className="pb-8 text-[11px] uppercase tracking-[0.22em] font-semibold text-lp-green">
                 {t.howItWorks.needLabel}
               </div>
-              {renderFlow(t.howItWorks.needSteps)}
+              {renderFlow(t.howItWorks.needSteps, needIcons, t.howItWorks.needCta, APP_URL)}
             </div>
             <div>
-              <div className="pb-6 text-[11px] uppercase tracking-[0.22em] font-semibold text-lp-green">
+              <div className="pb-8 text-[11px] uppercase tracking-[0.22em] font-semibold text-lp-green">
                 {t.howItWorks.giveLabel}
               </div>
-              {renderFlow(t.howItWorks.giveSteps)}
+              {renderFlow(t.howItWorks.giveSteps, giveIcons, t.howItWorks.giveCta, DONOR_URL)}
             </div>
           </div>
         </Reveal>
@@ -1189,6 +1210,7 @@ const Partners: React.FC = () => {
   const { t } = useLanguage();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [selectedType, setSelectedType] = useState<string>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1274,11 +1296,14 @@ const Partners: React.FC = () => {
             </Reveal>
 
             <Reveal delay={200}>
-              <div className="mt-14 md:mt-20">
-                <p className="display-serif text-[28px] md:text-[44px] leading-[1.1] text-lp-green">
+              <div className="mt-14 md:mt-20 card-editorial rounded-3xl p-6 md:p-8">
+                <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-lp-green mb-3">
+                  {t.partners.eyebrow}
+                </div>
+                <p className="display-serif text-[26px] md:text-[34px] leading-[1.15] text-lp-ink">
                   {t.partners.line}
                 </p>
-                <div className="mt-8">
+                <div className="mt-6">
                   <Button onClick={() => setSheetOpen(true)}>
                     {t.partners.cta}
                     <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -1290,41 +1315,101 @@ const Partners: React.FC = () => {
         </div>
       </div>
 
-      <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title={t.partners.formTitle}>
+      <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
         {submitted ? (
-          <div className="py-12 text-center">
-            <div className="w-14 h-14 mx-auto rounded-full bg-lp-sage flex items-center justify-center">
-              <ShieldCheck className="w-7 h-7 text-lp-green" strokeWidth={2} />
+          <div className="py-12 text-center content-in">
+            <div className="w-16 h-16 mx-auto rounded-full bg-lp-sage flex items-center justify-center mb-5">
+              <ShieldCheck className="w-8 h-8 text-lp-green" strokeWidth={1.75} />
             </div>
-            <p className="mt-4 text-base text-lp-ink">{t.partners.success}</p>
+            <p className="display-serif text-3xl text-lp-ink">Thank you.</p>
+            <p className="text-sm text-lp-ink/55 mt-2 max-w-xs mx-auto leading-relaxed">
+              We'll be in touch within 48 hours.
+            </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldOrg}</label>
-              <input type="text" required placeholder={t.partners.fieldOrgPlaceholder}
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent" />
+              <span className="eyebrow">Partnership</span>
+              <h2 className="display-serif mt-2 text-2xl text-lp-ink">
+                {t.partners.formTitle}
+              </h2>
+              <p className="mt-1 text-sm text-lp-ink/55">
+                Tell us about your organisation.
+              </p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldType}</label>
-              <select required
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent">
-                <option value="">Select</option>
-                {t.partners.typeOptions.map((opt) => (<option key={opt} value={opt}>{opt}</option>))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldEmail}</label>
-              <input type="email" required placeholder={t.partners.fieldEmailPlaceholder}
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-lp-ink mb-1.5">{t.partners.fieldMessage}</label>
-              <textarea rows={3} placeholder={t.partners.fieldMessagePlaceholder}
-                className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/15 text-base text-lp-ink placeholder:text-lp-ink/40 focus:outline-none focus:ring-2 focus:ring-lp-green focus:border-transparent resize-none" />
-            </div>
-            <Button type="submit" fullWidth>{t.partners.submit}</Button>
-          </form>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
+                  Organisation
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Organisation name"
+                  className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/10 text-base text-lp-ink placeholder:text-lp-ink/30 focus:outline-none focus:border-lp-green focus:ring-2 focus:ring-lp-green/20 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
+                  Organisation type
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {t.partners.typeOptions.map((opt) => (
+                    <label
+                      key={opt}
+                      className={
+                        'relative flex items-center justify-center px-3 py-2.5 rounded-xl text-sm font-medium press-scale cursor-pointer transition-all ' +
+                        (selectedType === opt
+                          ? 'bg-lp-green text-white shadow-sm'
+                          : 'bg-lp-canvas border border-lp-ink/10 text-lp-ink/70 hover:text-lp-ink hover:border-lp-green/30')
+                      }
+                    >
+                      <input
+                        type="radio"
+                        name="partnerType"
+                        value={opt}
+                        checked={selectedType === opt}
+                        onChange={() => setSelectedType(opt)}
+                        className="sr-only"
+                        required
+                      />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
+                  Work email
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="name@organisation.org"
+                  className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/10 text-base text-lp-ink placeholder:text-lp-ink/30 focus:outline-none focus:border-lp-green focus:ring-2 focus:ring-lp-green/20 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
+                  Message <span className="text-lp-ink/30 normal-case tracking-normal">(optional)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="What would you like to discuss?"
+                  className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/10 text-base text-lp-ink placeholder:text-lp-ink/30 focus:outline-none focus:border-lp-green focus:ring-2 focus:ring-lp-green/20 transition-all resize-none"
+                />
+              </div>
+
+              <Button type="submit" fullWidth>
+                {t.partners.submit}
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </form>
+          </div>
         )}
       </Sheet>
     </section>
