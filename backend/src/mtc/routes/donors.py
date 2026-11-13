@@ -1,4 +1,5 @@
 """Donor contributions — blind pooled giving, leaderboard, profile."""
+import logging
 import asyncpg
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -9,6 +10,8 @@ from mtc.mpesa.client import initiate_stk_push
 from pydantic import BaseModel
 from mtc.rate_limit.counter import check_ip_rate_limit, RateLimitExceeded
 from fastapi import Request
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/donations", tags=["donors"])
 
@@ -42,9 +45,13 @@ async def create_donation(
         return cached
 
     try:
+        # Payments review #2: explicitly set status='unpaid' instead of
+        # relying on the column default. The old default was 'paid', which
+        # made every new donation immediately report "already paid".
         row = await conn.fetchrow(
-            """INSERT INTO donor_contributions (donor_hash, amount_pence, is_anonymous, opt_in_ledger)
-               VALUES ($1, $2, $3, $4) RETURNING id, created_at""",
+            """INSERT INTO donor_contributions
+                   (donor_hash, amount_pence, is_anonymous, opt_in_ledger, status)
+               VALUES ($1, $2, $3, $4, 'unpaid') RETURNING id, created_at""",
             donor_hash, body.amount_pence, body.is_anonymous, body.opt_in_ledger,
         )
         response = {
@@ -52,6 +59,7 @@ async def create_donation(
             "amount_pence": body.amount_pence,
             "is_anonymous": body.is_anonymous,
             "opt_in_ledger": body.opt_in_ledger,
+            "status": "unpaid",
             "created_at": row["created_at"].isoformat(),
         }
         await idempotency.complete(conn, idempotency_key, "donation", donor_hash, response)
@@ -77,6 +85,8 @@ async def my_donations(
                 "amount_pence": r["amount_pence"],
                 "is_anonymous": r["is_anonymous"],
                 "opt_in_ledger": r["opt_in_ledger"],
+                "status": r["status"],
+                "mpesa_receipt": r["mpesa_receipt"] if "mpesa_receipt" in r.keys() else None,
                 "created_at": r["created_at"].isoformat(),
             }
             for r in rows
