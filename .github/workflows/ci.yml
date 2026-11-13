@@ -105,6 +105,7 @@ jobs:
         env:
           PYTHONPATH: src
           CI_NO_DB: "1"
+          MESSAGING_ENCRYPTION_KEY: "ci-dummy-messaging-key-not-for-prod-0000"
         run: pytest tests/test_secret_validation.py tests/test_mpesa_callback.py tests/test_pay_route.py -v
 
       - name: Test (real DB)
