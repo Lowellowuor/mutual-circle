@@ -113,243 +113,101 @@ const WaveDivider: React.FC = () => (
 
 // ── Top bar ─────────────────────────────────────────────────────────────────
 
+const HEADER_NAV = [
+  { href: '#how-it-works', label: 'How it works' },
+  { href: '#three-doors', label: 'Give' },
+  { href: '#partners', label: 'Partners' },
+  { href: '#faq', label: 'FAQ' },
+];
+
 const TopBar: React.FC = () => {
   const { t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [whatOpen, setWhatOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('');
-  const closeTimer = React.useRef<number | undefined>(undefined);
 
-  React.useEffect(() => {
-    const sectionIds = ['how-it-works', 'inside-circle', 'what-you-can-get', 'give', 'partners', 'faq'];
-    const onScroll = () => {
-      setScrolled(window.scrollY > 40);
-      let current = '';
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top < 130) current = id;
-      }
-      setActiveSection(current);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const whatItems = [
-    { label: t.navItems.food, href: '#what-you-can-get', Icon: Package, sub: 'Standardised pantry bundle' },
-    { label: t.navItems.hygiene, href: '#what-you-can-get', Icon: Droplet, sub: 'Soap, sanitary, cleaning' },
-    { label: t.navItems.bills, href: '#what-you-can-get', Icon: Zap, sub: 'Power and water' },
-    { label: t.navItems.school, href: '#what-you-can-get', Icon: GraduationCap, sub: 'Paid to the school' },
-  ];
-
-  const navLinks = [
-    { href: '#how-it-works', label: t.nav.howItWorks, slug: 'how-it-works' },
-    { href: '#inside-circle', label: t.nav.theCircle, slug: 'inside-circle' },
-    { href: '#partners', label: t.nav.partners, slug: 'partners' },
-    { href: '#faq', label: t.nav.faq, slug: 'faq' },
-  ];
-
-  const openWhat = () => {
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
-    setWhatOpen(true);
-  };
-  const scheduleCloseWhat = () => {
-    closeTimer.current = window.setTimeout(() => setWhatOpen(false), 150);
-  };
+  const CircleMark = () => (
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <circle cx="10" cy="14" r="8" stroke="#1F6B4A" strokeWidth="1.75" />
+      <circle cx="18" cy="14" r="8" stroke="#1F6B4A" strokeWidth="1.75" />
+    </svg>
+  );
 
   return (
     <>
-      <header className={'sticky top-0 z-40 ' + (scrolled ? 'shadow-sm' : '')}>
-        {/* Main bar - 72px desktop, 64px mobile */}
-        <div className="relative bg-white/70 backdrop-blur-xl border-b border-white/50">
-          <div className="max-w-[1120px] mx-auto px-6 h-16 md:h-[72px] flex items-center justify-between">
-            <a href="#" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-lp-green flex items-center justify-center shadow-lg shadow-lp-green/20 group-hover:scale-105 transition-transform">
-                <HeartHandshake className="w-4 h-4 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="text-lg font-semibold text-lp-ink tracking-tight">{t.nav.brand}</span>
-            </a>
+      <header className="sticky top-0 z-40 bg-[#FAF8F4]/95 backdrop-blur-sm border-b border-[#E8E6DE]">
+        <div className="max-w-[1120px] mx-auto px-6 h-16 md:h-[72px] flex items-center justify-between">
+          <a href="#" className="flex items-center gap-2.5 shrink-0">
+            <CircleMark />
+            <span className="text-base font-semibold text-[#111111] tracking-tight">{t.nav.brand}</span>
+          </a>
 
-            <nav className="hidden md:flex items-center gap-0.5">
+          <nav className="hidden md:flex items-center gap-8" aria-label="Primary">
+            {HEADER_NAV.map((link) => (
               <a
-                href="#how-it-works"
-                className={
-                  'relative px-3 py-2 text-sm font-medium rounded-full transition-all ' +
-                  (activeSection === 'how-it-works'
-                    ? 'text-lp-ink'
-                    : 'text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/[0.04]')
-                }
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-[#111111] hover:text-[#1F6B4A] transition-colors focus:outline-none focus-visible:text-[#1F6B4A]"
               >
-                {t.nav.howItWorks}
-                {activeSection === 'how-it-works' && (
-                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-lp-green" aria-hidden="true" />
-                )}
+                {link.label}
               </a>
+            ))}
+          </nav>
 
-              <button
-                type="button"
-                onMouseEnter={openWhat}
-                onMouseLeave={scheduleCloseWhat}
-                onClick={() => setWhatOpen(o => !o)}
-                aria-expanded={whatOpen}
-                aria-haspopup="true"
-                className={
-                  'relative px-3 py-2 text-sm font-medium rounded-full transition-all flex items-center gap-1 ' +
-                  (activeSection === 'what-you-can-get'
-                    ? 'text-lp-ink'
-                    : 'text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/[0.04]')
-                }
-              >
-                {t.navItems.whatYouGetLabel}
-                <svg width="10" height="10" viewBox="0 0 10 10" className={'transition-transform ' + (whatOpen ? 'rotate-180' : '')} aria-hidden="true">
-                  <path d="M2 4L5 7L8 4" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-                </svg>
-                {activeSection === 'what-you-can-get' && (
-                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-lp-green" aria-hidden="true" />
-                )}
-              </button>
-
-              {navLinks.slice(1).map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className={
-                    'relative px-3 py-2 text-sm font-medium rounded-full transition-all ' +
-                    (activeSection === link.slug
-                      ? 'text-lp-ink'
-                      : 'text-lp-ink/60 hover:text-lp-ink hover:bg-lp-ink/[0.04]')
-                  }
-                >
-                  {link.label}
-                  {activeSection === link.slug && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-lp-green" aria-hidden="true" />
-                  )}
-                </a>
-              ))}
-            </nav>
-
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                variant="glass"
-                onClick={() => { window.location.href = DONOR_URL; }}
-                className="!h-10 !px-4 !text-sm"
-              >
-                {t.common.give}
-              </Button>
-              <Button
-                onClick={() => { window.location.href = APP_URL; }}
-                className="!h-10 !px-4 !text-sm"
-              >
-                {t.common.getHelp}
-                <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              className="md:hidden p-2 rounded-lg hover:bg-lp-ink/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green"
-              aria-label={t.common.menu}
+          <div className="hidden md:flex items-center gap-5">
+            <a
+              href={DONOR_URL}
+              className="text-sm font-medium text-[#111111] hover:text-[#1F6B4A] transition-colors inline-flex items-center gap-1 focus:outline-none focus-visible:text-[#1F6B4A]"
             >
-              <Menu className="w-5 h-5 text-lp-ink" />
-            </button>
+              Give <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={APP_URL}
+              className="btn btn-primary !h-11 !px-5 !text-sm"
+            >
+              Open the app
+            </a>
           </div>
 
-          {/* Mega menu - full-width, drops from main bar */}
-          {whatOpen && (
-            <div
-              onMouseEnter={openWhat}
-              onMouseLeave={scheduleCloseWhat}
-              className="absolute left-0 right-0 top-full bg-white border-t border-lp-ink/8 shadow-2xl z-50 content-in"
-              role="region"
-              aria-label={t.navItems.whatYouGetLabel}
-            >
-              <div className="max-w-[1120px] mx-auto px-6 py-6 grid grid-cols-[1fr_1fr_260px] gap-6">
-                <div className="col-span-2 grid grid-cols-2 gap-1">
-                  {whatItems.map((item) => {
-                    const I = item.Icon;
-                    return (
-                      <a
-                        key={item.label}
-                        href={item.href}
-                        onClick={() => setWhatOpen(false)}
-                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-lp-sage/30 transition-colors press-scale"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-lp-sage flex items-center justify-center shrink-0">
-                          <I className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-lp-ink">{item.label}</div>
-                          <div className="text-xs text-lp-ink/55 mt-0.5">{item.sub}</div>
-                        </div>
-                      </a>
-                    );
-                  })}
-                </div>
-                <div className="bg-[#020B43] rounded-xl p-5 flex flex-col text-white">
-                  <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-emerald-400 mb-3">
-                    The principle
-                  </div>
-                  <p className="display-serif text-base text-white leading-tight">
-                    Every gift enters the pool. Every request leaves from the pool.
-                  </p>
-                  <p className="text-xs text-white/60 mt-2 leading-relaxed flex-1">
-                    No line between giver and receiver.
-                  </p>
-                  <a
-                    href="#inside-circle"
-                    onClick={() => setWhatOpen(false)}
-                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
-                  >
-                    Inside the circle <ArrowRight className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="md:hidden p-2 -mr-2 text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] rounded-lg"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
       </header>
 
-      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t.nav.brand}>
-        <div className="flex flex-col gap-1">
-          {navLinks.map((link) => (
+      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)}>
+        <div className="flex flex-col gap-0 py-2">
+          <div className="flex items-center gap-2.5 pb-4 border-b border-[#E8E6DE]">
+            <CircleMark />
+            <span className="text-base font-semibold text-[#111111]">{t.nav.brand}</span>
+          </div>
+          {HEADER_NAV.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="text-base font-medium text-lp-ink py-3 border-b border-lp-ink/5"
+              className="text-base font-medium text-[#111111] py-3.5 border-b border-[#E8E6DE]"
             >
               {link.label}
             </a>
           ))}
-          <div className="pt-4 text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/40">
-            {t.navItems.whatYouGetLabel}
-          </div>
-          <div className="flex flex-col gap-1 mt-1">
-            {whatItems.map((it) => {
-              const I = it.Icon;
-              return (
-                <a
-                  key={it.label}
-                  href={it.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 text-sm text-lp-ink/70 py-2 px-1 press-scale"
-                >
-                  <div className="w-7 h-7 rounded-full bg-lp-sage/60 flex items-center justify-center shrink-0">
-                    <I className="w-3.5 h-3.5 text-lp-green" strokeWidth={1.75} />
-                  </div>
-                  {it.label}
-                </a>
-              );
-            })}
-          </div>
-          <div className="pt-4">
-            <a href={APP_URL} className="block text-sm font-medium text-lp-ink py-2">
-              Sign in →
-            </a>
-          </div>
+          <a
+            href={DONOR_URL}
+            onClick={() => setMenuOpen(false)}
+            className="text-base font-medium text-[#111111] py-3.5 border-b border-[#E8E6DE] inline-flex items-center gap-1"
+          >
+            Give <ArrowRight className="w-4 h-4" />
+          </a>
+          <a
+            href={APP_URL}
+            onClick={() => setMenuOpen(false)}
+            className="btn btn-primary !h-12 w-full mt-4"
+          >
+            Open the app
+          </a>
         </div>
       </Sheet>
     </>
@@ -417,100 +275,90 @@ const PhoneMockup: React.FC = () => {
 // ── Hero ────────────────────────────────────────────────────────────────────
 
 const Hero: React.FC = () => {
-  const { t } = useLanguage();
   return (
-    <section className="relative overflow-hidden mesh-hero">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-32 -left-20 w-[460px] h-[460px] rounded-full bg-lp-sage/60 blur-3xl orb-drift" />
-        <div className="absolute -top-32 right-0 w-[560px] h-[560px] rounded-full bg-lp-green/10 blur-3xl orb-drift-slow" />
-      </div>
-      <DotGrid className="opacity-40" />
-
-      <div className="relative max-w-[1120px] mx-auto px-6 min-h-[80vh] md:min-h-[calc(100vh-6.5rem)] py-16 md:py-24 grid md:grid-cols-12 gap-12 items-center">
-        <div className="md:col-span-6 animate-fade-up">
-          <Eyebrow>{t.hero.eyebrow}</Eyebrow>
-          <h1 className="display-serif mt-6 text-[44px] md:text-[64px] lg:text-[76px] leading-[0.98] text-lp-ink">
-            {t.hero.h1}
-          </h1>
-          <p className="mt-8 text-lg md:text-xl text-lp-ink/65 max-w-lg leading-relaxed">
-            {t.hero.sub}
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Button onClick={() => { window.location.href = APP_URL; }}>
-              {t.common.openApp}
-              <ArrowRight className="w-4 h-4 ml-1.5" />
-            </Button>
-            <Button
-              variant="glass"
-              onClick={() => { document.getElementById('partners')?.scrollIntoView({ behavior: 'smooth' }); }}
-            >
-              {t.common.partnerWithUs}
-            </Button>
-          </div>
-          <div className="mt-10 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-            </span>
-            <span className="text-xs font-medium text-lp-ink/80">{t.hero.chip}</span>
-          </div>
-        </div>
-
-        <div className="md:col-span-6 relative">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[420px] h-[420px] rounded-full bg-gradient-to-br from-lp-green/25 via-lp-sage/40 to-transparent blur-3xl" />
-          </div>
-
-          <div
-            className="absolute top-2 -left-6 md:-left-10 w-[190px] rounded-2xl bg-lp-canvas p-4 shadow-[0_30px_60px_-15px_rgba(17,17,17,0.32)] border border-lp-ink/8 float-slow hidden md:block"
-            style={{ transform: 'rotate(-3deg)' }}
-          >
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="text-[9px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50">
-                Reserved
-              </span>
+    <section className="relative bg-[#FAF8F4]">
+      <div className="max-w-[1120px] mx-auto px-6 pt-14 pb-20 md:pt-24 md:pb-32">
+        <div className="grid md:grid-cols-12 gap-12 md:gap-16 items-center">
+          {/* Copy column */}
+          <div className="md:col-span-6">
+            <h1 className="type-display-m md:type-display-d text-[#111111]">
+              Get what you need, privately.
+            </h1>
+            <p className="type-body-m md:type-body-d text-[#4A4F4B] mt-6 max-w-[60ch]">
+              Bills and fees go straight to the institution. Food and hygiene come from a locker. No name, no address.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-5">
+              <a href={APP_URL} className="btn btn-primary">
+                Open the app
+              </a>
+              <a href={DONOR_URL} className="btn-tertiary">
+                I want to give <ArrowRight className="w-4 h-4" />
+              </a>
             </div>
-            <div className="text-xs font-semibold text-lp-ink">Standard Pantry</div>
-            <div className="text-[10px] text-lp-ink/55 mt-0.5">Kibera Hub</div>
-            <div className="mt-3 pt-3 border-t border-lp-ink/8 flex justify-between items-baseline">
-              <span className="text-[9px] uppercase tracking-[0.18em] text-lp-ink/40">PIN</span>
-              <span className="display-serif text-xl text-lp-green tracking-[0.1em] tabular-nums">
-                4712
-              </span>
+            <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[#4A4F4B]">
+              <span>No names</span>
+              <span className="w-1 h-1 rounded-full bg-[#4A4F4B]/40" aria-hidden="true" />
+              <span>Private token</span>
+              <span className="w-1 h-1 rounded-full bg-[#4A4F4B]/40" aria-hidden="true" />
+              <span>Hospital: invoice only</span>
             </div>
           </div>
 
-          <div
-            className="absolute bottom-16 -right-6 float-medium hidden md:block shadow-2xl rounded-2xl overflow-hidden w-[170px] border-[6px] border-white bg-lp-sage/40 ring-1 ring-lp-ink/8"
-            style={{ transform: 'rotate(4deg)' }}
-          >
-            <div className="relative">
-              <img
-                src={IMG.heroAccent}
-                alt={t.hero.accentAlt}
-                className="w-full h-full object-cover aspect-square"
-                loading="lazy"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.3'; }}
-              />
+          {/* Straight phone mockup — no tilt, no float, no artifact card */}
+          <div className="md:col-span-6 flex justify-center md:justify-end">
+            <div className="w-[280px] md:w-[300px] rounded-[2.5rem] bg-[#111111] p-2">
               <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.05) 0%, transparent 40%, rgba(17,17,17,0.10) 100%)' }}
-                aria-hidden="true"
-              />
+                className="rounded-[2.1rem] bg-[#FAF8F4] overflow-hidden flex flex-col"
+                style={{ height: '580px' }}
+              >
+                <div className="text-center text-[10px] pt-3 pb-1 text-[#4A4F4B]">9:41</div>
+                <div className="px-4 py-3 flex items-center gap-2 border-b border-[#E8E6DE]">
+                  <svg width="18" height="18" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                    <circle cx="10" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
+                    <circle cx="18" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
+                  </svg>
+                  <span className="text-xs font-semibold text-[#111111]">Mutual Circle</span>
+                </div>
+                <div className="p-3 space-y-2 flex-1">
+                  <div className="p-4 rounded-2xl bg-[#1F6B4A] text-white space-y-1">
+                    <Package className="w-4 h-4" strokeWidth={2} />
+                    <div className="text-sm font-semibold">Reserve</div>
+                    <div className="text-[11px] text-white/75">Food or hygiene bundle</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white border border-[#E8E6DE] space-y-1">
+                    <CreditCard className="w-4 h-4 text-[#1F6B4A]" strokeWidth={2} />
+                    <div className="text-sm font-semibold text-[#111111]">Pay a bill</div>
+                    <div className="text-[11px] text-[#4A4F4B]">Utility, school, hospital</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#DCE8E0]/60 flex justify-between items-center">
+                    <span className="text-[11px] text-[#111111]">Bundle reserved</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1F6B4A] text-white font-medium">
+                      Ready
+                    </span>
+                  </div>
+                </div>
+                <div className="border-t border-[#E8E6DE] bg-white grid grid-cols-3 py-3">
+                  {['Home', 'Activity', 'Settings'].map((label, i) => (
+                    <div key={label} className="text-center">
+                      <div
+                        className={
+                          'w-4 h-4 mx-auto rounded-sm ' +
+                          (i === 0 ? 'bg-[#1F6B4A]' : 'bg-[#111111]/20')
+                        }
+                      />
+                      <div
+                        className={
+                          'text-[9px] mt-1 ' +
+                          (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')
+                        }
+                      >
+                        {label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="relative float-slow" style={{ perspective: '1400px' }}>
-            <PhoneMockup />
-            <div
-              className="absolute left-1/2 -translate-x-1/2 -bottom-8 w-[260px] h-[28px] pointer-events-none"
-              style={{
-                background: 'radial-gradient(ellipse at center, rgba(17,17,17,0.25) 0%, transparent 70%)',
-                filter: 'blur(8px)',
-              }}
-              aria-hidden="true"
-            />
           </div>
         </div>
       </div>
@@ -520,23 +368,7 @@ const Hero: React.FC = () => {
 
 // ── Promise ─────────────────────────────────────────────────────────────────
 
-const Promise: React.FC = () => {
-  const { t } = useLanguage();
-  return (
-    <section className="relative overflow-hidden py-20 md:py-32 bg-lp-canvas border-t border-lp-ink/5">
-      <AmbientBackdrop />
-      <div className="max-w-4xl mx-auto px-6 text-center">
-        <Eyebrow number={t.promise.number}>{t.promise.eyebrow}</Eyebrow>
-        <h2 className="display-serif mt-6 text-[36px] md:text-[56px] lg:text-[64px] leading-[1.05] text-lp-ink">
-          {t.promise.headline}
-        </h2>
-        <p className="mt-8 text-lg md:text-xl text-lp-ink/60 max-w-2xl mx-auto leading-relaxed">
-          {t.promise.body}
-        </p>
-      </div>
-    </section>
-  );
-};
+
 
 // ── How it works ────────────────────────────────────────────────────────────
 
@@ -1614,8 +1446,7 @@ const LandingInner: React.FC = () => (
     <TopBar />
     <main>
       <Hero />
-      <Promise />
-      <InsideTheCircle />
+            <InsideTheCircle />
       <HowItWorks />
       <InteractiveDemo />
       <WhatYouCanGet />

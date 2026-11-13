@@ -255,9 +255,9 @@ input, textarea {
 /* Prosper Blue — Standard Chartered-inspired navy (2026-11) */
 .mesh-navy {
   background:
-    radial-gradient(ellipse 60% 55% at 20% 20%, rgba(4, 115, 234, 0.14), transparent 65%),
-    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(31, 107, 74, 0.22), transparent 65%),
-    linear-gradient(180deg, #020B43 0%, #0A1554 100%);
+    radial-gradient(ellipse 60% 55% at 20% 20%, rgba(31, 107, 74, 0.26), transparent 65%),
+    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(31, 107, 74, 0.34), transparent 65%),
+    linear-gradient(180deg, #0F1E17 0%, #1A3026 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -315,3 +315,144 @@ input, textarea {
 section[id] {
   scroll-margin-top: 88px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM v2 — spec-compliant tokens, type scale, controls
+   Ships progressively. Old classes (.glass, .orb-drift, .card-editorial)
+   remain during migration and are removed in Ship 6.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Type scale (Cormorant Garamond 500 at 32+, Inter else) ─────────── */
+.type-display-d {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  font-size: 56px;
+  line-height: 64px;
+  letter-spacing: -0.02em;
+  color: #111111;
+}
+.type-display-m {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 44px;
+  letter-spacing: -0.02em;
+  color: #111111;
+}
+.type-h2-d {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 44px;
+  letter-spacing: -0.02em;
+  color: #111111;
+}
+.type-h2-m {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+  color: #111111;
+}
+.type-body-d {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 28px;
+  color: #111111;
+}
+.type-body-m {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #111111;
+}
+.type-secondary { color: #4A4F4B; }
+
+/* ─── Radii ──────────────────────────────────────────────────────────── */
+.r-control { border-radius: 12px; }
+.r-card { border-radius: 20px; }
+
+/* ─── Elevation (two levels only) ────────────────────────────────────── */
+.elev-1 { box-shadow: 0 1px 3px rgba(17,17,17,0.06), 0 1px 2px rgba(17,17,17,0.04); }
+.elev-2 { box-shadow: 0 4px 16px rgba(17,17,17,0.08), 0 2px 4px rgba(17,17,17,0.04); }
+
+/* ─── Solid surface (no glass) ───────────────────────────────────────── */
+.surface-solid {
+  background: #FFFFFF;
+  border: 1px solid #E8E6DE;
+}
+
+/* ─── Section padding (96 desktop / 64 mobile) ───────────────────────── */
+.section-pad { padding-top: 96px; padding-bottom: 96px; }
+@media (max-width: 767px) {
+  .section-pad { padding-top: 64px; padding-bottom: 64px; }
+}
+
+/* ─── 12-col container ───────────────────────────────────────────────── */
+.container-1120 {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* ─── Button base (spec §22) ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 100ms ease;
+  cursor: pointer;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-primary {
+  background: #1F6B4A;
+  color: #FFFFFF;
+  border: 1px solid #1F6B4A;
+}
+.btn-primary:hover { background: #1A5C3F; border-color: #1A5C3F; }
+.btn-primary:focus-visible { outline: 2px solid #1F6B4A; outline-offset: 2px; }
+
+.btn-secondary {
+  background: #FFFFFF;
+  color: #111111;
+  border: 1px solid #111111;
+}
+.btn-secondary:hover { background: #111111; color: #FFFFFF; }
+.btn-secondary:focus-visible { outline: 2px solid #111111; outline-offset: 2px; }
+
+.btn-tertiary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #111111;
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+.btn-tertiary:hover { color: #1F6B4A; }
+.btn-tertiary:focus-visible { outline: 2px solid #1F6B4A; outline-offset: 2px; border-radius: 4px; }
+
+/* ─── prefers-reduced-motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active { transform: none; }
+}
+
