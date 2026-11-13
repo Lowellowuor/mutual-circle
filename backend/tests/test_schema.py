@@ -35,6 +35,8 @@ EXPECTED_TABLES = {
     "helplines": None,
     "household_declarations": None,
     "idempotency_keys": None,
+    "institutions": {"id", "name", "type", "paybill_number", "account_number"},
+    "institutional_payments": {"id", "request_id", "institution_id", "amount_pence", "status", "kplc_token"},
     "intake_surveys": {
         "id", "request_id", "family_size", "work_status", "industry",
         "primary_need", "willing_to_give_back", "consent_to_aggregate",
