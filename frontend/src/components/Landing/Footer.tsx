@@ -24,8 +24,7 @@ const Footer: React.FC = () => {
               <span className="text-base font-semibold tracking-tight">{t.nav.brand}</span>
             </div>
             <p className="text-sm text-white/70 leading-relaxed max-w-[40ch]">{t.footer.tagline}</p>
-            <p className="text-sm text-white/40 mt-2">{t.footer.taglineCredit}</p>
-          </div>
+                      </div>
           <div className="md:col-span-2">
             <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">{t.footer.productLabel}</div>
             <ul className="space-y-2 text-sm">

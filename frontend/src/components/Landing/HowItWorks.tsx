@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Package, Droplet, CreditCard, FileText, ShieldCheck, Check, Hash, Zap, GraduationCap,
+  Package, Droplet, CreditCard, FileText, ShieldCheck, Check, Hash, Zap, GraduationCap, Building2,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n';
 
@@ -55,6 +55,7 @@ const HowItWorks: React.FC = () => {
     { Icon: Droplet, label: t.howItWorks.coversHygiene },
     { Icon: Zap, label: t.howItWorks.coversUtility },
     { Icon: GraduationCap, label: t.howItWorks.coversSchool },
+    { Icon: Building2, label: t.howItWorks.coversHospital },
   ];
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -162,7 +163,7 @@ const HowItWorks: React.FC = () => {
 
         <div className="mt-16 md:mt-24 pt-10 md:pt-14 border-t border-[#E8E6DE]">
           <div className="section-label mb-6 md:mb-8">{t.howItWorks.coversLabel}</div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
             {covers.map(({ Icon, label }) => (
               <div
                 key={label}
