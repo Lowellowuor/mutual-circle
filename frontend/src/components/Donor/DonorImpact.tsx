@@ -171,7 +171,7 @@ export const DonorImpact: React.FC<DonorImpactProps> = (props) => {
       </div>
 
       {/* CTA back to give */}
-      <button className="btn btn-primary w-full mb-3"> {}}>
+      <button className="btn btn-primary w-full mb-3">
         Support another category
       </button>
     </div>

@@ -65,16 +65,11 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
 
         <div className="space-y-3 pt-2">
           {stillUnpaid && (
-            <Button
-              variant="primary"
-              fullWidth
-              onClick={() => props.setPayingPledge(props.payingPledge)}
-              className="bg-green-600 hover:bg-green-700"
-            >
+            <button className="btn btn-primary bg-green-600 hover:bg-green-700" w-full onClick={() => props.setPayingPledge(props.payingPledge)}>
               Pay with M-PESA
             </button>
           )}
-          <button className="btn btn-primary w-full mb-3"> { props.onCloseSuccess(); props.setPDesc(''); props.setPValue(''); }}>
+          <button className="btn btn-primary w-full mb-3" onClick={() => { props.onCloseSuccess(); props.setPDesc(''); props.setPValue(''); }}>
             Pledge again
           </button>
           <button className="btn btn-secondary w-full mb-3">
@@ -151,12 +146,7 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
         </select>
       </div>
 
-      <Button
-        variant="primary"
-        fullWidth
-        onClick={props.handlePledge}
-        disabled={props.pProcessing || !props.pDesc}
-      >
+      <button className="btn btn-primary" w-full onClick={props.handlePledge} disabled={props.pProcessing || !props.pDesc}>
         {props.pProcessing ? 'Submitting...' : 'Submit Pledge'}
       </button>
 

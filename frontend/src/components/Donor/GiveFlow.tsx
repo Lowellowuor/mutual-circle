@@ -44,12 +44,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
         </div>
 
         {stillUnpaid && (
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={() => props.setPayingDonation(props.payingDonation)}
-            className="bg-green-600 hover:bg-green-700 font-bold shadow-soft mt-4"
-          >
+          <button className="btn btn-primary bg-green-600 hover:bg-green-700 font-bold shadow-soft mt-4" w-full onClick={() => props.setPayingDonation(props.payingDonation)}>
             Pay with M-PESA
           </button>
         )}
@@ -88,7 +83,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
         )}
 
         <div className="space-y-3 pt-2">
-          <button className="btn btn-primary w-full mb-3"> { props.onCloseSuccess(); props.setCustom(''); }}>
+          <button className="btn btn-primary w-full mb-3" onClick={() => { props.onCloseSuccess(); props.setCustom(''); }}>
             Give again
           </button>
           <button className="btn btn-secondary w-full mb-3">
@@ -161,12 +156,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
         </label>
       </div>
 
-      <Button
-        variant="primary"
-        fullWidth
-        onClick={props.handleGive}
-        disabled={props.processing || props.finalAmount <= 0}
-      >
+      <button className="btn btn-primary" w-full onClick={props.handleGive} disabled={props.processing || props.finalAmount <= 0}>
         {props.processing ? 'Processing...' : `Contribute KES ${props.finalAmount.toLocaleString()}`}
       </button>
 

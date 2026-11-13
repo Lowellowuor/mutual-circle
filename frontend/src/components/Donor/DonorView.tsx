@@ -460,6 +460,7 @@ export const DonorView: React.FC = () => {
         <DonorLeaders
           leaderboard={leaderboard}
           myProfile={myProfile}
+          cancelEdit={() => setEditingProfile(false)}
           editingProfile={editingProfile}
           setEditingProfile={setEditingProfile}
           profileName={profileName}
