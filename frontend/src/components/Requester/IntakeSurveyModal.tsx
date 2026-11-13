@@ -33,7 +33,7 @@ export const IntakeSurveyModal: React.FC<Props> = ({ token, requestId, onClose, 
         consent_to_aggregate: consentAggregate,
         consent_to_followup: true,
       });
-      push('success', 'Questionnaire completed. Basket sized.');
+      push({ kind: 'success', message: 'Questionnaire completed. Basket sized.' });
       onSuccess();
       onClose();
     } catch (err: any) {

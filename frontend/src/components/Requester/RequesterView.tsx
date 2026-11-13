@@ -121,7 +121,7 @@ export const RequesterView: React.FC = () => {
     if (activeReq) {
       getSurveyStatus(tokenHash, activeReq.id)
         .then(res => {
-          if (res.can_submit_intake && !res.has_intake) {
+          if (res && res.can_submit_intake && !res.has_intake) {
             setShowIntakePrompt(true);
             setSurveyRequestId(activeReq.id);
           }
