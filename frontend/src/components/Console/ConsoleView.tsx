@@ -569,7 +569,7 @@ export const ConsoleView: React.FC = () => {
                     <div className="min-w-0 flex-1">
                       <div className="text-[11px] font-semibold text-[#111111] capitalize truncate">{details}</div>
                       <div className="text-[11px] font-mono text-[#111111]/50 truncate">
-                        {String(r.id).slice(0, 8)}ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Ãƒâ€šÃ‚Â· {(r.status || '').replace(/_/g, ' ')}
+                        {String(r.id).slice(0, 8)}… · {(r.status || '').replace(/_/g, ' ')}
                       </div>
                     </div>
                     {r.amount_pence !== undefined && r.amount_pence > 0 && (
