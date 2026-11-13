@@ -223,15 +223,40 @@ async def pay_route(
             request_id, checkout_id, row["amount_pence"],
         )
 
-        await conn.execute(
-            """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone)
-               VALUES ($1, $2, 'requests', $3, $4)""",
-            checkout_id, row["amount_pence"], row["id"], stk["phone"]
-        )
-        await conn.execute(
-            "UPDATE requests SET payment_status = 'pending_payment', updated_at = now() WHERE id = $1",
-            row["id"],
-        )
+        # R.U.T.H 4.8 / payments review issue #3:
+        # STK has already fired. The INSERT into mpesa_transactions is the
+        # critical write. If it fails, log at CRITICAL and tell caller NOT
+        # to retry (a retry would fire a second STK prompt and double-charge).
+        try:
+            await conn.execute(
+                """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone)
+                   VALUES ($1, $2, 'requests', $3, $4)""",
+                checkout_id, row["amount_pence"], row["id"], stk["phone"],
+            )
+        except Exception as exc:
+            logger.critical(
+                "PAYMENT_LOST: STK fired but save failed. "
+                "checkout_id=%s request_id=%s amount_pence=%s phone=%s error=%r",
+                checkout_id, request_id, row["amount_pence"], stk.get("phone"), exc,
+            )
+            raise HTTPException(
+                503,
+                "M-PESA was initiated but the transaction could not be recorded. "
+                f"Reference: {checkout_id}. Do not retry — contact support with this reference.",
+            ) from exc
+
+        # Non-critical second write. If it fails, the mpesa_transactions row
+        # still exists in 'pending' state and the callback will still fire.
+        try:
+            await conn.execute(
+                "UPDATE requests SET payment_status = 'pending_payment', updated_at = now() WHERE id = $1",
+                row["id"],
+            )
+        except Exception as exc:
+            logger.error(
+                "Non-critical UPDATE failed for request %s (checkout_id=%s): %r",
+                request_id, checkout_id, exc,
+            )
 
         response = {
             "ok": True,

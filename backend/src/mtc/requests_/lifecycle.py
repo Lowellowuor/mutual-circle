@@ -31,7 +31,7 @@ async def withdraw_request(
         raise LookupError(f"Request not found: {request_id}")
     if row["token_hash"] != token_hash:
         raise PermissionError("Token does not own this request")
-    if row["status"] not in ("verified", "pending_check"):
+    if row["status"] not in ("verified", "pending_check", "pending_evidence"):
         raise WithdrawNotAllowed(row["status"])
 
     updated = await conn.fetchrow(

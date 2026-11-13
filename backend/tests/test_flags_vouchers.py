@@ -73,17 +73,36 @@ async def test_flag_clear(client, clean_db):
 
 
 
+_verified_pool_counter = 0
+
+
 async def _create_verified_pool(client, phone="+254700111222", amount=350000):
+    r"""Create a Tier 2 utility pool request via the API, then force verified.
+
+    PoolBody validates utility hashed_object_id against ^\d{8,12}$ (R.U.T.H
+    4.3 meter-number format). Use a counter so each call produces a unique
+    8-digit value, avoiding UNIQUE collisions when a test creates two pools.
+    """
+    global _verified_pool_counter
+    _verified_pool_counter += 1
+    object_id = f"9999{_verified_pool_counter:04d}"  # 8 digits
+
     tok = (await client.post("/tokens", json={"phone": phone})).json()["token"]
     r = await client.post(
         "/requests/pool",
         headers={"X-Token": tok}, json={
             "category": "utility",
-            "hashed_object_id": "objhash-test-" + phone[-4:],
+            "hashed_object_id": object_id,
             "amount_pence": amount,
         },
     )
-    return tok, r.json()["id"]
+    rid = r.json()["id"]
+    # Tier 2 pool requests now land in 'pending_evidence' (photo flow).
+    # Every caller of this helper expects a verified request, so force it.
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("UPDATE requests SET status = 'verified' WHERE id = $1", rid)
+    return tok, rid
 
 
 async def test_issue_voucher(client, clean_db):

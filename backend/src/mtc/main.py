@@ -193,7 +193,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     We surface a human-readable ``reason`` (first error's msg) plus the full
     ``errors`` array for clients that want to render field-specific feedback.
     """
-    errors = exc.errors()
+    # Pydantic v2 stores raw exception objects in `ctx` for custom
+    # validators (e.g. ValueError). Those are not JSON serializable, so
+    # stringify every non-primitive before handing the list to JSONResponse.
+    def _safe(v):
+        if isinstance(v, (str, int, float, bool, type(None))):
+            return v
+        if isinstance(v, (list, tuple)):
+            return [_safe(x) for x in v]
+        if isinstance(v, dict):
+            return {str(k): _safe(x) for k, x in v.items()}
+        return str(v)
+
+    errors = [_safe(e) for e in exc.errors()]
     first = errors[0] if errors else {"msg": "Validation failed"}
     reason = first.get("msg", "Validation failed")
     return JSONResponse(

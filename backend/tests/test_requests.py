@@ -34,7 +34,7 @@ def test_tier_assignment_swap():
 
 def test_tier_assignment_small_utility():
     assert assign_tier("utility", 350_000) == 2
-    assert initial_status(2) == "verified"
+    assert initial_status(2) == "pending_evidence"
 
 
 def test_tier_assignment_large_utility():
@@ -85,7 +85,7 @@ async def test_create_pool_tier_2(clean_conn):
         hashed_object_id="objhash-aaaa", amount_pence=350_000,
     )
     assert result["tier"] == 2
-    assert result["status"] == "verified"
+    assert result["status"] == "pending_evidence"
 
 
 @pytest.mark.asyncio

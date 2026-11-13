@@ -24,6 +24,18 @@ async def clean_conn():
                 pass
 
 
+
+async def _force_verified(conn, request_id: str) -> None:
+    """Force a request to 'verified' status.
+
+    Tier 2 pool requests now start in 'pending_evidence' (R.U.T.H photo
+    evidence flow). Dispatch and voucher tests need a 'verified' request to
+    exercise their logic; the photo flow is tested separately in
+    test_create_pool_tier_2.
+    """
+    await conn.execute("UPDATE requests SET status = 'verified' WHERE id = $1", request_id)
+
+
 async def test_dispatch_verified_pool(clean_conn):
     conn = clean_conn
     token = issue_token("+254700111222")
@@ -31,12 +43,17 @@ async def test_dispatch_verified_pool(clean_conn):
         conn, token_hash=token, category="utility",
         hashed_object_id="objhash-dispatch-1", amount_pence=350_000,
     )
+    await _force_verified(conn, created["id"])
     result = await dispatch_pool_request(conn, request_id=created["id"], staff_id="FULF-08")
     assert result["receipt"].startswith("MPESA-")
     assert result["status"] == "submitted_to_partner"
 
+    req_row = await conn.fetchrow(
+        "SELECT hashed_object_id FROM requests WHERE id = $1", created["id"]
+    )
     ledger_row = await conn.fetchrow(
-        "SELECT object_hash, amount_pence FROM ledger_entries WHERE object_hash = 'objhash-dispatch-1'"
+        "SELECT object_hash, amount_pence FROM ledger_entries WHERE object_hash = $1",
+        req_row["hashed_object_id"],
     )
     assert ledger_row is not None
     assert ledger_row["amount_pence"] == 350_000
@@ -63,6 +80,7 @@ async def test_dispatch_duplicate_object_blocked(clean_conn):
         conn, token_hash=token, category="utility",
         hashed_object_id="objhash-same", amount_pence=350_000,
     )
+    await _force_verified(conn, a["id"])
     b = await create_pool(
         conn, token_hash=issue_token("+254700777888"), category="utility",
         hashed_object_id="objhash-same", amount_pence=350_000,
