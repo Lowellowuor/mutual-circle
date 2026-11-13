@@ -475,7 +475,7 @@ export const DonorView: React.FC = () => {
 
     if (tab === 'impact') {
       return (
-        <DonorImpact
+        <DonorImpact goTab={setTab}
           impactStats={impactStats}
           distribution={distribution}
           donorContributions={donorContributions}

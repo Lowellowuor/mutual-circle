@@ -24,10 +24,10 @@ const ThreeDoors: React.FC = () => {
             <a
               key={title}
               href={href}
-              className="surface-solid r-card p-6 md:p-7 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] focus-visible:ring-offset-2 hover:shadow-md transition-shadow"
+              className="surface-solid r-card p-8 md:p-10 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] focus-visible:ring-offset-2 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
             >
-              <div className="w-11 h-11 rounded-full bg-[#DCE8E0] flex items-center justify-center mb-5">
-                <Icon className="w-5 h-5 text-[#1F6B4A]" strokeWidth={1.75} />
+              <div className="w-14 h-14 rounded-full bg-[#DCE8E0] flex items-center justify-center mb-6">
+                <Icon className="w-6 h-6 text-[#1F6B4A]" strokeWidth={1.5} />
               </div>
               <div className="type-h2-m text-[#111111] mb-2">{title}</div>
               <p className="type-body-m type-secondary flex-1 mb-5">{body}</p>

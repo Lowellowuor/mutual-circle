@@ -171,6 +171,7 @@ async def test_pay_idempotent_duplicate(client, mock_conn):
         "response_body": {
             "ok": True,
             "checkout_request_id": "ws_CO_PREVIOUS",
+            "phone": "254113661960",
             "message": "STK push sent",
         },
         "created_at": "2026-11-07T14:37:00Z",

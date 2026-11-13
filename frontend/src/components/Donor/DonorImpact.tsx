@@ -26,6 +26,7 @@ interface DonorContribution {
 }
 
 interface DonorImpactProps {
+  goTab: (t: any) => void;
   impactStats: ImpactStats | null;
   distribution: DistributionItem[];
   donorContributions: DonorContribution[];
@@ -171,7 +172,7 @@ export const DonorImpact: React.FC<DonorImpactProps> = (props) => {
       </div>
 
       {/* CTA back to give */}
-      <button className="btn btn-primary w-full mb-3">
+      <button className="btn btn-primary w-full mb-3" onClick={() => props.goTab('give')}>
         Support another category
       </button>
     </div>

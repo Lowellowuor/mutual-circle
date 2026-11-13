@@ -10,8 +10,8 @@ const Hero: React.FC = () => {
       <div className="max-w-[1120px] mx-auto px-6 pt-14 pb-20 md:pt-24 md:pb-32">
         <div className="grid md:grid-cols-12 gap-12 md:gap-16 items-center">
           <div className="md:col-span-6">
-            <h1 className="type-display-m md:type-display-d text-[#111111]">{t.hero.h1}</h1>
-            <p className="type-body-m md:type-body-d text-[#4A4F4B] mt-6 max-w-[60ch]">{t.hero.sub}</p>
+            <h1 className="type-display-m md:type-display-d text-[#111111] tracking-tighter leading-[0.95]">{t.hero.h1}</h1>
+            <p className="type-body-m md:type-body-d text-[#4A4F4B] mt-8 max-w-[60ch] leading-relaxed">{t.hero.sub}</p>
             <div className="mt-8 flex flex-wrap items-center gap-5">
               <a href={APP_URL} className="btn btn-primary">{t.common.openApp}</a>
               <a href={DONOR_URL} className="btn-tertiary">
