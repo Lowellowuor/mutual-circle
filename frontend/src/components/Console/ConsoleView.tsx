@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { ConsoleBills } from './ConsoleBills';
 import { useApp } from '../../context/AppContext';
 import { STAFF_CREDS } from '../../services/auth';
 import { DetailModal } from './DetailModal';
