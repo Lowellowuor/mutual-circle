@@ -456,3 +456,13 @@ section[id] {
   .btn:active { transform: none; }
 }
 
+/* Section label at 14px (spec #19 floor) */
+.section-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4A4F4B;
+}

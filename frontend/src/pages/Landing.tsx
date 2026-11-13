@@ -372,92 +372,99 @@ const Hero: React.FC = () => {
 
 // ── How it works ────────────────────────────────────────────────────────────
 
-const InsideTheCircle: React.FC = () => {
+const ThePool: React.FC = () => {
   const { t } = useLanguage();
   return (
-    <section
-      id="inside-circle"
-      className="relative py-20 md:py-32 mesh-navy overflow-hidden text-white"
-    >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-10 w-[420px] h-[420px] rounded-full bg-lp-green/30 blur-3xl orb-drift" />
-        <div className="absolute bottom-10 right-10 w-[380px] h-[380px] rounded-full bg-lp-green/20 blur-3xl orb-drift-slow" />
+    <section id="the-pool" className="bg-[#0F1E17] py-16 md:py-24">
+      <div className="max-w-[1120px] mx-auto px-6">
+        <div className="max-w-2xl mb-10 md:mb-14">
+          <span className="section-label !text-[#DCE8E0]">{t.thePool.eyebrow}</span>
+          <h2 className="type-h2-m md:type-h2-d mt-3 !text-white">{t.thePool.headline}</h2>
+          <p className="type-body-m md:type-body-d mt-4 !text-white/70 max-w-[60ch]">
+            {t.thePool.body}
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+          {/* Request card */}
+          <div className="bg-white r-card p-6 md:p-8">
+            <div className="section-label !text-[#1F6B4A] mb-5">{t.thePool.requestLabel}</div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-baseline gap-4">
+                <span className="type-body-m type-secondary">{t.thePool.requestType}</span>
+                <span className="type-h2-m !text-[#111111] tabular-nums">{t.thePool.requestAmount}</span>
+              </div>
+              <div className="flex justify-between items-baseline gap-4">
+                <span className="type-body-m type-secondary">{t.thePool.requestRefLabel}</span>
+                <span className="text-sm font-mono text-[#111111]">{t.thePool.requestRef}</span>
+              </div>
+            </div>
+            <div className="mt-5 pt-4 border-t border-[#E8E6DE]">
+              <div className="section-label mb-1">Status</div>
+              <div className="text-sm font-medium text-[#1F6B4A]">{t.thePool.requestStatus}</div>
+            </div>
+            <div className="mt-5 text-sm italic text-[#4A4F4B]">{t.thePool.exampleLabel}</div>
+          </div>
+
+          {/* Gift card */}
+          <div className="bg-white r-card p-6 md:p-8">
+            <div className="section-label !text-[#1F6B4A] mb-5">{t.thePool.giftLabel}</div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-baseline gap-4">
+                <span className="type-body-m type-secondary">{t.thePool.giftType}</span>
+                <span className="type-h2-m !text-[#111111] tabular-nums">{t.thePool.giftAmount}</span>
+              </div>
+              <div className="flex justify-between items-baseline gap-4">
+                <span className="type-body-m type-secondary">{t.thePool.giftRefLabel}</span>
+                <span className="text-sm font-mono text-[#111111]">{t.thePool.giftRef}</span>
+              </div>
+            </div>
+            <div className="mt-5 pt-4 border-t border-[#E8E6DE]">
+              <div className="section-label mb-1">Status</div>
+              <div className="text-sm font-medium text-[#1F6B4A]">{t.thePool.giftStatus}</div>
+            </div>
+            <div className="mt-5 text-sm italic text-[#4A4F4B]">{t.thePool.exampleLabel}</div>
+          </div>
+        </div>
       </div>
+    </section>
+  );
+};
 
-      <div className="relative max-w-[1120px] mx-auto px-6">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="eyebrow-dark"><span className="mr-1.5 tabular-nums text-emerald-400/70">{t.insideCircle.number}</span>{t.insideCircle.eyebrow}</span>
-            <h2 className="display-serif mt-5 text-[44px] md:text-[72px] leading-[1.0] text-white">
-              {t.insideCircle.headline}
-            </h2>
-            <p className="mt-6 text-base md:text-lg text-white/60 leading-relaxed">
-              {t.insideCircle.body}
-            </p>
-          </div>
-        </Reveal>
-
-        <Reveal delay={100}>
-          <div className="mt-16 grid md:grid-cols-2 gap-8 md:gap-20">
-            <div>
-              <div className="glass-dark rounded-3xl p-7 md:p-8">
-                <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-emerald-400 mb-5">
-                  {t.insideCircle.requestLabel}
-                </div>
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-white/50">{t.insideCircle.requestBill}</span>
-                    <span className="display-serif text-2xl md:text-[28px] leading-none text-white tabular-nums">KES 850</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-white/50">{t.insideCircle.requestRef}</span>
-                    <span className="font-mono text-white">541234567</span>
-                  </div>
-                </div>
-                <div className="mt-6 pt-5 border-t border-white/10">
-                  <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-white/30 mb-1.5">
-                    Status
-                  </div>
-                  <div className="text-sm font-medium text-emerald-400">
-                    {t.insideCircle.requestStatus}
-                  </div>
-                </div>
+const ThreeDoors: React.FC = () => {
+  const { t } = useLanguage();
+  const doors = [
+    { Icon: Package, title: t.threeDoors.needTitle, body: t.threeDoors.needBody, cta: t.threeDoors.needCta, href: APP_URL },
+    { Icon: HeartHandshake, title: t.threeDoors.giveTitle, body: t.threeDoors.giveBody, cta: t.threeDoors.giveCta, href: DONOR_URL },
+    { Icon: Users, title: t.threeDoors.partnerTitle, body: t.threeDoors.partnerBody, cta: t.threeDoors.partnerCta, href: '#partners' },
+  ];
+  return (
+    <section id="three-doors" className="bg-white border-y border-[#E8E6DE]">
+      <div className="max-w-[1120px] mx-auto px-6 section-pad">
+        <div className="max-w-2xl mb-10 md:mb-14">
+          <span className="section-label">{t.threeDoors.eyebrow}</span>
+          <h2 className="type-h2-m md:type-h2-d mt-3 text-[#111111]">
+            {t.threeDoors.headline}
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6">
+          {doors.map(({ Icon, title, body, cta, href }) => (
+            <a
+              key={title}
+              href={href}
+              className="surface-solid r-card p-6 md:p-7 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] focus-visible:ring-offset-2 hover:shadow-md transition-shadow"
+            >
+              <div className="w-11 h-11 rounded-full bg-[#DCE8E0] flex items-center justify-center mb-5">
+                <Icon className="w-5 h-5 text-[#1F6B4A]" strokeWidth={1.75} />
               </div>
-              <div className="mt-3 text-[10px] uppercase tracking-[0.2em] text-white/25 text-center font-medium">
-                {t.insideCircle.example}
-              </div>
-            </div>
-
-            <div>
-              <div className="glass-dark rounded-3xl p-7 md:p-8">
-                <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-emerald-400 mb-5">
-                  {t.insideCircle.giftLabel}
-                </div>
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-white/50">{t.insideCircle.giftAmount}</span>
-                    <span className="display-serif text-2xl md:text-[28px] leading-none text-white tabular-nums">KES 850</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-white/50">{t.insideCircle.giftDonor}</span>
-                    <span className="text-white">{t.insideCircle.giftDonorValue}</span>
-                  </div>
-                </div>
-                <div className="mt-6 pt-5 border-t border-white/10">
-                  <div className="text-[10px] uppercase tracking-[0.18em] font-semibold text-white/30 mb-1.5">
-                    Status
-                  </div>
-                  <div className="text-sm font-medium text-emerald-400">
-                    {t.insideCircle.giftStatus}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 text-[10px] uppercase tracking-[0.2em] text-white/25 text-center font-medium">
-                {t.insideCircle.example}
-              </div>
-            </div>
-          </div>
-        </Reveal>
+              <div className="type-h2-m text-[#111111] mb-2">{title}</div>
+              <p className="type-body-m type-secondary flex-1 mb-5">{body}</p>
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-[#1F6B4A]">
+                {cta} <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </a>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -520,7 +527,7 @@ const HowItWorks: React.FC = () => {
       <div className="max-w-[1120px] mx-auto px-6">
         <Reveal>
           <div className="max-w-2xl">
-            <Eyebrow number={t.howItWorks.number}>{t.howItWorks.eyebrow}</Eyebrow>
+            <Eyebrow>{t.howItWorks.eyebrow}</Eyebrow>
             <h2 className="display-serif mt-4 text-[40px] md:text-[56px] leading-[1.02] text-lp-ink">
               {t.howItWorks.title}
             </h2>
@@ -583,268 +590,13 @@ const HowItWorks: React.FC = () => {
 
 // ── Interactive demo ─────────────────────────────────────────────────────────
 
-const DEMO_TABS = [
-  {
-    id: 'request' as const,
-    number: '01',
-    label: 'Request',
-    subtitle: 'Choose what you need.',
-    header: 'What do you need?',
-    items: [
-      { Icon: Package, label: 'Food bundle', sub: 'Reserved in seconds' },
-      { Icon: CreditCard, label: 'Pay a bill', sub: 'Utility, school, hospital' },
-      { Icon: Users, label: 'Match', sub: 'Opt-in opportunities' },
-    ],
-  },
-  {
-    id: 'verify' as const,
-    number: '02',
-    label: 'Verify',
-    subtitle: 'We check the bill, not you.',
-    header: 'Upload your bill',
-    items: [
-      { Icon: FileText, label: 'Photo of bill', sub: 'JPEG, PNG, or PDF' },
-      { Icon: ShieldCheck, label: 'Verified by staff', sub: 'Under review' },
-      { Icon: Check, label: 'Approved', sub: 'Funds go to the institution' },
-    ],
-  },
-  {
-    id: 'collect' as const,
-    number: '03',
-    label: 'Collect',
-    subtitle: 'PIN. Collect. Done.',
-    header: 'Locker reserved',
-    items: [
-      { Icon: Hash, label: 'PIN 4712', sub: 'Sent by SMS' },
-      { Icon: Package, label: 'Food bundle', sub: 'Standard Pantry' },
-      { Icon: Check, label: 'Ready to collect', sub: 'Kibera Hub' },
-    ],
-  },
-];
 
-const DemoPhone: React.FC<{ tab: typeof DEMO_TABS[number] }> = ({ tab }) => (
-  <div className="relative mx-auto w-[290px] md:w-[320px] rounded-[2.75rem] bg-gradient-to-br from-lp-ink via-[#232b26] to-lp-ink p-[3px] shadow-[0_40px_80px_-20px_rgba(17,17,17,0.45)]">
-    <div className="rounded-[2.6rem] bg-lp-canvas overflow-hidden flex flex-col" style={{ height: '620px' }}>
-      <div className="text-center text-[10px] pt-3 pb-1 text-lp-ink/40 font-medium">9:41</div>
-      <div className="px-4 py-3 flex items-center gap-2 border-b border-lp-ink/5">
-        <div className="w-7 h-7 rounded-lg bg-lp-green flex items-center justify-center">
-          <HeartHandshake className="w-3.5 h-3.5 text-white" strokeWidth={2} />
-        </div>
-        <span className="text-xs font-semibold text-lp-ink">{tab.header}</span>
-      </div>
-      <div className="p-4 space-y-3 flex-1">
-        {tab.items.map((item, i) => (
-          <div
-            key={i}
-            className="p-3 rounded-xl bg-lp-surface border border-lp-ink/8 space-y-1 content-in"
-            style={{ animationDelay: i * 80 + 'ms' }}
-          >
-            <item.Icon className="w-4 h-4 text-lp-green" strokeWidth={2} />
-            <div className="text-xs font-semibold text-lp-ink">{item.label}</div>
-            <div className="text-[10px] text-lp-ink/50">{item.sub}</div>
-          </div>
-        ))}
-      </div>
-      <div className="border-t border-lp-ink/10 bg-lp-surface grid grid-cols-3 py-2">
-        {[
-          { label: 'Home', active: true },
-          { label: 'Activity', active: false },
-          { label: 'Settings', active: false },
-        ].map((item) => (
-          <div key={item.label} className="text-center">
-            <div className={'w-4 h-4 mx-auto rounded-sm ' + (item.active ? 'bg-lp-green' : 'bg-lp-ink/20')} />
-            <div className={'text-[8px] mt-0.5 ' + (item.active ? 'text-lp-green font-medium' : 'text-lp-ink/40')}>
-              {item.label}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
 
-const InteractiveDemo: React.FC = () => {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
 
-  useEffect(() => {
-    if (paused) return;
-    const timer = setInterval(() => setActive(a => (a + 1) % DEMO_TABS.length), 6000);
-    return () => clearInterval(timer);
-  }, [paused]);
-
-  return (
-    <section className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
-      <AmbientBackdrop />
-      <div className="relative max-w-[1120px] mx-auto px-6">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <Eyebrow>See it in action</Eyebrow>
-            <h2 className="display-serif mt-4 text-[40px] md:text-[56px] leading-[1.05] text-lp-ink">
-              Three actions. One screen.
-            </h2>
-          </div>
-        </Reveal>
-
-        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-          <Reveal delay={100}>
-            <div className="order-2 md:order-1">
-              {DEMO_TABS.map((tab, i) => {
-                const isActive = i === active;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => { setActive(i); setPaused(true); }}
-                    className={
-                      'w-full text-left flex gap-5 py-5 border-b border-lp-ink/8 last:border-0 press-scale transition-all ' +
-                      (isActive ? 'bg-lp-green/[0.04]' : 'row-lift')
-                    }
-                  >
-                    <span
-                      className={
-                        'display-serif text-3xl md:text-4xl tabular-nums w-14 shrink-0 transition-colors ' +
-                        (isActive ? 'text-lp-green' : 'text-lp-ink/15')
-                      }
-                    >
-                      {tab.number}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-lg font-semibold text-lp-ink">{tab.label}</div>
-                      <div className="text-sm text-lp-ink/55 mt-1">{tab.subtitle}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </Reveal>
-
-          <Reveal delay={200}>
-            <div className="order-1 md:order-2 flex justify-center">
-              <DemoPhone tab={DEMO_TABS[active]} />
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const WhatYouCanGet: React.FC = () => {
-  const { t } = useLanguage();
-  const [active, setActive] = useState(0);
-  const items = [
-    { Icon: Package, title: t.whatYouCanGet.item1Title, body: t.whatYouCanGet.item1Body, img: IMG.food, alt: t.whatYouCanGet.item1Alt },
-    { Icon: Droplet, title: t.whatYouCanGet.item2Title, body: t.whatYouCanGet.item2Body, img: IMG.hygiene, alt: t.whatYouCanGet.item2Alt },
-    { Icon: Zap, title: t.whatYouCanGet.item3Title, body: t.whatYouCanGet.item3Body, img: IMG.utility, alt: t.whatYouCanGet.item3Alt },
-    { Icon: GraduationCap, title: t.whatYouCanGet.item4Title, body: t.whatYouCanGet.item4Body, img: IMG.school, alt: t.whatYouCanGet.item4Alt },
-  ];
-
-  return (
-    <section id="what-you-can-get" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
-      <AmbientBackdrop />
-      <div className="max-w-[1120px] mx-auto px-6">
-        <Reveal>
-          <div className="max-w-2xl">
-            <Eyebrow number={t.whatYouCanGet.number}>{t.whatYouCanGet.eyebrow}</Eyebrow>
-            <h2 className="display-serif mt-4 text-[40px] md:text-[56px] leading-[1.02] text-lp-ink">
-              {t.whatYouCanGet.title}
-            </h2>
-          </div>
-        </Reveal>
-
-        <div className="mt-14 grid md:grid-cols-12 gap-10 md:gap-14 items-center">
-          <div className="md:col-span-5">
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
-              {items.map((item, i) => (
-                <img
-                  key={i}
-                  src={item.img}
-                  alt={item.alt}
-                  className={
-                    'absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 ease-out ' +
-                    (i === active ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.03]')
-                  }
-                  loading="lazy"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15'; }}
-                />
-              ))}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.05) 0%, transparent 30%, transparent 70%, rgba(17,17,17,0.15) 100%)' }}
-                aria-hidden="true"
-              />
-            </div>
-          </div>
-
-          <div className="md:col-span-7">
-            {items.map((item, i) => (
-              <button
-                key={i}
-                type="button"
-                onMouseEnter={() => setActive(i)}
-                onFocus={() => setActive(i)}
-                onClick={() => setActive(i)}
-                className={
-                  'w-full text-left flex gap-5 py-5 border-b border-lp-ink/8 last:border-0 transition-colors ' +
-                  (i === active ? 'bg-lp-green/[0.05]' : 'hover:bg-lp-ink/[0.02]')
-                }
-              >
-                <span
-                  className={
-                    'display-serif text-3xl md:text-4xl tabular-nums w-12 shrink-0 transition-colors ' +
-                    (i === active ? 'text-lp-green' : 'text-lp-ink/15')
-                  }
-                >
-                  0{i + 1}
-                </span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <item.Icon className="w-4 h-4 text-lp-green" strokeWidth={1.75} />
-                    <h3 className="text-lg font-semibold text-lp-ink">{item.title}</h3>
-                  </div>
-                  <p className="mt-1.5 text-sm text-lp-ink/60 leading-relaxed">{item.body}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
 
 // ── Private by design ───────────────────────────────────────────────────────
 
-const PhotoBreak: React.FC = () => {
-  const { t } = useLanguage();
-  return (
-    <section className="relative overflow-hidden">
-      <div className="relative h-[70vh] md:h-[85vh] min-h-[500px] max-h-[800px]">
-        <img
-          src={IMG.architecture}
-          alt={t.photoBreak.alt}
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          loading="lazy"
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.10) 0%, transparent 40%)' }}
-          aria-hidden="true"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-lp-ink/85 via-lp-ink/30 to-lp-ink/40" />
-        <div className="relative z-10 h-full max-w-[1120px] mx-auto px-6 flex items-end pb-16 md:pb-24">
-          <div className="max-w-3xl">
-            <span className="eyebrow-dark">{t.photoBreak.eyebrow}</span>
-            <p className="display-serif mt-5 text-[36px] md:text-[56px] lg:text-[64px] leading-[1.05] text-white">
-              {t.photoBreak.quote}
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
+
 
 const Private: React.FC = () => {
   const { t } = useLanguage();
@@ -862,7 +614,7 @@ const Private: React.FC = () => {
       <div className="relative max-w-[1120px] mx-auto px-6">
         <Reveal>
           <div className="max-w-3xl">
-            <Eyebrow number={t.private.number}>{t.private.eyebrow}</Eyebrow>
+            <Eyebrow>{t.private.eyebrow}</Eyebrow>
             <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
               {t.private.headline}
             </h2>
@@ -940,103 +692,7 @@ const SectionArrow: React.FC<{ direction: 'left' | 'right'; className?: string }
   </div>
 );
 
-const Givers: React.FC = () => {
-  const { t } = useLanguage();
-  const principles = [
-    { title: t.givers.p1Title, body: t.givers.p1Body },
-    { title: t.givers.p2Title, body: t.givers.p2Body },
-    { title: t.givers.p3Title, body: t.givers.p3Body },
-  ];
-  return (
-    <section id="give" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
-      <AmbientBackdrop />
-      <div className="relative max-w-[1120px] mx-auto px-6">
-        <div className="grid md:grid-cols-5 gap-12 md:gap-16 items-start">
-          {/* Text column */}
-          <div className="md:col-span-3">
-            <Reveal>
-              <div>
-                <Eyebrow number={t.givers.number}>{t.givers.eyebrow}</Eyebrow>
-                <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
-                  {t.givers.headline}
-                </h2>
-                <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
-                  {t.givers.body}
-                </p>
-              </div>
-            </Reveal>
 
-            <Reveal delay={100}>
-              <div className="mt-12 md:mt-16">
-                {principles.map((p, i) => (
-                  <div
-                    key={i}
-                    className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-8 items-baseline"
-                  >
-                    <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
-                      0{i + 1}
-                    </span>
-                    <div>
-                      <h3 className="text-base md:text-lg font-semibold text-lp-ink">
-                        {p.title}
-                      </h3>
-                      <p className="mt-1 text-sm md:text-base text-lp-ink/60 leading-relaxed">
-                        {p.body}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-
-            <Reveal delay={200}>
-              <div className="mt-14 md:mt-20">
-                <p className="display-serif text-[28px] md:text-[44px] leading-[1.1] text-lp-green">
-                  {t.givers.line}
-                </p>
-                <div className="mt-8">
-                  <Button onClick={() => { window.location.href = DONOR_URL; }}>
-                    {t.givers.cta}
-                    <ArrowRight className="w-4 h-4 ml-1.5" />
-                  </Button>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-
-          {/* Photo column */}
-          <Reveal delay={150} className="md:col-span-2">
-            <div className="md:sticky md:top-28 relative">
-              <SectionArrow direction="left" className="-left-14 top-32" />
-              <figure className="relative">
-                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
-                  <img
-                    src={IMG.giving}
-                    alt={t.givers.photoAlt}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-[1.03]"
-                    loading="lazy"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15'; }}
-                  />
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.06) 0%, rgba(31,107,74,0.02) 50%, rgba(17,17,17,0.18) 100%)' }}
-                    aria-hidden="true"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-emerald-300 mb-1">
-                      The pool
-                    </div>
-                    <div className="display-serif text-xl leading-tight">Where gifts gather.</div>
-                  </div>
-                </div>
-              </figure>
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-};
 
 const Partners: React.FC = () => {
   const { t } = useLanguage();
@@ -1094,7 +750,7 @@ const Partners: React.FC = () => {
           <div className="md:col-span-3 md:order-2">
             <Reveal>
               <div>
-                <Eyebrow number={t.partners.number}>{t.partners.eyebrow}</Eyebrow>
+                <Eyebrow>{t.partners.eyebrow}</Eyebrow>
                 <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
                   {t.partners.headline}
                 </h2>
@@ -1267,7 +923,7 @@ const Faq: React.FC = () => {
       <div className="max-w-[1120px] mx-auto px-6 mt-6 md:mt-10">
         <Reveal>
           <div className="text-center">
-            <Eyebrow number={t.faq.number}>{t.faq.eyebrow}</Eyebrow>
+            <Eyebrow>{t.faq.eyebrow}</Eyebrow>
             <h2 className="display-serif mt-3 text-4xl md:text-5xl text-lp-ink">
               {t.faq.title}
             </h2>
@@ -1446,13 +1102,10 @@ const LandingInner: React.FC = () => (
     <TopBar />
     <main>
       <Hero />
-            <InsideTheCircle />
+      <ThreeDoors />
       <HowItWorks />
-      <InteractiveDemo />
-      <WhatYouCanGet />
-      <PhotoBreak />
       <Private />
-      <Givers />
+      <ThePool />
       <Partners />
       <Faq />
     </main>
