@@ -19,6 +19,7 @@ from mtc.routes.fulfilment import router as fulfilment_router
 from mtc.routes.partner import router as partner_router
 from mtc.routes.pledges import router as pledges_router
 from mtc.routes.institutional import router as institutional_router
+from mtc.routes.webhooks import router as webhooks_router
 from mtc.routes.surveys import router as surveys_router
 from mtc.routes.helplines import router as helplines_router
 from mtc.routes.ledger_public import router as ledger_public_router
@@ -263,6 +264,7 @@ app.include_router(campaigns_router)
 app.include_router(donors_router)
 app.include_router(pledges_router)
 app.include_router(institutional_router)
+app.include_router(webhooks_router)
 app.include_router(surveys_router)
 app.include_router(admin_router)
 app.include_router(opportunities_router)
