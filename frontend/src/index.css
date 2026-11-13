@@ -466,3 +466,15 @@ section[id] {
   text-transform: uppercase;
   color: #4A4F4B;
 }
+
+/* Tab content fade (spec #23 — 150ms) */
+@keyframes contentInFast {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.content-in-fast {
+  animation: contentInFast 150ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .content-in-fast { animation: none; }
+}
