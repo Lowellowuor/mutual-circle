@@ -5,7 +5,7 @@ import { useToast } from '../Shared/Toast';
 
 interface Props {
   token: string;
-  requestId: string;
+  requestId: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -25,7 +25,7 @@ export const IntakeSurveyModal: React.FC<Props> = ({ token, requestId, onClose, 
     setError(null);
     try {
       await submitIntake(token, {
-        request_id: requestId,
+        request_id: requestId as any,
         family_size: familySize,
         work_status: workStatus,
         industry,

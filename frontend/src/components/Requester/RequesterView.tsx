@@ -133,19 +133,20 @@ export const RequesterView: React.FC = () => {
 
   useEffect(() => {
     if (!tokenHash) return;
-    // Check for the most recent approved request that doesn't have a survey yet
+    // Check for ANY active request that doesn't have a survey yet
     const activeReq = poolRequests.find(r => ['verified', 'pending_check', 'pending_evidence'].includes(r.status));
-    if (activeReq) {
-      getSurveyStatus(tokenHash, activeReq.id)
-        .then(res => {
-          if (res && res.can_submit_intake && !res.has_intake) {
-            setShowIntakePrompt(true);
-            setSurveyRequestId(activeReq.id);
-            if (res.family_size) setFamilySize(res.family_size);
-          }
-        })
-        .catch(() => {});
-    }
+    
+    // If they have no requests, just check if they have a survey at all (by passing null)
+    const idToCheck = activeReq ? activeReq.id : null;
+    
+    getSurveyStatus(tokenHash, idToCheck)
+      .then(res => {
+        if (res && res.can_submit_intake && !res.has_intake) {
+          setShowIntakePrompt(true);
+          setSurveyRequestId(activeReq ? activeReq.id : null);
+        }
+      })
+      .catch(() => {});
   }, [tokenHash, poolRequests]);
 
   useEffect(() => {

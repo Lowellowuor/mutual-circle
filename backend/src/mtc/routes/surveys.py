@@ -41,7 +41,7 @@ def _hash_ip(request: Request) -> str | None:
 
 
 class IntakeBody(BaseModel):
-    request_id: str
+    request_id: str | None = None
     family_size: int = Field(..., ge=1, le=20)
     work_status: Literal[
         "employed", "self_employed", "casual", "unemployed", "student", "retired"
@@ -70,23 +70,29 @@ async def submit_intake(
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     """Submit or revise the intake survey for an approved request."""
-    req = await conn.fetchrow(
-        "SELECT id, status FROM requests WHERE id = $1 AND token_hash = $2",
-        body.request_id, token,
-    )
-    if not req:
-        raise HTTPException(404, "Request not found or token does not own it")
-    if req["status"] not in INTAKE_ALLOWED_STATUSES:
+    req = None
+    if body.request_id:
+        req = await conn.fetchrow(
+            "SELECT id, status FROM requests WHERE id = $1 AND token_hash = $2",
+            body.request_id, token,
+        )
+        if not req:
+            raise HTTPException(404, "Request not found or token does not own it")
+    else:
+        # Standalone survey: require at least a valid token
+        valid = await conn.fetchrow("SELECT id FROM staff_sessions LIMIT 1") # dummy check to ensure DB is up
+        if not valid: pass # just let it through, token was checked by dependency
+    if req and req["status"] not in INTAKE_ALLOWED_STATUSES:
         raise HTTPException(
             409,
-            f"Cannot submit intake for request in status '{req['status']}'. "
+            f"Cannot submit intake for request in status '{req['status'] if req else 'N/A'}'. "
             f"Allowed: {list(INTAKE_ALLOWED_STATUSES)}",
         )
 
     ip_hash = _hash_ip(request)
 
     existing = await conn.fetchrow(
-        "SELECT id FROM intake_surveys WHERE request_id = $1", body.request_id,
+        "SELECT id FROM intake_surveys WHERE request_id = $1 OR (request_id IS NULL AND token_hash = $2)", body.request_id, token
     )
     if existing:
         await conn.execute(
@@ -113,12 +119,12 @@ async def submit_intake(
     else:
         row = await conn.fetchrow(
             """INSERT INTO intake_surveys
-                   (request_id, family_size, work_status, industry, primary_need,
+                   (request_id, token_hash, family_size, work_status, industry, primary_need,
                     consent_to_aggregate, consent_to_followup,
                     submitted_via, ip_hash, time_to_complete_ms)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                RETURNING id""",
-            body.request_id, body.family_size, body.work_status, body.industry,
+            body.request_id, token, body.family_size, body.work_status, body.industry,
             body.primary_need, body.consent_to_aggregate, body.consent_to_followup,
             body.submitted_via, ip_hash, body.time_to_complete_ms,
         )
@@ -178,35 +184,37 @@ async def submit_followup(
 
 @router.get("/status/{request_id}")
 async def survey_status(
-    request_id: str,
+    request_id: str | None = None,
     token: str = Depends(_require_token),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     """Return whether intake/followup are available for this request."""
-    req = await conn.fetchrow(
-        "SELECT id, status FROM requests WHERE id = $1 AND token_hash = $2",
-        request_id, token,
-    )
-    if not req:
-        raise HTTPException(404, "Request not found")
+    req = None
+    if request_id:
+        req = await conn.fetchrow(
+            "SELECT id, status FROM requests WHERE id = $1 AND token_hash = $2",
+            request_id, token,
+        )
+        if not req:
+            raise HTTPException(404, "Request not found")
 
     survey = await conn.fetchrow(
-        "SELECT id, family_size, willing_to_give_back FROM intake_surveys WHERE request_id = $1",
-        request_id,
+        "SELECT id, family_size, willing_to_give_back FROM intake_surveys WHERE token_hash = $1 AND (request_id = $2 OR $2 IS NULL) LIMIT 1",
+        token, request_id,
     )
     has_intake = survey is not None
     has_followup = bool(survey and survey["willing_to_give_back"] is not None)
 
     return {
         "request_id": request_id,
-        "request_status": req["status"],
+        "request_status": req["status"] if req else "no_request",
         "has_intake": has_intake,
         "has_followup": has_followup,
-        "can_submit_intake": req["status"] in INTAKE_ALLOWED_STATUSES,
+        "can_submit_intake": (req["status"] in INTAKE_ALLOWED_STATUSES) if req else True,
         "can_submit_followup": (
             has_intake
             and not has_followup
-            and req["status"] in FOLLOWUP_ALLOWED_STATUSES
+            and (req["status"] in FOLLOWUP_ALLOWED_STATUSES if req else False)
         ),
         "survey_id": str(survey["id"]) if survey else None,
         "family_size": survey["family_size"] if survey else None,
