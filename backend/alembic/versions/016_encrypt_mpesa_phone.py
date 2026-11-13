@@ -26,6 +26,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # SAFETY FIX: On fresh CI databases, expected_phone may not exist because
+    # it was originally added manually in production and never captured in migrations.
+    op.execute("ALTER TABLE mpesa_transactions ADD COLUMN IF NOT EXISTS expected_phone TEXT")
+    
     op.execute("ALTER TABLE mpesa_transactions ADD COLUMN IF NOT EXISTS expected_phone_encrypted TEXT")
     op.execute("ALTER TABLE mpesa_transactions ADD COLUMN IF NOT EXISTS expected_phone_hash TEXT")
 
