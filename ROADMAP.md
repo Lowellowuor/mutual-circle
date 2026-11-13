@@ -15,6 +15,20 @@
 - OCR queue for Tier 3 verification
 - Public ledger with chain verification and CSV export
 
+### Landing page (2026-11)
+
+- 7-section marketing page: Header, Hero, Three doors, How it works, Private, The pool, Partners, FAQ, Footer
+- Token system: canvas #FAF8F4, surface #FFFFFF, ink #111111, muted #4A4F4B, accent #1F6B4A, sage #DCE8E0, dark band #0F1E17
+- Type scale: Cormorant Garamond 500 at 32px+, Inter for everything else, 14px minimum
+- All copy in `frontend/src/i18n/en.ts`, no hardcoded strings in JSX
+- How it works tabs: `role=tablist` + `tab` + `tabpanel`, Arrow/Home/End keyboard nav, roving tabindex
+- Partner form: idle -> loading -> success -> error with `aria-busy` / `role=alert` / `aria-live` on state containers
+- Button states: default, hover, focus-visible (2px green outline), pressed (scale 0.98), disabled (opacity 0.5)
+- `prefers-reduced-motion` respected on every animation
+- Landing-only CSS removed from `index.css`; BenchTab moved to its own stylesheet so the app keeps its orb drift
+- Dead components removed: Reveal, AmbientBackdrop, Eyebrow, SectionArrow, WaveDivider, DotGrid, OrbGlow
+- 8 landing photos removed from repo (~1.8MB)
+
 ### Collection confirmation
 
 - POST /requests/{id}/collect — canonical, PIN in body

@@ -4,7 +4,7 @@
 
 **Resource-sharing network for Kenya.** Requesters submit a need  a food bundle or a bill to pay  and receive an outcome without ever being linked to a specific donor. Donors give to a blind pool, never to a person. Fulfilment staff settle requests with partner institutions. Every state change is on a public HMAC-chained ledger.
 
-**Status:** Functional prototype. Production-ready architecture; pilot-ready operations. Waiting on: real payment integration, SMS provider, partner authentication hardening, and the security items in `SECURITY.md` before public deployment.
+**Status:** Functional prototype. M-PESA Daraja (STK Push) and Africa's Talking (SMS) are wired end-to-end against sandbox APIs. Production-ready architecture; pilot-ready operations. Waiting on: B2C SecurityCredential, partner API access, and the security items in `SECURITY.md` before public deployment.
 
 ## Recent updates (2026-11)
 
@@ -56,6 +56,25 @@ Spec section 8 open items are tracked in SECURITY.md and ROADMAP.md.
 GitHub Actions runs `.github/workflows/ci.yml` on every push and pull request: pytest for backend, TypeScript check and build for frontend. Badge in the header.
 
 
+## Landing page
+
+The public page at `/` is the front door. Seven sections, solid surfaces, one serif headline per section, one primary action per section. No photography, no glass, no gradients.
+
+| Section | Purpose |
+|---|---|
+| Header | Abstract circle mark, four nav links, one primary button (Open the app) |
+| Hero | Headline, subtitle, phone mockup, trust row |
+| Three doors | Reserve or pay / Give / Partner |
+| How it works | Request / Verify / Collect tabs with keyboard nav and screen-reader labels |
+| Private | Three icon rows + quiet M-Pesa note |
+| The pool | Solid dark band, three icon points, request + gift cards, Give button |
+| Partners | Icon rows, Talk to us opens a responsive modal with loading / success / error states |
+| FAQ | Single accordion, all collapsed, multi-open |
+| Footer | Tagline, three-column links, contact details |
+| Mobile dock | Single Open the app button, safe-area padded |
+
+All strings live in `frontend/src/i18n/en.ts`, read via `useLanguage()`. No hardcoded copy in JSX. 14px is the minimum font size. `prefers-reduced-motion` respected on every animation.
+
 ## What works today
 
 - **Requesters** apply by phone (web), declare household size, and either reserve a food bundle or submit a bill for payment. Every request returns a reference and a collection PIN.
@@ -63,10 +82,6 @@ GitHub Actions runs `.github/workflows/ci.yml` on every push and pull request: p
 - **Donors** give to the blind pool, opt in to a public recognition ledger, pledge goods or services that fulfilment staff match to specific requests.
 - **Partners** see only the redemptions and settlements that concern them, via a scoped API key.
 - The **blind-pool invariant holds**: no field in the schema connects a specific donor to a specific disbursement. Enforced at the data model, not just the UI.
-
-## What is stubbed or mocked
-
-See the [Current Limitations](#current-limitations) section below. In short: payments, SMS, USSD, WhatsApp, and locker hardware are simulated. The code paths, contracts, and audit trail for those systems exist; they are not connected to live providers.
 
 ## Stack
 
@@ -119,7 +134,7 @@ Open http://localhost:3000/mutual-circle/ (or whichever URL Vite prints).
 
 **Partner auth is pilot-grade.** `X-Partner-Key` is a static per-partner key. Real deployment needs per-partner JWTs with rotation. See `SECURITY.md`.
 
-**Audit trail is partial.** Compliance-critical actions (dispatch, voucher issuance, OCR verification, flag resolution, partner confirm) write to `audit_log`. Some operator actions are local-only â€” see `SECURITY.md` for the full list.
+**Audit trail is partial.** Compliance-critical actions (dispatch, voucher issuance, OCR verification, flag resolution, partner confirm) write to `audit_log`. Some operator actions are local-only — see `SECURITY.md` for the full list.
 
 **Bench tab is a stub.** The Requester Bench shows the top-level entry (helplines + "reach out directly") but is not the full peer-support experience.
 
@@ -127,7 +142,7 @@ Open http://localhost:3000/mutual-circle/ (or whichever URL Vite prints).
 
 ## Blind-pool invariant
 
-No donor is linked to a specific recipient anywhere in the schema. This is enforced at the data model, not just the UI. If you find a query that appears to link donor to recipient, that is a bug â€” report it.
+No donor is linked to a specific recipient anywhere in the schema. This is enforced at the data model, not just the UI. If you find a query that appears to link donor to recipient, that is a bug — report it.
 
 ## Integration test
 
@@ -137,8 +152,8 @@ Expect `Total: 47 / 47 passed`. The test runs on port 8010 to isolate from a zom
 
 ## Deployment note (Windows)
 
-The integration test kills all venv python during setup. Stop the demo backend with `Ctrl+C`, not `Stop-Process` â€” killing uvicorn with `Stop-Process` leaves the Windows socket in LISTEN state for hours.
+The integration test kills all venv python during setup. Stop the demo backend with `Ctrl+C`, not `Stop-Process` — killing uvicorn with `Stop-Process` leaves the Windows socket in LISTEN state for hours.
 
 ## License
 
-See `LICENSE`. Prototype â€” not for public deployment without addressing `SECURITY.md`.
+See `LICENSE`. Prototype — not for public deployment without addressing `SECURITY.md`.
