@@ -14,7 +14,7 @@ import { Sheet } from '../ui/Sheet';
 const APP_URL = import.meta.env.BASE_URL + 'app';
 const DONOR_URL = import.meta.env.BASE_URL + 'donor';
 
-// Curated photography â€” served locally from frontend/public/images/landing/
+// Curated photography — served locally from frontend/public/images/landing/
 // (see ROLE.txt amendment 2026-11-13). No people, no partner logos.
 const BASE = import.meta.env.BASE_URL;
 const IMG = {
@@ -28,7 +28,7 @@ const IMG = {
   institutions: BASE + 'images/landing/institutions.jpg',
 };
 
-// â”€â”€ Reveal / scroll animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Reveal / scroll animation ───────────────────────────────────────────────
 
 const useInView = <T extends HTMLElement>(ref: React.RefObject<T | null>) => {
   const [visible, setVisible] = useState(false);
@@ -63,7 +63,7 @@ const Reveal: React.FC<{ children: React.ReactNode; delay?: number; className?: 
   );
 };
 
-// â”€â”€ Ambient backdrop (subtle drifting orbs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Ambient backdrop (subtle drifting orbs) ─────────────────────────────────
 
 const AmbientBackdrop: React.FC = () => (
   <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
@@ -78,7 +78,7 @@ const AmbientBackdrop: React.FC = () => (
   </div>
 );
 
-// â”€â”€ Shared decorative primitives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shared decorative primitives ────────────────────────────────────────────
 
 const Eyebrow: React.FC<{ children: React.ReactNode; number?: string }> = ({ children, number }) => (
   <span className="eyebrow">
@@ -111,7 +111,7 @@ const WaveDivider: React.FC = () => (
   </div>
 );
 
-// â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Top bar ─────────────────────────────────────────────────────────────────
 
 const TopBar: React.FC = () => {
   const { t } = useLanguage();
@@ -347,7 +347,7 @@ const TopBar: React.FC = () => {
           </div>
           <div className="pt-4">
             <a href={APP_URL} className="block text-sm font-medium text-lp-ink py-2">
-              {t.persona.signIn} →
+              Sign in →
             </a>
           </div>
         </div>
@@ -414,7 +414,7 @@ const PhoneMockup: React.FC = () => {
   );
 };
 
-// â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Hero ────────────────────────────────────────────────────────────────────
 
 const Hero: React.FC = () => {
   const { t } = useLanguage();
@@ -518,7 +518,7 @@ const Hero: React.FC = () => {
   );
 };
 
-// â”€â”€ Promise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Promise ─────────────────────────────────────────────────────────────────
 
 const Promise: React.FC = () => {
   const { t } = useLanguage();
@@ -538,7 +538,7 @@ const Promise: React.FC = () => {
   );
 };
 
-// â”€â”€ How it works â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── How it works ────────────────────────────────────────────────────────────
 
 const InsideTheCircle: React.FC = () => {
   const { t } = useLanguage();
@@ -726,7 +726,7 @@ const HowItWorks: React.FC = () => {
   );
 };
 
-// â”€â”€ What you can get â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── What you can get ────────────────────────────────────────────────────────
 
 // ── Interactive demo ─────────────────────────────────────────────────────────
 
@@ -961,7 +961,7 @@ const WhatYouCanGet: React.FC = () => {
   );
 };
 
-// â”€â”€ Private by design â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Private by design ───────────────────────────────────────────────────────
 
 const PhotoBreak: React.FC = () => {
   const { t } = useLanguage();
@@ -1492,7 +1492,7 @@ const Footer: React.FC = () => {
 };
 
 
-// â”€â”€ Mobile dock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Mobile dock ─────────────────────────────────────────────────────────────
 
 const MobileDock: React.FC = () => {
   const { t } = useLanguage();
@@ -1522,7 +1522,7 @@ const MobileDock: React.FC = () => {
   );
 };
 
-// â”€â”€ Page root â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Page root ───────────────────────────────────────────────────────────────
 
 const LandingInner: React.FC = () => (
   <>
