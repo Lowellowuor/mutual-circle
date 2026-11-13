@@ -97,6 +97,7 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL_MAIN: "postgresql://mtc_ci:mtc_ci_password@localhost:5432/mtc_ci"
+          MESSAGING_ENCRYPTION_KEY: "ci-dummy-messaging-key-not-for-prod-0000"
         run: alembic upgrade head
 
       - name: Test (no-DB)
@@ -117,6 +118,7 @@ jobs:
           LEDGER_HMAC_KEY: "ci-dummy-ledger-hmac-key-not-for-prod-0000"
           TOKEN_HMAC_KEY_CURRENT: "ci-dummy-token-hmac-key-not-for-prod-0000"
           PARTNER_HMAC_KEY: "ci-dummy-partner-hmac-key-not-for-prod-000"
+          MESSAGING_ENCRYPTION_KEY: "ci-dummy-messaging-key-not-for-prod-0000"
           # ENROL-04 bcrypt('4821')
           STAFF_ENROL_ID: ENROL-04
           STAFF_ENROL_PIN_HASH: "$2b$12$8HFMUTxWJ/f.HdEB5WY9C.YaGuNWjxAefDWhR.UAmeklNDCoxpWhO"

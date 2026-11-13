@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from mtc.crypto import hash_phone
 from mtc.db.main import get_conn
 from mtc.main import app
 
@@ -59,7 +60,7 @@ async def test_success_marks_request_paid(client, mock_conn):
         "target_table": "requests",
         "target_id": "req-uuid-1",
         "amount_pence": 5000,             # matches _success_payload Amount 50.0 * 100
-        "expected_phone": "254113661960", # matches payload PhoneNumber after normalization
+        "expected_phone_hash": hash_phone("254113661960"), # matches payload PhoneNumber after normalization
     }
     mock_conn.execute.return_value = "UPDATE 1"
 

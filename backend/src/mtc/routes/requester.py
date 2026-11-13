@@ -13,6 +13,7 @@ import asyncpg
 from mtc import idempotency
 from mtc.config import settings
 from mtc.mpesa.client import initiate_stk_push
+from mtc.crypto import encrypt_phone, hash_phone
 from mtc.db.main import get_conn
 from mtc.rate_limit.counter import RateLimitExceeded, consume_quota, check_ip_rate_limit
 from fastapi import Request
@@ -229,9 +230,9 @@ async def pay_route(
         # to retry (a retry would fire a second STK prompt and double-charge).
         try:
             await conn.execute(
-                """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone)
-                   VALUES ($1, $2, 'requests', $3, $4)""",
-                checkout_id, row["amount_pence"], row["id"], stk["phone"],
+                """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone_encrypted, expected_phone_hash)
+               VALUES ($1, $2, 'requests', $3, $4, $5)""",
+                checkout_id, row["amount_pence"], row["id"], encrypt_phone(stk["phone"]), hash_phone(stk["phone"]),
             )
         except Exception as exc:
             logger.critical(

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from mtc import idempotency
+from mtc.crypto import encrypt_phone, hash_phone
 from mtc.db.main import get_conn
 from mtc.mpesa.client import initiate_stk_push
 from pydantic import BaseModel
@@ -221,9 +222,9 @@ async def pay_donation(
         checkout_id = stk["checkout_request_id"]
 
         await conn.execute(
-            """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone)
-               VALUES ($1, $2, 'donor_contributions', $3, $4)""",
-            checkout_id, row["amount_pence"], row["id"], stk["phone"]
+            """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone_encrypted, expected_phone_hash)
+               VALUES ($1, $2, 'donor_contributions', $3, $4, $5)""",
+            checkout_id, row["amount_pence"], row["id"], encrypt_phone(stk["phone"]), hash_phone(stk["phone"])
         )
         await conn.execute(
             "UPDATE donor_contributions SET status = 'pending_payment' WHERE id = $1",

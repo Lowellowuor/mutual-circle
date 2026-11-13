@@ -3,6 +3,7 @@ import asyncpg
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel, Field
 
+from mtc.crypto import encrypt_phone, hash_phone
 from mtc.db.main import get_conn
 from mtc.mpesa.client import initiate_stk_push
 from mtc.rate_limit.counter import check_ip_rate_limit, RateLimitExceeded
@@ -121,9 +122,9 @@ async def pay_pledge(
     checkout_id = stk["checkout_request_id"]
 
     await conn.execute(
-        """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone)
-           VALUES ($1, $2, 'pledges', $3, $4)""",
-        checkout_id, row["max_value_pence"], row["id"], stk["phone"]
+        """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone_encrypted, expected_phone_hash)
+           VALUES ($1, $2, 'pledges', $3, $4, $5)""",
+        checkout_id, row["max_value_pence"], row["id"], encrypt_phone(stk["phone"]), hash_phone(stk["phone"])
     )
     await conn.execute(
         "UPDATE pledges SET payment_status = 'pending_payment' WHERE id = $1",

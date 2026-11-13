@@ -41,6 +41,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from mtc import idempotency
 from mtc.db.main import get_conn
+from mtc.crypto import hash_phone
 from mtc.mpesa.client import parse_stk_callback
 
 logger = logging.getLogger(__name__)
@@ -96,12 +97,14 @@ def _verify_callback(parsed: dict, tx: asyncpg.Record) -> str | None:
         return f"amount_mismatch (expected={tx['amount_pence']}p, got={parsed['amount_pence']}p)"
 
     # Layer 2: phone must match the one we sent STK to.
-    # Fail-closed if expected_phone is NULL (old rows before this check)
-    expected_phone = tx["expected_phone"]
-    if not expected_phone:
-        return "expected_phone_missing (transaction predates callback verification; re-initiate payment)"
-    if _norm_phone(parsed.get("phone")) != _norm_phone(expected_phone):
-        return f"phone_mismatch (expected={expected_phone}, got={parsed.get('phone')})"
+    # Compare hashes so we never need the plaintext. Fail-closed if the
+    # hash is NULL (old rows before encryption migration 016).
+    expected_phone_hash = tx["expected_phone_hash"]
+    if not expected_phone_hash:
+        return "expected_phone_hash_missing (transaction predates encryption; re-initiate payment)"
+    if hash_phone(parsed.get("phone")) != expected_phone_hash:
+        # Do NOT log the incoming phone or the stored hash — PII leak (payments #9)
+        return "phone_mismatch"
 
     # Layer 3: receipt format
     receipt = parsed.get("receipt") or ""
@@ -147,7 +150,7 @@ async def stk_callback(
 
     try:
         tx = await conn.fetchrow(
-            "SELECT target_table, target_id, amount_pence, expected_phone "
+            "SELECT target_table, target_id, amount_pence, expected_phone_hash "
             "FROM mpesa_transactions WHERE checkout_request_id = $1",
             checkout_id,
         )

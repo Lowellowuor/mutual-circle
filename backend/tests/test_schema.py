@@ -45,7 +45,7 @@ EXPECTED_TABLES = {
     "ledger_entries": {"object_hash", "entry_hash", "previous_entry_hash"},
     "locker_stock": None,
     "match_interests": None,
-    "mpesa_transactions": {"checkout_request_id", "expected_phone", "target_table", "target_id"},
+    "mpesa_transactions": {"checkout_request_id", "expected_phone_encrypted", "expected_phone_hash", "target_table", "target_id"},
     "notifications": None,
     "opportunities": None,
     "partner_confirmations": None,
