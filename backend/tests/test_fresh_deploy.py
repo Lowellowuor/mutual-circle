@@ -32,6 +32,7 @@ async def test_every_live_table_is_created_by_a_migration(conn):
     # Tables we know are created by migrations
     EXPECTED_FROM_MIGRATIONS = {
         "audit_log", "campaigns", "dedup_items", "depot_state",
+        "institutions", "institutional_payments",
         "donor_contributions", "donor_otp_challenges", "donor_profiles",
         "donor_sessions", "helplines", "household_declarations",
         "idempotency_keys", "intake_surveys", "ledger_entries",
@@ -59,6 +60,7 @@ async def test_every_expected_table_exists(conn):
     """Inverse of the above: every table migrations promise must exist."""
     REQUIRED = {
         "audit_log", "campaigns", "dedup_items", "depot_state",
+        "institutions", "institutional_payments",
         "donor_contributions", "donor_otp_challenges", "donor_profiles",
         "donor_sessions", "helplines", "household_declarations",
         "idempotency_keys", "intake_surveys", "ledger_entries",

@@ -22,6 +22,7 @@ interface RequesterHomeProps {
   collectRequest: (id: string, pin: string) => Promise<boolean>;
   setPayingRequest: (req: { id: string, amount: number } | null) => void;
   sessionStats: { total: number, dispatched: number, pending: number };
+  intakePrompt?: React.ReactNode;
 }
 
 const mapStatus = (s: string, type: string): any => {
@@ -61,6 +62,8 @@ export const RequesterHome: React.FC<RequesterHomeProps> = (props) => {
         title="Welcome back"
         subtitle="Reserve a bundle, pay a bill, or check on your requests."
       />
+
+      {props.intakePrompt}
 
       {/* Redemption alert */}
       {props.unseenRedemptions.length > 0 && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { peekRate, consumeRate, loadHistory, saveHistory, loadSeen, saveSeen } from '../../services/auth';
-import { getHelplines, getHouseholdSize as apiGetHousehold, getOpportunities, getUnreadNotificationCount, setHouseholdSize as apiSetHousehold, uploadPoolEvidence } from '../../lib/apiClient';
+import { getSurveyStatus, getHelplines, getHouseholdSize as apiGetHousehold, getOpportunities, getUnreadNotificationCount, setHouseholdSize as apiSetHousehold, uploadPoolEvidence } from '../../lib/apiClient';
 import {
   HeartHandshake, Shield, Package, CreditCard, Users, MessageCircle,
   Home, MapPin, Check, CheckCircle, Clock, Copy, ScanLine, ArrowRight,
@@ -16,6 +16,8 @@ import { useToast } from '../Shared/Toast';
 import { SwapRequest, PoolRequest } from '../../types';
 import { RequesterMessages } from './Messages';
 import { RequesterHome } from './RequesterHome';
+import { IntakeSurveyPrompt } from './IntakeSurveyPrompt';
+import { IntakeSurveyModal } from './IntakeSurveyModal';
 import { RequesterIntake } from './RequesterIntake';
 import { SwapFlow } from './SwapFlow';
 import { PoolFlow } from './PoolFlow';
@@ -56,6 +58,10 @@ const POOL_CATS: { id: PoolCat; name: string; desc: string; Icon: any; accent: s
 export const RequesterView: React.FC = () => {
   const { tokenHash, initializeSession, logout, swapRequests, poolRequests, executeSwap, executePool, withdrawRequest, expressInterest, vouchers, voucherRedemptions, collectRequest } = useApp();
   const [payingRequest, setPayingRequest] = useState<{ id: string; amount: number } | null>(null);
+  const [showIntakePrompt, setShowIntakePrompt] = useState(false);
+  const [showIntakeModal, setShowIntakeModal] = useState(false);
+  const [surveyRequestId, setSurveyRequestId] = useState<string | null>(null);
+  const [familySize, setFamilySize] = useState<number | null>(null);
 
   const [intakeStep, setIntakeStep] = useState<IntakeStep>('phone');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -106,6 +112,23 @@ export const RequesterView: React.FC = () => {
   const [declined, setDeclined] = useState<Set<string>>(new Set());
   const [opportunities, setOpportunities] = useState<{ id: string; type: string; title: string; description: string; locality: string; commit: string; posted_at: string }[]>([]);
   const [helplines, setHelplines] = useState<{ id: string; name: string; number: string; sub: string; category: string }[]>([]);
+
+
+  useEffect(() => {
+    if (!tokenHash) return;
+    // Check for the most recent approved request that doesn't have a survey yet
+    const activeReq = poolRequests.find(r => ['verified', 'pending_check', 'pending_evidence'].includes(r.status));
+    if (activeReq) {
+      getSurveyStatus(tokenHash, activeReq.id)
+        .then(res => {
+          if (res.can_submit_intake && !res.has_intake) {
+            setShowIntakePrompt(true);
+            setSurveyRequestId(activeReq.id);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [tokenHash, poolRequests]);
 
   useEffect(() => {
     if (!tokenHash) return;
@@ -408,7 +431,7 @@ export const RequesterView: React.FC = () => {
 
 
   const renderHome = () => (
-    <RequesterHome
+    <RequesterHome intakePrompt={showIntakePrompt ? <IntakeSurveyPrompt onOpen={() => setShowIntakeModal(true)} onDismiss={() => setShowIntakePrompt(false)} /> : null}
       tokenHash={tokenHash}
       unseenRedemptions={unseenRedemptions}
       dismissRedemptions={dismissRedemptions}

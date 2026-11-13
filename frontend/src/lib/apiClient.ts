@@ -539,3 +539,17 @@ export const fetchEvidencePhoto = async (
     return null;
   }
 };
+
+// ── Intake Surveys ────────────────────────────────────────────────────────
+
+export const getSurveyStatus = (token: string, requestId: string) =>
+  call<{ has_intake: boolean; can_submit_intake: boolean; can_submit_followup: boolean; request_status: string }>(`/surveys/status/${requestId}`, {
+    headers: { 'X-Token': token },
+  });
+
+export const submitIntake = (token: string, data: { request_id: string; family_size: number; work_status: string; industry: string; primary_need: string; consent_to_aggregate: boolean; consent_to_followup: boolean; submitted_via?: string }) =>
+  call<{ ok: boolean; survey_id: string; basket_recommendation: any }>('/surveys/intake', {
+    method: 'POST',
+    headers: { 'X-Token': token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
