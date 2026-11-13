@@ -35,6 +35,11 @@ EXPECTED_TABLES = {
     "helplines": None,
     "household_declarations": None,
     "idempotency_keys": None,
+    "intake_surveys": {
+        "id", "request_id", "family_size", "work_status", "industry",
+        "primary_need", "willing_to_give_back", "consent_to_aggregate",
+        "verification_status",
+    },
     "ledger_entries": {"object_hash", "entry_hash", "previous_entry_hash"},
     "locker_stock": None,
     "match_interests": None,

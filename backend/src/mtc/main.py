@@ -18,6 +18,7 @@ from mtc.routes.enrolment import router as enrolment_router
 from mtc.routes.fulfilment import router as fulfilment_router
 from mtc.routes.partner import router as partner_router
 from mtc.routes.pledges import router as pledges_router
+from mtc.routes.surveys import router as surveys_router
 from mtc.routes.helplines import router as helplines_router
 from mtc.routes.ledger_public import router as ledger_public_router
 from mtc.mpesa.routes import router as mpesa_router
@@ -239,6 +240,7 @@ app.include_router(enrolment_router)
 app.include_router(campaigns_router)
 app.include_router(donors_router)
 app.include_router(pledges_router)
+app.include_router(surveys_router)
 app.include_router(admin_router)
 app.include_router(opportunities_router)
 app.include_router(helplines_router)
