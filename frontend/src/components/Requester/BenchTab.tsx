@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Phone } from 'lucide-react';
 import { ScreenHeader } from '../../ui';
+import './BenchTab.css';
 
 interface Helpline {
   id: string;
@@ -17,7 +18,7 @@ export const BenchTab: React.FC<BenchTabProps> = (props) => {
   return (
     <div className="relative pb-20 content-in">
       <div
-        className="absolute -top-16 -right-24 w-[280px] h-[280px] rounded-full blur-3xl pointer-events-none orb-drift"
+        className="absolute -top-16 -right-24 w-[280px] h-[280px] rounded-full blur-3xl pointer-events-none bench-orb-drift"
         style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.6) 0%, rgba(220,232,224,0) 70%)' }}
         aria-hidden="true"
       />

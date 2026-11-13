@@ -21,14 +21,12 @@
   --color-muted: #5F655E;
   --color-pine: #1E4D3A;
   --color-pine-deep: #143828;
-  /* Landing page tokens (ROLE.txt spec) - separate from app tokens */
   --font-lp-serif: 'Cormorant Garamond', Georgia, serif;
   --color-lp-canvas: #FAF8F4;
   --color-lp-surface: #FFFFFF;
   --color-lp-ink: #111111;
   --color-lp-green: #1F6B4A;
   --color-lp-sage: #DCE8E0;
-  --color-lp-amber: #B45309;
   --color-lime: #D5E8B0;
   --color-tint: #E6EEDD;
   --color-green-ramp: #4E9B6B;
@@ -63,208 +61,11 @@ input, textarea {
   scroll-margin-top: 80px;
 }
 
-/* Prevent scroll chaining from simulator panels into the AppShell
-   page scroll. When the message list hits its end, the parent
-   should not start scrolling. */
 .overscroll-contain {
   overscroll-behavior: contain;
 }
 
-/* ─── Landing motion + polish (ROLE.txt: calm, respects reduced motion) ─── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes floatGlow {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
-  50%      { transform: translate(24px, -12px) scale(1.08); opacity: 0.85; }
-}
-
-.animate-fade-up {
-  animation: fadeUp 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.animate-glow {
-  animation: floatGlow 22s ease-in-out infinite;
-}
-
-/* Scroll-triggered reveal. Base state below, visible state via data-visible. */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-
-[data-reveal][data-visible="true"] {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.lift-hover {
-  transition:
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.lift-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px -8px rgba(17, 17, 17, 0.10);
-  border-color: rgba(31, 107, 74, 0.25);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-up,
-  .animate-glow {
-    animation: none;
-  }
-  [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-    will-change: auto;
-  }
-  .lift-hover,
-  .lift-hover:hover {
-    transform: none;
-    transition: none;
-    box-shadow: none;
-  }
-}
-
-/* ─── Glass morphism + gradient mesh (Standard Chartered-inspired) ─── */
-.glass {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow:
-    0 1px 0 0 rgba(255, 255, 255, 0.65) inset,
-    0 8px 32px -8px rgba(17, 17, 17, 0.10);
-}
-
-.glass-dark {
-  background: rgba(20, 26, 22, 0.55);
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow:
-    0 1px 0 0 rgba(255, 255, 255, 0.08) inset,
-    0 12px 40px -8px rgba(0, 0, 0, 0.50);
-}
-
-.mesh-hero {
-  background:
-    radial-gradient(ellipse 60% 55% at 15% 15%, rgba(31, 107, 74, 0.16), transparent 70%),
-    radial-gradient(ellipse 55% 60% at 85% 5%, rgba(220, 232, 224, 0.85), transparent 65%),
-    radial-gradient(ellipse 70% 55% at 55% 95%, rgba(180, 83, 9, 0.05), transparent 65%),
-    linear-gradient(180deg, #FAF8F4 0%, #F5F2EB 100%);
-}
-
-.mesh-sage {
-  background:
-    radial-gradient(ellipse 75% 60% at 10% 20%, rgba(220, 232, 224, 0.75), transparent 65%),
-    radial-gradient(ellipse 60% 55% at 90% 80%, rgba(31, 107, 74, 0.10), transparent 65%),
-    linear-gradient(180deg, #FAF8F4 0%, #F5F2EB 100%);
-}
-
-.mesh-dark {
-  background:
-    radial-gradient(ellipse 60% 55% at 20% 20%, rgba(31, 107, 74, 0.45), transparent 65%),
-    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(31, 107, 74, 0.28), transparent 65%),
-    linear-gradient(180deg, #0F1411 0%, #1A2620 100%);
-}
-
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-14px); }
-}
-.float-slow   { animation: floatY 9s ease-in-out infinite; }
-.float-medium { animation: floatY 7s ease-in-out infinite; animation-delay: -2s; }
-
-@keyframes orbDrift {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
-  33%      { transform: translate(30px, -20px) scale(1.08); opacity: 0.75; }
-  66%      { transform: translate(-20px, 20px) scale(0.96); opacity: 0.50; }
-}
-.orb-drift      { animation: orbDrift 24s ease-in-out infinite; }
-.orb-drift-slow { animation: orbDrift 32s ease-in-out infinite; animation-delay: -8s; }
-
-.gradient-border { position: relative; }
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.5px;
-  background: linear-gradient(135deg, rgba(31, 107, 74, 0.4), rgba(255, 255, 255, 0.3) 40%, rgba(31, 107, 74, 0.15));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-}
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(31, 107, 74, 0.9);
-}
-.eyebrow::before {
-  content: '';
-  width: 22px;
-  height: 1px;
-  background: rgba(31, 107, 74, 0.5);
-}
-
-.display-serif {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  letter-spacing: -0.028em;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .float-slow, .float-medium, .orb-drift, .orb-drift-slow { animation: none; }
-}
-
-/* Light-on-dark eyebrow variant */
-.eyebrow-dark {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
-}
-.eyebrow-dark::before {
-  content: '';
-  width: 22px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.4);
-}
-
-/* Prosper Blue — Standard Chartered-inspired navy (2026-11) */
-.mesh-navy {
-  background:
-    radial-gradient(ellipse 60% 55% at 20% 20%, rgba(31, 107, 74, 0.26), transparent 65%),
-    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(31, 107, 74, 0.34), transparent 65%),
-    linear-gradient(180deg, #0F1E17 0%, #1A3026 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mesh-navy { animation: none; }
-}
-
-/* ─── Editorial app primitives (Requester, Donor, Console) ─── */
+/* ═══ Editorial app primitives (Requester, Donor, Console) ═══ */
 
 .press-scale {
   transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -311,18 +112,11 @@ input, textarea {
   .press-scale:active { transform: none; }
 }
 
-/* Anchor scroll offset for sticky header (72px main + 32px persona + 8px gap) */
 section[id] {
   scroll-margin-top: 88px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   DESIGN SYSTEM v2 — spec-compliant tokens, type scale, controls
-   Ships progressively. Old classes (.glass, .orb-drift, .card-editorial)
-   remain during migration and are removed in Ship 6.
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* ─── Type scale (Cormorant Garamond 500 at 32+, Inter else) ─────────── */
+/* ═══ Type scale (Cormorant Garamond 500 at 32+, Inter else) ═══ */
 .type-display-d {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 500;
@@ -369,27 +163,27 @@ section[id] {
 }
 .type-secondary { color: #4A4F4B; }
 
-/* ─── Radii ──────────────────────────────────────────────────────────── */
+/* ═══ Radii ═══ */
 .r-control { border-radius: 12px; }
 .r-card { border-radius: 20px; }
 
-/* ─── Elevation (two levels only) ────────────────────────────────────── */
+/* ═══ Elevation (two levels only) ═══ */
 .elev-1 { box-shadow: 0 1px 3px rgba(17,17,17,0.06), 0 1px 2px rgba(17,17,17,0.04); }
 .elev-2 { box-shadow: 0 4px 16px rgba(17,17,17,0.08), 0 2px 4px rgba(17,17,17,0.04); }
 
-/* ─── Solid surface (no glass) ───────────────────────────────────────── */
+/* ═══ Solid surface (no glass) ═══ */
 .surface-solid {
   background: #FFFFFF;
   border: 1px solid #E8E6DE;
 }
 
-/* ─── Section padding (96 desktop / 64 mobile) ───────────────────────── */
+/* ═══ Section padding (96 desktop / 64 mobile) ═══ */
 .section-pad { padding-top: 96px; padding-bottom: 96px; }
 @media (max-width: 767px) {
   .section-pad { padding-top: 64px; padding-bottom: 64px; }
 }
 
-/* ─── 12-col container ───────────────────────────────────────────────── */
+/* ═══ 12-col container ═══ */
 .container-1120 {
   max-width: 1120px;
   margin-left: auto;
@@ -398,7 +192,7 @@ section[id] {
   padding-right: 24px;
 }
 
-/* ─── Button base (spec §22) ─────────────────────────────────────────── */
+/* ═══ Button base (spec §22) ═══ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -451,7 +245,6 @@ section[id] {
 .btn-tertiary:hover { color: #1F6B4A; }
 .btn-tertiary:focus-visible { outline: 2px solid #1F6B4A; outline-offset: 2px; border-radius: 4px; }
 
-/* ─── prefers-reduced-motion ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .btn:active { transform: none; }
 }
@@ -467,7 +260,7 @@ section[id] {
   color: #4A4F4B;
 }
 
-/* Tab content fade (spec #23 — 150ms) */
+/* Tab content fade (spec #23 - 150ms) */
 @keyframes contentInFast {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -477,4 +270,34 @@ section[id] {
 }
 @media (prefers-reduced-motion: reduce) {
   .content-in-fast { animation: none; }
+}
+
+/* ═══ App-only primitives (kept for Requester, Donor, Console) ═══ */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(31, 107, 74, 0.9);
+}
+.eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: rgba(31, 107, 74, 0.5);
+}
+
+.display-serif {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: -0.028em;
+}
+
+.mesh-dark {
+  background:
+    radial-gradient(ellipse 60% 55% at 20% 20%, rgba(31, 107, 74, 0.45), transparent 65%),
+    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(31, 107, 74, 0.28), transparent 65%),
+    linear-gradient(180deg, #0F1411 0%, #1A2620 100%);
 }
