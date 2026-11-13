@@ -4,6 +4,7 @@ import asyncpg
 import logging
 import bcrypt
 from mtc.db.main import get_conn
+from mtc.crypto import encrypt_phone, hash_phone
 from mtc.tokens.hmac import issue_token
 from mtc.requests_.swap import create_swap
 from mtc.requests_.pool import create_pool
@@ -23,6 +24,17 @@ async def ussd_inbound(
     logger.info("USSD session %s from %s: '%s'", sessionId, phoneNumber, text)
     parts = text.split("*") if text else []
     token = issue_token(phoneNumber)
+    await conn.execute(
+        """
+        INSERT INTO requesters (token_hash, phone_encrypted, phone_hash)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (token_hash) DO UPDATE SET
+            phone_encrypted = EXCLUDED.phone_encrypted,
+            updated_at = now()
+        """,
+        token, encrypt_phone(phoneNumber), hash_phone(phoneNumber)
+    )
+
 
     if len(parts) == 0 or parts == [""]:
         return (

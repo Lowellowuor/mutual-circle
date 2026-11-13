@@ -5,6 +5,7 @@ import logging
 import json
 import bcrypt
 from mtc.db.main import get_conn
+from mtc.crypto import encrypt_phone, hash_phone
 from mtc.tokens.hmac import issue_token
 from mtc.requests_.swap import create_swap
 from mtc.requests_.pool import create_pool
@@ -23,6 +24,17 @@ async def sms_inbound(
     logger.info("SMS received from %s: %s", from_, text)
 
     token = issue_token(from_)
+    await conn.execute(
+        """
+        INSERT INTO requesters (token_hash, phone_encrypted, phone_hash)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (token_hash) DO UPDATE SET
+            phone_encrypted = EXCLUDED.phone_encrypted,
+            updated_at = now()
+        """,
+        token, encrypt_phone(from_), hash_phone(from_)
+    )
+
     msg = text.strip()
 
     session = await conn.fetchrow(
