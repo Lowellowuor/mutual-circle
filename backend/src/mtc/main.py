@@ -136,6 +136,27 @@ async def lifespan(app: FastAPI):
     logger.info("Shutdown complete")
 
 
+def _check_staff_env_on_startup() -> None:
+    import logging, os
+    _logger = logging.getLogger(__name__)
+    required = [
+        ("STAFF_ENROL_ID", "STAFF_ENROL_PIN_HASH", "enrolment"),
+        ("STAFF_FULF_ID", "STAFF_FULF_PIN_HASH", "fulfilment"),
+        ("STAFF_AUDIT_ID", "STAFF_AUDIT_PIN_HASH", "audit"),
+    ]
+    missing = []
+    for id_var, hash_var, role in required:
+        if not os.environ.get(id_var): missing.append(id_var + " (" + role + ")")
+        if not os.environ.get(hash_var): missing.append(hash_var + " (" + role + ")")
+    if missing:
+        env = os.environ.get("ENVIRONMENT", "development")
+        msg = "Missing staff credentials: " + ", ".join(missing)
+        if env in ("production", "staging"):
+            raise RuntimeError(msg)
+        _logger.warning(msg)
+
+_check_staff_env_on_startup()
+
 app = FastAPI(
     title="Mutual Circle API",
     version="0.6.0",
