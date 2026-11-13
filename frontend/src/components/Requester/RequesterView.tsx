@@ -23,7 +23,7 @@ import { SwapFlow } from './SwapFlow';
 import { PoolFlow } from './PoolFlow';
 import { MatchTab } from './MatchTab';
 import { BenchTab } from './BenchTab';
-import { HouseholdSetup } from './HouseholdSetup';
+
 import { SettingsTab } from './SettingsTab';
 import { MpesaModal } from './MpesaModal';
 
@@ -141,12 +141,13 @@ export const RequesterView: React.FC = () => {
     
     getSurveyStatus(tokenHash, idToCheck)
       .then(res => {
+        console.log('[survey-debug] status response:', res);
         if (res && res.can_submit_intake && !res.has_intake) {
           setShowIntakePrompt(true);
           setSurveyRequestId(activeReq ? activeReq.id : null);
         }
       })
-      .catch(() => {});
+      .catch((err) => console.error('[survey-status] failed to fetch:', err));
   }, [tokenHash, poolRequests]);
 
   useEffect(() => {
@@ -563,14 +564,7 @@ export const RequesterView: React.FC = () => {
   };
 
   const renderHouseholdStep = () => (
-    <HouseholdSetup
-      householdMode={householdMode}
-      setHouseholdMode={setHouseholdMode}
-      householdSize={householdSize}
-      setHouseholdSize={setHouseholdSize}
-      householdError={householdError}
-      handleHouseholdComplete={handleHouseholdComplete}
-    />
+    <IntakeSurveyModal token={tokenHash!} requestId={null} onClose={() => setHouseholdStep(false)} onSuccess={() => setHouseholdStep(false)} />
   );
 
   if (!tokenHash) {

@@ -254,7 +254,7 @@ async def test_aggregate_k_anonymity_suppresses_small_buckets(client, clean_db):
 
 async def test_status_reports_intake_available(client, clean_db):
     tok, rid = await _create_and_approve_request(client)
-    r = await client.get(f"/surveys/status/{rid}", headers={"X-Token": tok})
+    r = await client.get(f"/surveys/status?request_id={rid}", headers={"X-Token": tok})
     assert r.status_code == 200
     body = r.json()
     assert body["has_intake"] is False

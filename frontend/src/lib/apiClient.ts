@@ -546,11 +546,11 @@ export const getBasketPreview = (familySize: number) =>
   call<{ items: { category: string; amount_pence: number }[] }>(`/surveys/basket-preview?family_size=${familySize}`);
 
 export const getSurveyStatus = (token: string, requestId: string | null) =>
-  call<{ has_intake: boolean; can_submit_intake: boolean; can_submit_followup: boolean; request_status: string; family_size: number | null }>(`/surveys/status/${requestId || ''}`, {
+  call<{ has_intake: boolean; can_submit_intake: boolean; can_submit_followup: boolean; request_status: string; family_size: number | null }>(`/surveys/status${requestId ? `?request_id=${requestId}` : ''}`, {
     headers: { 'X-Token': token },
   });
 
-export const submitIntake = (token: string, data: { request_id: string; family_size: number; work_status: string; industry: string; primary_need: string; consent_to_aggregate: boolean; consent_to_followup: boolean; submitted_via?: string }) =>
+export const submitIntake = (token: string, data: { request_id: string | null; family_size: number; work_status: string; industry: string; primary_need: string; consent_to_aggregate: boolean; consent_to_followup: boolean; submitted_via?: string }) =>
   call<{ ok: boolean; survey_id: string; basket_recommendation: any }>('/surveys/intake', {
     method: 'POST',
     headers: { 'X-Token': token, 'Content-Type': 'application/json' },

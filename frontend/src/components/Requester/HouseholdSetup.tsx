@@ -110,16 +110,7 @@ export const HouseholdSetup: React.FC<HouseholdSetupProps> = (props) => {
         )}
 
         <div className="mt-10 pt-8 border-t border-lp-ink/8">
-          <div className="eyebrow mb-3 flex items-center gap-2">
-            <ShieldCheck className="w-3 h-3" /> Why we ask
-          </div>
-          <p className="text-sm text-lp-ink/60 leading-relaxed">
-            Household size determines the bundle variant. A single person gets one week of staples. A family of five gets a larger bundle with more of the same items.
-          </p>
-        </div>
-
-        <div className="mt-8">
-          <div className="eyebrow mb-3">Bundle sizes</div>
+          
           <div>
             {[
               { range: '1 person', size: 'Small' },

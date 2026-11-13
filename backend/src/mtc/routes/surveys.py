@@ -182,10 +182,10 @@ async def submit_followup(
     return {"ok": True, "survey_id": survey_id}
 
 
-@router.get("/status/{request_id}")
+@router.get("/status")
 async def survey_status(
-    request_id: str | None = None,
     token: str = Depends(_require_token),
+    request_id: str | None = None,
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     """Return whether intake/followup are available for this request."""

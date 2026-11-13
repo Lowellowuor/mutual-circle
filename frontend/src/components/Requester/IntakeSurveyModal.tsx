@@ -25,7 +25,7 @@ export const IntakeSurveyModal: React.FC<Props> = ({ token, requestId, onClose, 
     setError(null);
     try {
       await submitIntake(token, {
-        request_id: requestId as any,
+        request_id: requestId,
         family_size: familySize,
         work_status: workStatus,
         industry,
@@ -83,6 +83,17 @@ export const IntakeSurveyModal: React.FC<Props> = ({ token, requestId, onClose, 
               <option value="services">Services / Retail</option>
               <option value="manufacturing">Manufacturing</option>
               <option value="none">None</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-[#111111] block mb-2">Primary Need</label>
+            <select value={primaryNeed} onChange={e => setPrimaryNeed(e.target.value)} className="w-full h-12 px-3 rounded-xl border border-[#E8E6DE] bg-white text-sm">
+              <option value="food">Food Bundle</option>
+              <option value="utilities">Utility Bill (KPLC)</option>
+              <option value="school_fees">School Fees</option>
+              <option value="hospital">Hospital Invoice</option>
+              <option value="rent">Rent</option>
             </select>
           </div>
 
