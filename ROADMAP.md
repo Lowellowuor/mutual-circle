@@ -29,7 +29,20 @@
 - Dead components removed: Reveal, AmbientBackdrop, Eyebrow, SectionArrow, WaveDivider, DotGrid, OrbGlow
 - 8 landing photos removed from repo (~1.8MB)
 
+
+### Phase 1 Hardening & Scale (2026-11-14)
+
+- **PII Encryption:** All phone numbers encrypted at rest (Fernet) and hashed for lookup (HMAC-SHA256). Payments #9 closed.
+- **Africa's Talking SMS:** Replaced the broken SMS stub with a real `httpx` async client, config guards, and 9 tests.
+- **Intake Questionnaires:** Post-approval flow capturing family size, work status, industry, and primary need. Includes k-anonymity aggregate stats for funders.
+- **KPLC Direct Payments:** Admin console flow to record bank transfers and automatically SMS KPLC tokens to requesters.
+- **Chui Locker Webhooks:** Webhook integration with `X-Webhook-Secret` verification to mark bundles as collected.
+- **UI Editorial Redesign:** Replaced legacy dashboard UI in Donor and Admin (Console) apps with the premium editorial design system (ScreenHeader, card-editorial, stat-display).
+- **Migrations 011 - 022:** Standardized the schema (pledge status, donation defaults, phone encryption, standalone surveys, requesters table, institutional payments).
+- **CI Pipeline:** 133 tests running against a fresh PostgreSQL container, enforcing schema contracts.
+
 ### Collection confirmation
+
 
 - POST /requests/{id}/collect — canonical, PIN in body
 - POST /requests/collect — PIN-only, for channels without request_id

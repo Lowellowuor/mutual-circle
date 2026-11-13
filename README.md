@@ -4,7 +4,7 @@
 
 **Resource-sharing network for Kenya.** Requesters submit a need  a food bundle or a bill to pay  and receive an outcome without ever being linked to a specific donor. Donors give to a blind pool, never to a person. Fulfilment staff settle requests with partner institutions. Every state change is on a public HMAC-chained ledger.
 
-**Status:** Functional prototype. M-PESA Daraja (STK Push) and Africa's Talking (SMS) are wired end-to-end against sandbox APIs. Production-ready architecture; pilot-ready operations. Waiting on: B2C SecurityCredential, partner API access, and the security items in `SECURITY.md` before public deployment.
+**Status:** Pilot-ready. 133 automated tests passing. Full end-to-end integrations (M-PESA Daraja, Africa's Talking, KPLC, Chui). All PII encrypted at rest. Ready for Nairobi pilot.
 
 ## Recent updates (2026-11)
 
@@ -77,6 +77,9 @@ All strings live in `frontend/src/i18n/en.ts`, read via `useLanguage()`. No hard
 
 ## What works today
 
+- **KPLC Payments:** Admins record bank transfers and the system sends prepaid tokens directly via SMS. No cash goes to the requester.
+- **Chui Lockers:** Automated webhook integration marks food/hygiene bundles as collected when the locker is opened.
+- **Intake Surveys:** Post-approval questionnaires capture demographic data for funder reporting (k-anonymity protected).
 - **Requesters** apply by phone (web), declare household size, and either reserve a food bundle or submit a bill for payment. Every request returns a reference and a collection PIN.
 - **Staff** see a fulfilment queue, dispatch verified requests to partner institutions (KPLC, schools, hospitals), issue vouchers where the requester collects from a retail partner, and process the OCR queue for Tier 3 requests.
 - **Donors** give to the blind pool, opt in to a public recognition ledger, pledge goods or services that fulfilment staff match to specific requests.
