@@ -123,7 +123,7 @@ async def test_stk_writes_ciphertext_to_db(client, clean_db):
             "phone": "254711000001",
         }
         r = await client.post(
-            f"/requests/pool/{created['id']}/pay",
+            f"/requests/{created['id']}/pay",
             headers={"X-Token": token},
             json={"phone": "+254711000001"},
         )
