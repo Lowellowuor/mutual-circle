@@ -129,33 +129,33 @@ const PhoneMockup: React.FC = () => {
       style={{ transform: 'rotateY(-8deg) rotateX(2deg)', transformStyle: 'preserve-3d' }}
     >
       <div className="rounded-[2.6rem] bg-lp-canvas overflow-hidden flex flex-col" style={{ height: '620px' }}>
-        <div className="text-center text-[10px] pt-3 pb-1 text-lp-ink/40 font-medium">9:41</div>
+        <div className="text-center text-sm pt-3 pb-1 text-lp-ink/40 font-medium">9:41</div>
         <div className="px-4 py-3 flex items-center justify-between border-b border-lp-ink/5">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-lp-green flex items-center justify-center">
               <HeartHandshake className="w-3.5 h-3.5 text-white" strokeWidth={2} />
             </div>
-            <span className="text-xs font-semibold text-lp-ink">{t.phoneMockup.header}</span>
+            <span className="text-sm font-semibold text-lp-ink">{t.phoneMockup.header}</span>
           </div>
           <div className="w-6 h-6 rounded-full bg-lp-sage/60" />
         </div>
         <div className="p-3 space-y-2">
           <div className="p-3 rounded-xl bg-lp-green text-white space-y-1 shadow-lg shadow-lp-green/25">
             <Package className="w-4 h-4" strokeWidth={2} />
-            <div className="text-xs font-semibold">{t.phoneMockup.reserve}</div>
-            <div className="text-[10px] text-white/70">{t.phoneMockup.reserveSub}</div>
+            <div className="text-sm font-semibold">{t.phoneMockup.reserve}</div>
+            <div className="text-sm text-white/70">{t.phoneMockup.reserveSub}</div>
           </div>
           <div className="p-3 rounded-xl bg-lp-surface border border-lp-ink/10 space-y-1">
             <CreditCard className="w-4 h-4 text-lp-green" strokeWidth={2} />
-            <div className="text-xs font-semibold text-lp-ink">{t.phoneMockup.pay}</div>
-            <div className="text-[10px] text-lp-ink/50">{t.phoneMockup.paySub}</div>
+            <div className="text-sm font-semibold text-lp-ink">{t.phoneMockup.pay}</div>
+            <div className="text-sm text-lp-ink/50">{t.phoneMockup.paySub}</div>
           </div>
         </div>
         <div className="px-3 flex-1">
-          <div className="text-[9px] uppercase tracking-wider text-lp-ink/40 mb-1">{t.phoneMockup.recentRequest}</div>
+          <div className="text-sm uppercase tracking-wider text-lp-ink/40 mb-1">{t.phoneMockup.recentRequest}</div>
           <div className="p-2 rounded-lg bg-lp-sage/50 flex justify-between items-center">
-            <span className="text-[10px] text-lp-ink">Bundle reserved</span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-lp-green text-white font-medium">
+            <span className="text-sm text-lp-ink">Bundle reserved</span>
+            <span className="text-sm px-1.5 py-0.5 rounded-full bg-lp-green text-white font-medium">
               {t.phoneMockup.recentRequestStatus}
             </span>
           </div>
@@ -207,28 +207,28 @@ const Hero: React.FC = () => {
           <div className="md:col-span-6 flex justify-center md:justify-end">
             <div className="w-[280px] md:w-[300px] rounded-[2.5rem] bg-[#111111] p-2">
               <div className="rounded-[2.1rem] bg-[#FAF8F4] overflow-hidden flex flex-col" style={{ height: '580px' }}>
-                <div className="text-center text-[10px] pt-3 pb-1 text-[#4A4F4B]">{t.phoneMockup.statusTime}</div>
+                <div className="text-center text-sm pt-3 pb-1 text-[#4A4F4B]">{t.phoneMockup.statusTime}</div>
                 <div className="px-4 py-3 flex items-center gap-2 border-b border-[#E8E6DE]">
                   <svg width="18" height="18" viewBox="0 0 28 28" fill="none" aria-hidden="true">
                     <circle cx="10" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
                     <circle cx="18" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
                   </svg>
-                  <span className="text-xs font-semibold text-[#111111]">{t.phoneMockup.header}</span>
+                  <span className="text-sm font-semibold text-[#111111]">{t.phoneMockup.header}</span>
                 </div>
                 <div className="p-3 space-y-2 flex-1">
                   <div className="p-4 rounded-2xl bg-[#1F6B4A] text-white space-y-1">
                     <Package className="w-4 h-4" strokeWidth={2} />
                     <div className="text-sm font-semibold">{t.phoneMockup.reserve}</div>
-                    <div className="text-[11px] text-white/75">{t.phoneMockup.reserveSub}</div>
+                    <div className="text-sm text-white/75">{t.phoneMockup.reserveSub}</div>
                   </div>
                   <div className="p-4 rounded-2xl bg-white border border-[#E8E6DE] space-y-1">
                     <CreditCard className="w-4 h-4 text-[#1F6B4A]" strokeWidth={2} />
                     <div className="text-sm font-semibold text-[#111111]">{t.phoneMockup.pay}</div>
-                    <div className="text-[11px] text-[#4A4F4B]">{t.phoneMockup.paySub}</div>
+                    <div className="text-sm text-[#4A4F4B]">{t.phoneMockup.paySub}</div>
                   </div>
                   <div className="p-3 rounded-xl bg-[#DCE8E0]/60 flex justify-between items-center">
-                    <span className="text-[11px] text-[#111111]">{t.phoneMockup.recentRequest}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1F6B4A] text-white font-medium">
+                    <span className="text-sm text-[#111111]">{t.phoneMockup.recentRequest}</span>
+                    <span className="text-sm px-2 py-0.5 rounded-full bg-[#1F6B4A] text-white font-medium">
                       {t.phoneMockup.recentRequestStatus}
                     </span>
                   </div>
@@ -237,7 +237,7 @@ const Hero: React.FC = () => {
                   {[t.phoneMockup.tabHome, t.phoneMockup.tabRequests, t.phoneMockup.tabPrivacy].map((label, i) => (
                     <div key={label} className="text-center">
                       <div className={'w-4 h-4 mx-auto rounded-sm ' + (i === 0 ? 'bg-[#1F6B4A]' : 'bg-[#111111]/20')} />
-                      <div className={'text-[9px] mt-1 ' + (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')}>
+                      <div className={'text-sm mt-1 ' + (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')}>
                         {label}
                       </div>
                     </div>
@@ -375,6 +375,7 @@ const ThreeDoors: React.FC = () => {
 const HowItWorks: React.FC = () => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState(0);
+  const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
 
   const tabs = [
     {
@@ -424,6 +425,18 @@ const HowItWorks: React.FC = () => {
     { Icon: GraduationCap, label: t.howItWorks.coversSchool },
   ];
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let next = index;
+    if (e.key === 'ArrowRight') next = (index + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = tabs.length - 1;
+    else return;
+    e.preventDefault();
+    setActiveTab(next);
+    tabRefs.current[next]?.focus();
+  };
+
   return (
     <section id="how-it-works" className="bg-[#FAF8F4]">
       <div className="max-w-[1120px] mx-auto px-6 section-pad">
@@ -442,11 +455,16 @@ const HowItWorks: React.FC = () => {
           {tabs.map((tab, i) => (
             <button
               key={tab.id}
+              ref={(el) => { tabRefs.current[i] = el; }}
               role="tab"
+              id={'hiw-tab-' + tab.id}
               aria-selected={i === activeTab}
+              aria-controls={'hiw-panel-' + tab.id}
+              tabIndex={i === activeTab ? 0 : -1}
               onClick={() => setActiveTab(i)}
+              onKeyDown={(e) => handleKeyDown(e, i)}
               className={
-                'shrink-0 px-4 md:px-6 py-3 text-sm md:text-base font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] focus-visible:ring-offset-2 rounded-t-lg ' +
+                'shrink-0 px-4 md:px-6 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] focus-visible:ring-offset-2 rounded-t-lg ' +
                 (i === activeTab
                   ? 'text-[#1F6B4A] border-b-2 border-[#1F6B4A] -mb-px'
                   : 'text-[#4A4F4B] hover:text-[#111111] border-b-2 border-transparent')
@@ -457,20 +475,23 @@ const HowItWorks: React.FC = () => {
           ))}
         </div>
 
-        <div className="mt-10 md:mt-14 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <div
+          role="tabpanel"
+          id={'hiw-panel-' + current.id}
+          aria-labelledby={'hiw-tab-' + current.id}
+          tabIndex={0}
+          className="mt-10 md:mt-14 grid md:grid-cols-2 gap-10 md:gap-16 items-center focus:outline-none"
+        >
           <div className="flex justify-center md:justify-start order-2 md:order-1">
             <div className="w-[280px] md:w-[300px] rounded-[2.5rem] bg-[#111111] p-2">
-              <div
-                className="rounded-[2.1rem] bg-[#FAF8F4] overflow-hidden flex flex-col"
-                style={{ height: '580px' }}
-              >
-                <div className="text-center text-[10px] pt-3 pb-1 text-[#4A4F4B]">9:41</div>
+              <div className="rounded-[2.1rem] bg-[#FAF8F4] overflow-hidden flex flex-col" style={{ height: '580px' }}>
+                <div className="text-center text-sm pt-3 pb-1 text-[#4A4F4B]">{t.phoneMockup.statusTime}</div>
                 <div className="px-4 py-3 flex items-center gap-2 border-b border-[#E8E6DE]">
                   <svg width="18" height="18" viewBox="0 0 28 28" fill="none" aria-hidden="true">
                     <circle cx="10" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
                     <circle cx="18" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
                   </svg>
-                  <span className="text-xs font-semibold text-[#111111]">{current.title}</span>
+                  <span className="text-sm font-semibold text-[#111111]">{current.title}</span>
                 </div>
                 <div className="p-3 space-y-2 flex-1">
                   <div key={activeTab} className="space-y-2 content-in-fast">
@@ -480,7 +501,7 @@ const HowItWorks: React.FC = () => {
                         <div key={i} className="p-3 rounded-xl bg-white border border-[#E8E6DE] space-y-1">
                           <I className="w-4 h-4 text-[#1F6B4A]" strokeWidth={2} />
                           <div className="text-sm font-semibold text-[#111111]">{item.label}</div>
-                          <div className="text-xs text-[#4A4F4B]">{item.sub}</div>
+                          <div className="text-sm text-[#4A4F4B]">{item.sub}</div>
                         </div>
                       );
                     })}
@@ -490,7 +511,7 @@ const HowItWorks: React.FC = () => {
                   {[t.phoneMockup.tabHome, t.phoneMockup.tabRequests, t.phoneMockup.tabPrivacy].map((lbl, i) => (
                     <div key={lbl} className="text-center">
                       <div className={'w-4 h-4 mx-auto rounded-sm ' + (i === 0 ? 'bg-[#1F6B4A]' : 'bg-[#111111]/20')} />
-                      <div className={'text-[9px] mt-1 ' + (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')}>
+                      <div className={'text-sm mt-1 ' + (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')}>
                         {lbl}
                       </div>
                     </div>
@@ -588,11 +609,50 @@ const Partners: React.FC = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [selectedType, setSelectedType] = useState<string>('');
+  const [email, setEmail] = useState('');
+  const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const openSheet = () => {
+    setSheetOpen(true);
+    setSubmitState('idle');
+    setErrorMessage(null);
+    setSubmitted(false);
+  };
+
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setSubmitState('idle');
+    setErrorMessage(null);
+    setSubmitted(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    window.setTimeout(() => { setSheetOpen(false); setSubmitted(false); }, 1800);
+    if (submitState === 'loading') return;
+    setSubmitState('loading');
+    setErrorMessage(null);
+
+    try {
+      await new Promise((resolve, reject) => {
+        window.setTimeout(() => {
+          // Dev-only failure trigger: email ending in @error.test simulates server error
+          if (email.trim().toLowerCase().endsWith('@error.test')) {
+            reject(new Error('Could not reach the server. Please try again.'));
+          } else {
+            resolve(true);
+          }
+        }, 1200);
+      });
+      setSubmitState('success');
+      setSubmitted(true);
+      window.setTimeout(() => {
+        closeSheet();
+      }, 1800);
+    } catch (err) {
+      setSubmitState('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Could not send. Try again.');
+    }
   };
 
   const principles = [
@@ -600,6 +660,8 @@ const Partners: React.FC = () => {
     { Icon: Coins, title: t.partners.p2Title, body: t.partners.p2Body },
     { Icon: ShieldCheck, title: t.partners.p3Title, body: t.partners.p3Body },
   ];
+
+  const isLoading = submitState === 'loading';
 
   return (
     <section id="partners" className="bg-[#FAF8F4]">
@@ -628,16 +690,16 @@ const Partners: React.FC = () => {
         <div className="mt-10 md:mt-14 max-w-2xl">
           <p className="type-h2-m !text-[#1F6B4A] leading-tight">{t.partners.line}</p>
           <div className="mt-6">
-            <button type="button" onClick={() => setSheetOpen(true)} className="btn btn-primary">
+            <button type="button" onClick={openSheet} className="btn btn-primary">
               {t.partners.cta}
             </button>
           </div>
         </div>
       </div>
 
-      <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
+      <Sheet open={sheetOpen} onClose={closeSheet}>
         {submitted ? (
-          <div className="py-12 text-center">
+          <div className="py-12 text-center" role="status" aria-live="polite">
             <div className="w-16 h-16 mx-auto rounded-full bg-[#DCE8E0] flex items-center justify-center mb-5">
               <ShieldCheck className="w-8 h-8 text-[#1F6B4A]" strokeWidth={1.75} />
             </div>
@@ -651,7 +713,7 @@ const Partners: React.FC = () => {
               <h2 className="type-h2-m mt-2 text-[#111111]">{t.partners.formTitle}</h2>
               <p className="type-body-m type-secondary mt-1">{t.partners.formSubtitle}</p>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate={false}>
               <div>
                 <label htmlFor="partner-org" className="block section-label mb-2">{t.partners.fieldOrg}</label>
                 <input
@@ -695,6 +757,8 @@ const Partners: React.FC = () => {
                   id="partner-email"
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder={t.partners.fieldEmailPlaceholder}
                   className="w-full h-12 px-4 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all"
                 />
@@ -708,7 +772,27 @@ const Partners: React.FC = () => {
                   className="w-full px-4 py-3 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all resize-none"
                 />
               </div>
-              <button type="submit" className="btn btn-primary w-full">{t.partners.submit}</button>
+
+              {submitState === 'error' && errorMessage && (
+                <div role="alert" className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
+                  {errorMessage}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={isLoading}
+                aria-busy={isLoading}
+              >
+                {isLoading && (
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <circle cx="8" cy="8" r="6" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2" />
+                    <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                )}
+                {isLoading ? 'Sending…' : t.partners.submit}
+              </button>
             </form>
           </div>
         )}
