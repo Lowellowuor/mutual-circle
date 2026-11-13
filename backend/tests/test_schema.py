@@ -51,6 +51,7 @@ EXPECTED_TABLES = {
     "partner_confirmations": None,
     "partners": None,
     "pledges": {"id", "status", "payment_status", "type", "max_value_pence"},
+    "requesters": {"token_hash", "phone_encrypted", "phone_hash"},
     "rate_counters": None,
     "requests": {
         "id", "token_hash", "status", "payment_status",

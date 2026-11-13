@@ -556,3 +556,20 @@ export const submitIntake = (token: string, data: { request_id: string | null; f
     headers: { 'X-Token': token, 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+
+// ── Institutional Payments (KPLC) ─────────────────────────────────────────
+
+export const getInstitutionalQueue = (sessionToken: string) =>
+  call<{ pending: any[]; in_progress: any[]; recent: any[] }>('/admin/institutional-payments/queue', {
+    headers: { Authorization: `Bearer ${sessionToken}` },
+  });
+
+export const confirmInstitutionalPayment = (sessionToken: string, requestId: string, bankRef: string, kplcToken: string) =>
+  call<{ ok: boolean; sms_delivered: boolean; sms_error: string | null }>(
+    `/admin/institutional-payments/${requestId}/confirm`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${sessionToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bank_transaction_ref: bankRef, kplc_token: kplcToken }),
+    }
+  );

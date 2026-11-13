@@ -27,7 +27,9 @@ async def clean_db():
     yield
 
 
-def _headers(secret="dev-chui-secret"):
+def _headers(secret=None):
+    if secret is None:
+        secret = settings.partner_hmac_key or "dev-chui-secret"
     return {"X-Webhook-Secret": secret}
 
 

@@ -6,7 +6,7 @@ import EvidenceCard from './EvidenceCard';
 import {
   ShieldCheck, ShieldAlert, CheckCircle, Send, AlertTriangle, Users, Activity,
   Download, X, Layers, Boxes, Package, Truck, Check, Eye, EyeOff, RotateCcw,
-  LogIn, LogOut, Store, KeyRound, Lock, Building2, RefreshCw, Zap, ChevronRight,
+  LogIn, Receipt, LogOut, Store, KeyRound, Lock, Building2, RefreshCw, Zap, ChevronRight,
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -612,7 +612,8 @@ export const ConsoleView: React.FC = () => {
 
   const renderContent = () => {
     if (tab === 'queue') { if (staffRole === 'enrolment') return <ConsoleEnrolment />; if (staffRole === 'audit') return renderAudit(); return renderFulfilment(); }
-    if (tab === 'depot') return <ConsoleDepot />;
+    if (tab === 'bills') return <ConsoleBills sessionToken={sessionToken!} />;
+  if (tab === 'depot') return <ConsoleDepot />;
     if (tab === 'till') return renderTill();
     if (tab === 'partners') return renderPartners();
     return renderMore();
@@ -742,6 +743,7 @@ export const ConsoleView: React.FC = () => {
 
   const consoleTabs: { id: Tab; label: string; Icon: any; badge?: number }[] = [
     { id: 'queue', label: staffRole === 'enrolment' ? 'Metrics' : staffRole === 'audit' ? 'Audit' : 'Queue', Icon: Activity, badge: pendingQueueCount },
+    { id: 'bills', label: 'Bills', Icon: Receipt },
     { id: 'depot', label: 'Depot', Icon: Boxes },
     { id: 'till', label: 'Till', Icon: Store },
     { id: 'partners', label: 'Partners', Icon: Building2 },
