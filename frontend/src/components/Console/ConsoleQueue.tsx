@@ -1,4 +1,5 @@
-﻿import React from 'react';
+﻿import { ScreenHeader } from '../../ui';
+import React from 'react';
 import { CheckCircle, X, Package, Users, Activity, Send, Store } from 'lucide-react';
 import { EmptyState } from '../Shared/EmptyState';
 
@@ -24,6 +25,7 @@ interface ConsoleQueueProps {
 export const ConsoleQueue: React.FC<ConsoleQueueProps> = (props) => {
   return (
     <div className="space-y-3">
+      <ScreenHeader number="02" eyebrow="Operations" title="Queue" subtitle="Review and dispatch incoming requests." />
       {/* Filter pills */}
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {([{ id: 'all' as const, l: 'All' }, { id: 'swap' as const, l: 'Swap' }, { id: 'pool' as const, l: 'Pool' }, { id: 'pending' as const, l: 'Pending' }, { id: 'dispatched' as const, l: 'Sent' }]).map(f => (

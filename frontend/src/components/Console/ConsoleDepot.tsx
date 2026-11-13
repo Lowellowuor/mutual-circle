@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
   const ConsoleDepot: React.FC = () => {
   const { depotCounts, lockerStocks } = useApp();
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-4 md:p-6 max-w-[1120px] mx-auto content-in">
       <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Boxes className="w-4 h-4" /> Depot Pipeline</div><p className="text-[11px] text-[#111111]/60 mt-1">Bulk ? inspected ? packed ? loaded.</p></div>
       <div className="grid grid-cols-2 gap-2">
         {[{ Icon: Package, l: 'Received', v: depotCounts.receivedUnits, c: 'text-[#111111]' }, { Icon: Check, l: 'Checked', v: depotCounts.qualityCheckedUnits, c: 'text-[#1F6B4A]' }, { Icon: Layers, l: 'Packed', v: depotCounts.packedBundles, c: 'text-[#111111]' }, { Icon: Truck, l: 'Loaded', v: depotCounts.loadedLockerUnits, c: 'text-emerald-700' }].map(row => {
