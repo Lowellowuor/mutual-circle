@@ -126,4 +126,4 @@ jobs:
           # AUDIT-02 bcrypt('9142')
           STAFF_AUDIT_ID: AUDIT-02
           STAFF_AUDIT_PIN_HASH: "$2b$12$WUnfFZS4BgXKEYyacQ.aZ.q82qZUxOu9O9UAYpv7aCY4a/2ZZv.iC"
-        run: pytest tests/test_auth.py tests/test_dispatch.py tests/test_flags_vouchers.py tests/test_ledger.py tests/test_requests.py -v
+        run: pytest tests/ -v --tb=short
