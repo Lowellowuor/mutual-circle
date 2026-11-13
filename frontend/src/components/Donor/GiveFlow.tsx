@@ -1,7 +1,6 @@
-﻿import React from 'react';
+﻿import { ScreenHeader } from '../../ui';
+import React from 'react';
 import { Check, Wallet } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
 import { EmptyState } from '../Shared/EmptyState';
 
 interface GiveFlowProps {
@@ -33,6 +32,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
 
     return (
       <div className="space-y-4 pb-20">
+      <ScreenHeader number="02" eyebrow="Donate" title="Give Cash" subtitle="Contribute to the blind pool." />
         <div className="pt-6 text-center space-y-3">
           <div className="w-16 h-16 bg-lime text-pine rounded-full flex items-center justify-center mx-auto border border-tile">
             <Check className="w-8 h-8" />
@@ -51,7 +51,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
             className="bg-green-600 hover:bg-green-700 font-bold shadow-soft mt-4"
           >
             Pay with M-PESA
-          </Button>
+          </button>
         )}
         {!props.payingDonation && (
           <div className="text-sm text-muted text-center mt-4">
@@ -59,7 +59,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
           </div>
         )}
 
-        <Card>
+        <div className="card-editorial p-5 md:p-6 mb-4">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted">Fund</span>
@@ -78,22 +78,22 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
               <span className="font-semibold text-pine">None</span>
             </div>
           </div>
-        </Card>
+        </div>
 
         {props.ledger && (
-          <Card className="bg-emerald-50 border-emerald-200 text-sm text-emerald-900 leading-relaxed">
+          <div className="card-editorial p-5 md:p-6 mb-4">
             <Check className="w-4 h-4 inline mr-1" />
             Your contribution now appears in the Impact tab's recognition ledger.
-          </Card>
+          </div>
         )}
 
         <div className="space-y-3 pt-2">
-          <Button variant="primary" fullWidth onClick={() => { props.onCloseSuccess(); props.setCustom(''); }}>
+          <button className="btn btn-primary w-full mb-3"> { props.onCloseSuccess(); props.setCustom(''); }}>
             Give again
-          </Button>
-          <Button variant="secondary" fullWidth onClick={props.onViewDonations}>
+          </button>
+          <button className="btn btn-secondary w-full mb-3">
             View my donations
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -168,7 +168,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
         disabled={props.processing || props.finalAmount <= 0}
       >
         {props.processing ? 'Processing...' : `Contribute KES ${props.finalAmount.toLocaleString()}`}
-      </Button>
+      </button>
 
       <div className="pt-4 space-y-3">
         <div className="flex items-center justify-between">
@@ -178,7 +178,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
         {props.donorContributions.length === 0 ? (
           <EmptyState Icon={Wallet} title="No donations yet" body="Give above to start your contribution history." />
         ) : props.donorContributions.slice(0, 5).map(d => (
-          <Card key={d.id} className="space-y-2">
+          <div className="card-editorial p-5 md:p-6 mb-4">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-ink">KES {d.amount.toLocaleString()}</div>
@@ -193,7 +193,7 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
                 )}
               </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
     </div>

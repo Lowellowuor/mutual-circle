@@ -1,7 +1,6 @@
-﻿import React from 'react';
+﻿import { ScreenHeader } from '../../ui';
+import React from 'react';
 import { Check, Package, MapPin, Handshake } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
 import { EmptyState } from '../Shared/EmptyState';
 
 interface PledgeFlowProps {
@@ -32,6 +31,7 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
 
     return (
       <div className="space-y-4 pb-20">
+      <ScreenHeader number="02" eyebrow="Pledge" title="Pledge Resource" subtitle="Goods or credit. Matched by category." />
         <div className="pt-6 text-center space-y-3">
           <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-200">
             <Check className="w-8 h-8" />
@@ -42,7 +42,7 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
           </div>
         </div>
 
-        <Card>
+        <div className="card-editorial p-5 md:p-6 mb-4">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted">Type</span>
@@ -57,11 +57,11 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
               <span className="font-semibold text-amber-700">Awaiting match</span>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="bg-amber-50 border-amber-200 text-sm text-amber-900 leading-relaxed">
+        <div className="card-editorial p-5 md:p-6 mb-4">
           Your pledge is now visible to the Operations team for matching.
-        </Card>
+        </div>
 
         <div className="space-y-3 pt-2">
           {stillUnpaid && (
@@ -72,14 +72,14 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
               className="bg-green-600 hover:bg-green-700"
             >
               Pay with M-PESA
-            </Button>
+            </button>
           )}
-          <Button variant="primary" fullWidth onClick={() => { props.onCloseSuccess(); props.setPDesc(''); props.setPValue(''); }}>
+          <button className="btn btn-primary w-full mb-3"> { props.onCloseSuccess(); props.setPDesc(''); props.setPValue(''); }}>
             Pledge again
-          </Button>
-          <Button variant="secondary" fullWidth onClick={props.onViewPledges}>
+          </button>
+          <button className="btn btn-secondary w-full mb-3">
             View my pledges
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -158,7 +158,7 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
         disabled={props.pProcessing || !props.pDesc}
       >
         {props.pProcessing ? 'Submitting...' : 'Submit Pledge'}
-      </Button>
+      </button>
 
       <div className="pt-4 space-y-3">
         <div className="flex items-center justify-between">
@@ -177,7 +177,7 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
           const linkedReqId = (p as any).linked_request_id || (p as any).linkedRequestId;
           const ref = linkedReqId ? 'REF-' + String(linkedReqId).slice(0, 8).toUpperCase() : null;
           return (
-            <Card key={p.id} className="space-y-2">
+            <div className="card-editorial p-5 md:p-6 mb-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-ink truncate">{p.description}</div>
@@ -196,7 +196,7 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
               {ref && p.status !== 'settled' && (
                 <div className="text-sm text-pine pt-2 border-t border-tile">Linked to {ref}</div>
               )}
-            </Card>
+            </div>
           );
         })}
       </div>

@@ -1,7 +1,6 @@
-﻿import React from 'react';
+﻿import { ScreenHeader } from '../../ui';
+import React from 'react';
 import { Trophy, Edit2 } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
 import { EmptyState } from '../Shared/EmptyState';
 
 interface LeaderEntry {
@@ -31,50 +30,16 @@ interface DonorLeadersProps {
 export const DonorLeaders: React.FC<DonorLeadersProps> = (props) => {
   return (
     <div className="space-y-6 pb-4">
-      <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-pine to-pine-deep p-6 text-white shadow-soft space-y-3">
-        <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-        <Trophy className="w-6 h-6 text-lime relative z-10" />
-        <h2 className="text-2xl font-bold leading-tight relative z-10">Community Leaders</h2>
-        <p className="text-sm text-white/70 leading-relaxed relative z-10">
-          Opt-in recognition. Aggregate totals only. No recipient linkage.
-        </p>
-      </div>
-
-      <Card className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-muted uppercase tracking-wider">Your standing</span>
-          {!props.editingProfile && (
-            <button
-              onClick={() => props.setEditingProfile(true)}
-              className="text-xs font-semibold text-pine hover:underline flex items-center gap-1"
-            >
-              <Edit2 className="w-3 h-3" /> Edit
-            </button>
-          )}
-        </div>
-
-        {!props.editingProfile ? (
-          props.myProfile?.opt_in_ledger ? (
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted">Display name</span>
-                <span className="font-semibold text-ink">
-                  {props.myProfile.display_name || 'Anonymous Contributor'}
-                </span>
-              </div>
-              <div className="flex justify-between border-t border-tile pt-2">
-                <span className="text-muted">Listed publicly</span>
-                <span className="font-semibold text-pine">Yes</span>
-              </div>
-            </div>
+      <ScreenHeader number="04" eyebrow="Community" title="Leaders" subtitle="Opt-in recognition. Aggregate totals only." />
+      
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-muted leading-relaxed">
                 You are not in the public leaderboard. Your contributions are still counted and pooled.
               </p>
-              <Button variant="primary" fullWidth onClick={() => props.setEditingProfile(true)}>
+              <button className="btn btn-primary w-full mb-3"> props.setEditingProfile(true)}>
                 Join the leaderboard
-              </Button>
+              </button>
             </div>
           )
         ) : (
@@ -117,7 +82,7 @@ export const DonorLeaders: React.FC<DonorLeadersProps> = (props) => {
                 }}
               >
                 Cancel
-              </Button>
+              </button>
               <Button
                 variant="primary"
                 fullWidth
@@ -125,13 +90,13 @@ export const DonorLeaders: React.FC<DonorLeadersProps> = (props) => {
                 disabled={props.profileSaving}
               >
                 {props.profileSaving ? 'Saving...' : 'Save'}
-              </Button>
+              </button>
             </div>
           </div>
         )}
-      </Card>
+      </div>
 
-      <Card className="space-y-3">
+      <div className="card-editorial p-5 md:p-6 mb-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-semibold text-muted uppercase tracking-wider">Top contributors</h3>
           <span className="text-xs font-semibold bg-lime text-pine px-2 py-0.5 rounded">Opt-in</span>
@@ -159,9 +124,9 @@ export const DonorLeaders: React.FC<DonorLeadersProps> = (props) => {
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
-      <Card className="bg-rose-50 border-rose-200 space-y-2">
+      <div className="card-editorial p-5 md:p-6 mb-4">
         <h3 className="text-sm font-bold text-rose-900">What the leaderboard does NOT show</h3>
         <ul className="text-sm text-rose-900/80 leading-relaxed space-y-1">
           <li>· Which specific bills or recipients your money funded</li>
@@ -171,7 +136,7 @@ export const DonorLeaders: React.FC<DonorLeadersProps> = (props) => {
         <p className="text-xs text-rose-900/60 pt-2 border-t border-rose-200">
           Aggregate totals only. Recipient dignity comes first.
         </p>
-      </Card>
+      </div>
     </div>
   );
 };

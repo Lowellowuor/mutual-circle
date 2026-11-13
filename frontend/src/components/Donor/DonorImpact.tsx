@@ -1,7 +1,6 @@
-﻿import React from 'react';
+﻿import { ScreenHeader } from '../../ui';
+import React from 'react';
 import { TrendingUp, ChevronRight, ShieldCheck } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
 import { DonutChart } from '../ui/DonutChart';
 import { BarChart } from '../ui/BarChart';
 
@@ -98,12 +97,9 @@ export const DonorImpact: React.FC<DonorImpactProps> = (props) => {
 
   return (
     <div className="space-y-6">
+      <ScreenHeader number="03" eyebrow="Transparency" title="Impact" subtitle="Aggregate. Never individual." />
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-ink">Impact</h1>
-          <p className="text-sm text-muted mt-1">Aggregate. Never individual.</p>
-        </div>
+      <div className="flex items-center justify-end mb-2">
         <button
           onClick={props.openLedgerModal}
           className="p-2 rounded-full hover:bg-tint transition-colors bg-surface border border-tile shadow-sm"
@@ -129,7 +125,7 @@ export const DonorImpact: React.FC<DonorImpactProps> = (props) => {
       </div>
 
       {/* Summary card */}
-      <Card className="bg-gradient-to-br from-pine to-pine-deep text-white border-none shadow-soft">
+      <div className="card-editorial p-5 md:p-6 mb-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs uppercase tracking-wider text-white/60 font-semibold">Total given</span>
           <TrendingUp className="w-5 h-5 text-lime" />
@@ -141,10 +137,10 @@ export const DonorImpact: React.FC<DonorImpactProps> = (props) => {
         <p className="text-sm text-white/70 mt-2">
           {filteredContribs.length} gift{filteredContribs.length !== 1 ? 's' : ''} in this period
         </p>
-      </Card>
+      </div>
 
       {/* Donut chart — category breakdown */}
-      <Card>
+      <div className="card-editorial p-5 md:p-6 mb-4">
         <h3 className="text-sm font-semibold text-ink mb-4">Where it went</h3>
         {donutSegments.length > 0 ? (
           <DonutChart segments={donutSegments} minGroupSizePct={5} />
@@ -153,18 +149,18 @@ export const DonorImpact: React.FC<DonorImpactProps> = (props) => {
             No category data yet. Give to a category to see the breakdown.
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Bar chart — 6-month trend */}
-      <Card>
+      <div className="card-editorial p-5 md:p-6 mb-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-ink">Your last 6 months</h3>
         </div>
         <BarChart data={barData} height={140} />
-      </Card>
+      </div>
 
       {/* Insight banner */}
-      <Card className="bg-lime border-tile flex items-center justify-between cursor-pointer hover:shadow-soft transition-all">
+      <div className="card-editorial p-5 md:p-6 mb-4">
         <div>
           <p className="text-sm font-semibold text-pine-deep">Small group sizes are hidden</p>
           <p className="text-xs text-pine-deep/70 mt-1">
@@ -172,12 +168,12 @@ export const DonorImpact: React.FC<DonorImpactProps> = (props) => {
           </p>
         </div>
         <ChevronRight className="w-5 h-5 text-pine shrink-0" />
-      </Card>
+      </div>
 
       {/* CTA back to give */}
-      <Button variant="primary" fullWidth onClick={() => {}}>
+      <button className="btn btn-primary w-full mb-3"> {}}>
         Support another category
-      </Button>
+      </button>
     </div>
   );
 };
