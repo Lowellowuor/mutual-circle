@@ -1,5 +1,4 @@
 import React from 'react';
-import { X } from 'lucide-react';
 
 interface SheetProps {
   open: boolean;
@@ -8,10 +7,6 @@ interface SheetProps {
   title?: string;
 }
 
-/**
- * Bottom sheet for mobile menu and partner contact form.
- * Escape closes. Backdrop click closes.
- */
 export const Sheet: React.FC<SheetProps> = ({ open, onClose, children, title }) => {
   React.useEffect(() => {
     if (!open) return;
@@ -19,29 +14,39 @@ export const Sheet: React.FC<SheetProps> = ({ open, onClose, children, title }) 
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
   }, [open, onClose]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4"
+      role="dialog"
+      aria-modal="true"
+    >
       <div
-        className="absolute inset-0 bg-lp-ink/60 backdrop-blur-md"
+        className="absolute inset-0 bg-[#0F1E17]/60 backdrop-blur-md"
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="absolute inset-x-0 bottom-0 bg-lp-surface rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto overscroll-contain animate-in slide-in-from-bottom duration-300">
+      <div className="relative bg-white w-full md:max-w-md max-h-[85vh] overflow-y-auto overscroll-contain rounded-t-3xl md:rounded-3xl p-6 shadow-2xl content-in">
         {title && (
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-lp-ink">{title}</h2>
+            <h2 className="text-lg font-semibold text-[#111111]">{title}</h2>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="p-2 rounded-full hover:bg-lp-sage/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green"
+              className="p-1.5 rounded-full text-[#4A4F4B] hover:text-[#111111] hover:bg-[#FAF8F4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A]"
             >
-              <X className="w-5 h-5 text-lp-ink" strokeWidth={1.75} />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4 4L12 12M4 12L12 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
             </button>
           </div>
         )}

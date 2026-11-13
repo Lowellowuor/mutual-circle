@@ -933,72 +933,68 @@ const Faq: React.FC = () => {
 };
 
 const Footer: React.FC = () => {
-  const { t } = useLanguage();
   return (
-    <footer className="relative overflow-hidden mesh-navy text-white mt-16">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[420px] h-[420px] rounded-full bg-lp-green/20 blur-3xl orb-drift" />
-        <div className="absolute bottom-0 right-1/4 w-[420px] h-[420px] rounded-full bg-lp-green/10 blur-3xl orb-drift-slow" />
-      </div>
+    <footer className="bg-[#0F1E17] text-white pb-24 md:pb-0">
+      <div className="max-w-[1120px] mx-auto px-6 py-12 md:py-16">
+        <div className="grid md:grid-cols-12 gap-8 md:gap-12">
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <circle cx="10" cy="14" r="8" stroke="#DCE8E0" strokeWidth="1.75" />
+                <circle cx="18" cy="14" r="8" stroke="#DCE8E0" strokeWidth="1.75" />
+              </svg>
+              <span className="text-base font-semibold tracking-tight">Mutual Circle</span>
+            </div>
+            <p className="text-sm text-white/70 leading-relaxed max-w-[40ch]">
+              Equip. Transform. Made for more.
+            </p>
+            <p className="text-xs text-white/40 mt-2">
+              Tagline by LumiereCore CLG
+            </p>
+          </div>
 
-      <div className="relative max-w-[1120px] mx-auto px-6 pt-20 md:pt-28 pb-16 md:pb-20">
+          <div className="md:col-span-2">
+            <div className="text-xs uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
+              Product
+            </div>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#how-it-works" className="text-white/70 hover:text-white transition-colors">How it works</a></li>
+              <li><a href="#three-doors" className="text-white/70 hover:text-white transition-colors">Get started</a></li>
+              <li><a href={DONOR_URL} className="text-white/70 hover:text-white transition-colors">Give</a></li>
+              <li><a href="#partners" className="text-white/70 hover:text-white transition-colors">Partners</a></li>
+              <li><a href="#faq" className="text-white/70 hover:text-white transition-colors">FAQ</a></li>
+            </ul>
+          </div>
 
-        {/* Statement - the whole footer message in one line */}
-        <div className="max-w-3xl">
-          <p className="display-serif text-[44px] md:text-[64px] lg:text-[72px] leading-[1.0] text-white">
-            {t.footer.tagline}
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-white/40 font-semibold">
-            <span>{t.footer.brand}</span>
-            <span className="w-1 h-1 rounded-full bg-white/25" aria-hidden="true" />
-            <span>{t.footer.city}</span>
+          <div className="md:col-span-2">
+            <div className="text-xs uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
+              Company
+            </div>
+            <ul className="space-y-2 text-sm">
+              <li><a href="https://lumierecore.org" className="text-white/70 hover:text-white transition-colors">LumiereCore CLG</a></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-3">
+            <div className="text-xs uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
+              Contact
+            </div>
+            <ul className="space-y-2 text-sm text-white/70">
+              <li><a href="https://www.lumierecore.org" className="hover:text-white transition-colors">www.lumierecore.org</a></li>
+              <li><a href="mailto:swanjohi@lumierecore.org" className="hover:text-white transition-colors">swanjohi@lumierecore.org</a></li>
+              <li><a href="mailto:info@lumierecore.org" className="hover:text-white transition-colors">info@lumierecore.org</a></li>
+              <li>+254 107 777 007</li>
+              <li className="text-white/50">Nairobi, Kenya</li>
+            </ul>
           </div>
         </div>
 
-        {/* Three columns, compact */}
-        <div className="mt-20 md:mt-28 grid md:grid-cols-3 gap-10 md:gap-16">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-5 font-semibold">
-              {t.footer.product}
-            </div>
-            <ul className="space-y-3 text-sm">
-              <li><a href="#how-it-works" className="text-white/70 hover:text-white transition-colors">{t.footer.linkHowItWorks}</a></li>
-              <li><a href="#inside-circle" className="text-white/70 hover:text-white transition-colors">{t.footer.linkTheCircle}</a></li>
-              <li><a href="#give" className="text-white/70 hover:text-white transition-colors">{t.footer.linkGive}</a></li>
-              <li><a href="#partners" className="text-white/70 hover:text-white transition-colors">{t.footer.linkPartners}</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-5 font-semibold">
-              {t.footer.company}
-            </div>
-            <ul className="space-y-3 text-sm">
-              <li><a href="https://lumierecore.org" className="text-white/70 hover:text-white transition-colors">{t.footer.linkParent}</a></li>
-              <li><a href="#status" className="text-white/70 hover:text-white transition-colors">{t.footer.linkRoadmap}</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-5 font-semibold">
-              {t.footer.contact}
-            </div>
-            <ul className="space-y-3 text-sm">
-              <li><a href={'https://' + t.footer.website} className="text-white/70 hover:text-white transition-colors">{t.footer.website}</a></li>
-              <li><a href={'mailto:' + t.footer.email1} className="text-white/70 hover:text-white transition-colors">{t.footer.email1}</a></li>
-              <li><a href={'mailto:' + t.footer.email2} className="text-white/70 hover:text-white transition-colors">{t.footer.email2}</a></li>
-              <li><span className="text-white/70">{t.footer.phone}</span></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Legal strip - one row, quiet */}
-        <div className="mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs text-white/40">
-          <div>{t.footer.copyright}</div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <a href={'mailto:' + t.footer.email2 + '?subject=Privacy%20policy%20request'} className="hover:text-white transition-colors">{t.footer.privacy}</a>
-            <a href={'mailto:' + t.footer.email2 + '?subject=Terms%20of%20service%20request'} className="hover:text-white transition-colors">{t.footer.terms}</a>
-            <a href={'mailto:' + t.footer.email2 + '?subject=Data%20protection%20policy%20request'} className="hover:text-white transition-colors">{t.footer.linkDataProtection}</a>
+        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs text-white/40">
+          <div>© 2026 LumiereCore CLG</div>
+          <div className="flex flex-wrap items-center gap-4">
+            <a href="mailto:info@lumierecore.org?subject=Privacy%20policy" className="hover:text-white transition-colors">Privacy</a>
+            <a href="mailto:info@lumierecore.org?subject=Terms" className="hover:text-white transition-colors">Terms</a>
+            <a href="mailto:info@lumierecore.org?subject=Data%20protection" className="hover:text-white transition-colors">Data protection</a>
           </div>
         </div>
       </div>
@@ -1006,36 +1002,20 @@ const Footer: React.FC = () => {
   );
 };
 
-
 // ── Mobile dock ─────────────────────────────────────────────────────────────
 
-const MobileDock: React.FC = () => {
-  const { t } = useLanguage();
-  return (
-    <div
-      className="fixed inset-x-0 bottom-0 z-30 md:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-    >
-      <div className="bg-white/95 backdrop-blur-xl border-t border-lp-ink/10 px-4 pt-3 pb-3">
-        <div className="flex gap-2">
-          <Button
-            variant="glass"
-            onClick={() => { window.location.href = DONOR_URL; }}
-            className="!h-11 flex-1"
-          >
-            {t.common.give}
-          </Button>
-          <Button
-            onClick={() => { window.location.href = APP_URL; }}
-            className="!h-11 flex-[1.4]"
-          >
-            {t.common.getHelp}
-          </Button>
-        </div>
-      </div>
+const MobileDock: React.FC = () => (
+  <div
+    className="fixed inset-x-0 bottom-0 z-30 md:hidden bg-white border-t border-[#E8E6DE]"
+    style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+  >
+    <div className="p-3">
+      <a href={APP_URL} className="btn btn-primary w-full">
+        Open the app
+      </a>
     </div>
-  );
-};
+  </div>
+);
 
 // ── Page root ───────────────────────────────────────────────────────────────
 
