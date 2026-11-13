@@ -74,11 +74,23 @@ async def match_pledge(
 ):
     request_id = body.request_id if body else None
 
-    pledge = await conn.fetchrow("SELECT id, status, type FROM pledges WHERE id = $1", pledge_id)
+    pledge = await conn.fetchrow(
+        "SELECT id, status, type, payment_status FROM pledges WHERE id = $1",
+        pledge_id,
+    )
     if not pledge:
         raise HTTPException(404, "Pledge not found")
     if pledge["status"] != "awaiting_match":
         raise HTTPException(409, f"Pledge in status '{pledge['status']}' cannot be matched")
+    # Payments review #8: a service_credit pledge must be paid before
+    # it can be matched. Goods pledges are non-monetary and have no
+    # payment_status requirement.
+    if pledge["type"] == "service_credit" and pledge["payment_status"] != "paid":
+        raise HTTPException(
+            409,
+            f"Cannot match a service_credit pledge that has not been paid "
+            f"(payment_status='{pledge['payment_status']}')",
+        )
 
     # R.U.T.H 4.4: no direct donor-to-recipient handoff for goods.
     # Goods pledges must be pooled and redistributed as bundles (4.2)

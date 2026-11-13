@@ -40,6 +40,7 @@ async def create_pledge(
         "locality": body.locality,
         "max_value_pence": body.max_value_pence,
         "status": "awaiting_match",
+        "payment_status": "unpaid",
         "created_at": row["created_at"].isoformat(),
     }
 
@@ -68,6 +69,7 @@ def _row_to_dict(r):
         "locality": r["locality"],
         "max_value_pence": r["max_value_pence"],
         "status": r["status"],
+        "payment_status": r.get("payment_status", "unpaid") if hasattr(r, "get") else (r["payment_status"] if "payment_status" in r.keys() else "unpaid"),
         "created_at": r["created_at"].isoformat(),
     }
     if "linked_request_id" in r.keys():
@@ -95,13 +97,13 @@ async def pay_pledge(
         raise HTTPException(429, detail=e.reason)
 
     row = await conn.fetchrow(
-        "SELECT id, max_value_pence, status FROM pledges WHERE id = $1 AND donor_hash = $2",
+        "SELECT id, max_value_pence, status, payment_status FROM pledges WHERE id = $1 AND donor_hash = $2",
         pledge_id, donor_hash
     )
     if not row:
         raise HTTPException(404, "Pledge not found")
-    if row["status"] == "paid":
-        raise HTTPException(409, "Pledge already paid")
+    if row["payment_status"] in ("paid", "pending_payment"):
+        raise HTTPException(409, "Pledge already paid or payment in progress")
     if not row["max_value_pence"] or row["max_value_pence"] <= 0:
         raise HTTPException(400, "Pledge does not have a cash value to pay")
 
@@ -123,6 +125,9 @@ async def pay_pledge(
            VALUES ($1, $2, 'pledges', $3, $4)""",
         checkout_id, row["max_value_pence"], row["id"], stk["phone"]
     )
-    await conn.execute("UPDATE pledges SET status = 'pending_payment' WHERE id = $1", row["id"])
+    await conn.execute(
+        "UPDATE pledges SET payment_status = 'pending_payment' WHERE id = $1",
+        row["id"],
+    )
 
     return {"ok": True, "checkout_request_id": checkout_id, "message": stk.get("customer_message")}

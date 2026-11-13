@@ -505,16 +505,37 @@ async def collect_by_pin_route(
 
 
 async def _settle_pledge_for_request(conn: asyncpg.Connection, request_id: str) -> None:
-    """After a request is collected, mark its linked pledge as settled."""
+    """After a request is collected, mark its linked pledge as settled.
+
+    Payments review #8 defence-in-depth: if a service_credit pledge was
+    matched before payment confirmed, do NOT settle it — that would hide
+    a silent money loss. Log CRITICAL and leave the pledge in 'matched'
+    for manual reconciliation. The match_pledge route blocks this at the
+    front door, so this should only fire on legacy data or a bug.
+    """
     pledge_id = await conn.fetchval(
         "SELECT pledge_id FROM requests WHERE id = $1",
         request_id,
     )
-    if pledge_id:
-        await conn.execute(
-            "UPDATE pledges SET status = 'settled' WHERE id = $1 AND status = 'matched'",
-            str(pledge_id),
+    if not pledge_id:
+        return
+    pledge = await conn.fetchrow(
+        "SELECT type, status, payment_status FROM pledges WHERE id = $1",
+        str(pledge_id),
+    )
+    if pledge is None:
+        return
+    if pledge["type"] == "service_credit" and pledge["payment_status"] != "paid":
+        logger.critical(
+            "PLEDGE_SETTLE_UNPAID: request=%s pledge=%s payment_status=%s. "
+            "Not settling — pledge must be paid first. Manual review required.",
+            request_id, pledge_id, pledge["payment_status"],
         )
+        return
+    await conn.execute(
+        "UPDATE pledges SET status = 'settled' WHERE id = $1 AND status = 'matched'",
+        str(pledge_id),
+    )
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Tier 2 photo evidence (R.U.T.H §4.3 fallback path)

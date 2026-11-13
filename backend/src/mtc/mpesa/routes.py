@@ -201,8 +201,12 @@ async def stk_callback(
                 new_status, parsed["receipt"], target_id,
             )
         elif target_table == "pledges":
+            # Payments review #8: write payment_status, NOT status.
+            # The match state machine (awaiting_match -> matched -> settled)
+            # is independent of payment state. Overwriting status here was
+            # destroying the match state on every payment callback.
             await conn.execute(
-                "UPDATE pledges SET status = $1 WHERE id = $2",
+                "UPDATE pledges SET payment_status = $1 WHERE id = $2",
                 new_status, target_id,
             )
         else:
