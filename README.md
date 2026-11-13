@@ -138,7 +138,6 @@ Open http://localhost:3000/mutual-circle/ (or whichever URL Vite prints).
 
 **Bench tab is a stub.** The Requester Bench shows the top-level entry (helplines + "reach out directly") but is not the full peer-support experience.
 
-**CI is active.** GitHub Actions runs `.github/workflows/ci.yml` on every push and pull request: pytest for backend, TypeScript check and build for frontend.
 
 ## Blind-pool invariant
 
