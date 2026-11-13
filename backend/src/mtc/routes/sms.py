@@ -95,7 +95,11 @@ async def sms_inbound(
             "fulfilled": "Fulfilled", "collected": "Collected", "withdrawn": "Withdrawn"
         }
         readable_status = status_map.get(row["status"], row["status"])
-        return {"reply": f"Ref: {str(row['id'])[:8]}\nStatus: {readable_status}\nAmount: KES {row['amount_pence']//100}"}
+        if row["amount_pence"]:
+            amount_str = f"KES {row['amount_pence']//100}"
+        else:
+            amount_str = "N/A (Swap)"
+        return {"reply": f"Ref: {str(row['id'])[:8]}\nStatus: {readable_status}\nAmount: {amount_str}"}
 
 
     if step == "MENU":

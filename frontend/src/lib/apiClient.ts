@@ -542,8 +542,11 @@ export const fetchEvidencePhoto = async (
 
 // ── Intake Surveys ────────────────────────────────────────────────────────
 
+export const getBasketPreview = (familySize: number) =>
+  call<{ items: { category: string; amount_pence: number }[] }>(`/surveys/basket-preview?family_size=${familySize}`);
+
 export const getSurveyStatus = (token: string, requestId: string) =>
-  call<{ has_intake: boolean; can_submit_intake: boolean; can_submit_followup: boolean; request_status: string }>(`/surveys/status/${requestId}`, {
+  call<{ has_intake: boolean; can_submit_intake: boolean; can_submit_followup: boolean; request_status: string; family_size: number | null }>(`/surveys/status/${requestId}`, {
     headers: { 'X-Token': token },
   });
 

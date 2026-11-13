@@ -191,7 +191,7 @@ async def survey_status(
         raise HTTPException(404, "Request not found")
 
     survey = await conn.fetchrow(
-        "SELECT id, willing_to_give_back FROM intake_surveys WHERE request_id = $1",
+        "SELECT id, family_size, willing_to_give_back FROM intake_surveys WHERE request_id = $1",
         request_id,
     )
     has_intake = survey is not None
@@ -209,6 +209,7 @@ async def survey_status(
             and req["status"] in FOLLOWUP_ALLOWED_STATUSES
         ),
         "survey_id": str(survey["id"]) if survey else None,
+        "family_size": survey["family_size"] if survey else None,
     }
 
 

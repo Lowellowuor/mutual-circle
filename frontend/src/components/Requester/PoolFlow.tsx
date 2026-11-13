@@ -36,6 +36,8 @@ interface PoolFlowProps {
   evidenceError: string | null;
   handleUploadEvidence: (file: File) => void;
   goTab: (tab: 'home') => void;
+  familySize?: number | null;
+  basketBaseAmount?: number | null;
 }
 
 export const PoolFlow: React.FC<PoolFlowProps> = (props) => {
@@ -268,6 +270,31 @@ export const PoolFlow: React.FC<PoolFlowProps> = (props) => {
                   className="stat-display text-4xl text-lp-ink tabular-nums bg-transparent border-0 outline-none p-0 w-full placeholder:text-lp-ink/20"
                 />
               </div>
+              {props.familySize && props.basketBaseAmount && (() => {
+                const num = Number(props.poolAmount) || 0;
+                if (num === 0) {
+                  return (
+                    <div className="text-xs text-lp-ink/60 mt-2">
+                      Recommended for family of {props.familySize}: KES {props.basketBaseAmount.toLocaleString()}
+                    </div>
+                  );
+                }
+                const ratio = num / props.basketBaseAmount;
+                if (ratio <= 1.4) {
+                  return (
+                    <div className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 p-2 rounded-lg mt-2">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span>Within typical range for a family of {props.familySize}</span>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg mt-2">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Above typical range. Photo evidence may be required.</span>
+                  </div>
+                );
+              })()}
               {props.numAmount > 0 && props.numAmount > props.valueRemaining && (
                 <div className="text-xs text-rose-600 flex items-center gap-1 mt-2">
                   <AlertCircle className="w-3 h-3" />

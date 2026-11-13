@@ -62,6 +62,7 @@ export const RequesterView: React.FC = () => {
   const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [surveyRequestId, setSurveyRequestId] = useState<string | null>(null);
   const [familySize, setFamilySize] = useState<number | null>(null);
+  const [basketBaseAmount, setBasketBaseAmount] = useState<number | null>(null);
 
   const [intakeStep, setIntakeStep] = useState<IntakeStep>('phone');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -114,6 +115,22 @@ export const RequesterView: React.FC = () => {
   const [helplines, setHelplines] = useState<{ id: string; name: string; number: string; sub: string; category: string }[]>([]);
 
 
+
+  useEffect(() => {
+    if (familySize && poolCat) {
+      import('../../lib/apiClient').then(({ getBasketPreview }) => {
+        getBasketPreview(familySize).then(res => {
+          if (res && res.items) {
+             const match = res.items.find(i => i.category === poolCat || (poolCat === 'utility' && i.category === 'utility'));
+             if (match) setBasketBaseAmount(match.amount_pence / 100); // convert to KES
+          }
+        });
+      });
+    } else {
+      setBasketBaseAmount(null);
+    }
+  }, [familySize, poolCat]);
+
   useEffect(() => {
     if (!tokenHash) return;
     // Check for the most recent approved request that doesn't have a survey yet
@@ -124,6 +141,7 @@ export const RequesterView: React.FC = () => {
           if (res && res.can_submit_intake && !res.has_intake) {
             setShowIntakePrompt(true);
             setSurveyRequestId(activeReq.id);
+            if (res.family_size) setFamilySize(res.family_size);
           }
         })
         .catch(() => {});
@@ -474,6 +492,8 @@ export const RequesterView: React.FC = () => {
 
   const renderPool = () => (
     <PoolFlow
+          familySize={familySize}
+          basketBaseAmount={basketBaseAmount}
       poolStep={poolStep}
       setPoolStep={setPoolStep}
       poolResult={poolResult}

@@ -57,6 +57,46 @@ async def send_sms(*, phone: str, message: str) -> dict[str, Any]:
     can distinguish "AT said no" (ok=False) from "we couldn't reach AT"
     (raise). Never raises on AT-level rejection.
     """
+    if not settings.at_api_key:
+        raise RuntimeError("AT_API_KEY is not configured")
+    if not settings.at_username:
+        raise RuntimeError("AT_USERNAME is not configured")
+
+    normalized_phone = _normalize_phone(phone)
+    endpoint = _endpoint()
+
+    form = {
+        "username": settings.at_username,
+        "to": normalized_phone,
+        "message": message,
+    }
+    if settings.at_sender_id:
+        form["from"] = settings.at_sender_id
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(
+                endpoint,
+                headers={
+                    "apiKey": settings.at_api_key,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json",
+                },
+                data=form,
+            )
+            response.raise_for_status()
+            body = response.json()
+    except (httpx.HTTPError, httpx.TimeoutException) as exc:
+        logger.error("AT SMS transport failure: %s", exc)
+        raise RuntimeError(f"AT SMS transport failure: {exc}") from exc
+    except ValueError as exc:
+        # .json() failed -- response wasn't JSON
+        logger.error("AT SMS response was not JSON: %s", exc)
+        raise RuntimeError(f"AT SMS response was not JSON: {exc}") from exc
+
+    recipients = body.get("SMSMessageData", {}).get("Recipients") or []
+    recipient = recipients[0] if recipients else {}
+
     status_code = recipient.get("statusCode")
     ok = status_code == 101
 
@@ -73,5 +113,5 @@ async def send_sms(*, phone: str, message: str) -> dict[str, Any]:
         "status_code": status_code,
         "cost": recipient.get("cost"),
         "provider_response": body,
-        "error": None,
+        "error": None if ok else (recipient.get("status") or "AT rejected"),
     }
