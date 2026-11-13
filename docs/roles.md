@@ -1,12 +1,12 @@
 ﻿# Roles
 
-Six users interact with Mutual Circle. Separate credentials, separate scope, separate data visibility. No role can escalate into another's view â€” enforced at the API layer.
+Six users interact with Mutual Circle. Separate credentials, separate scope, separate data visibility. No role can escalate into another's view — enforced at the API layer.
 
 ## 1. Requester
 
 **Who:** End beneficiary. Needs a food bundle or bill payment.
 
-**Auth:** POST /tokens issues an HMAC token from phone number. Raw phone hashed and discarded â€” never stored.
+**Auth:** POST /tokens issues an HMAC token from phone number. Raw phone hashed and discarded — never stored.
 
 **Day in life:**
 1. Contacts via SMS / USSD / WhatsApp / web.
@@ -25,7 +25,7 @@ Six users interact with Mutual Circle. Separate credentials, separate scope, sep
 
 **Who:** Individual giving to the blind pool.
 
-**Auth:** Persistent donorHash in localStorage. Survives logout/refresh. No server-side issuance â€” the hash is the identity.
+**Auth:** Persistent donorHash in localStorage. Survives logout/refresh. No server-side issuance — the hash is the identity.
 
 **Day in life:**
 1. Opens Donor Portal, browses campaigns + impact.
@@ -38,7 +38,7 @@ Six users interact with Mutual Circle. Separate credentials, separate scope, sep
 
 **Cannot do:** see which specific request their gift funded (field doesn't exist); see other donors; see recipient names or clinical data.
 
-**Never sees:** the recipient of any specific gift â€” donation-to-disbursement link is architecturally absent.
+**Never sees:** the recipient of any specific gift — donation-to-disbursement link is architecturally absent.
 
 ## 3. Enrolment staff
 
@@ -82,7 +82,7 @@ Six users interact with Mutual Circle. Separate credentials, separate scope, sep
 
 **Who:** KPLC, CHUI, schools, hospitals.
 
-**Auth:** Static X-Partner-Key header (e.g. kplc-demo-key-2026). NOT production-grade â€” real deployment should issue partner JWTs. Documented limitation.
+**Auth:** Static X-Partner-Key header (e.g. kplc-demo-key-2026). NOT production-grade — real deployment should issue partner JWTs. Documented limitation.
 
 **Day in life:** receives settlement notification (out-of-band) -> checks own redemption list -> confirms delivery / settled / disputed -> downloads statement CSV.
 

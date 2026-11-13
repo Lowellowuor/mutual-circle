@@ -25,10 +25,10 @@ Wait for "Application startup complete." Leave running.
     npm install --legacy-peer-deps
     npm run dev
 
-Open http://localhost:3000/mutual-circle/ â€” the /mutual-circle/ suffix is intentional (see frontend/vite.config.ts base).
+Open http://localhost:3000/mutual-circle/ — the /mutual-circle/ suffix is intentional (see frontend/vite.config.ts base).
 
 ### Integration test (third terminal)
-Stop demo backend first â€” the test kills all venv python during setup.
+Stop demo backend first — the test kills all venv python during setup.
 
     & .\scripts\integration-test.ps1
 
@@ -60,14 +60,14 @@ Expected: Total: 47 / 47 passed.
 - All 001-005 are idempotent (IF NOT EXISTS / IF EXISTS / early-return).
   000_baseline is first, so 002/004/005 no-op on a fresh DB where 000
   already created the schema at post-005 shape.
-- **Fresh DB:** `alembic upgrade head` â€” one command creates the entire
+- **Fresh DB:** `alembic upgrade head` — one command creates the entire
   schema (21 tables from 000_baseline, then ledger_entries from 001,
   then idempotency_keys from 003, plus all indexes). 002/004/005 are
   no-ops because 000 already created the schema at post-005 shape.
 
 - **Existing DB already at 005** (e.g. the current Neon instance):
   **do nothing.** Alembic sees the DB at 005 = head of the chain. 000
-  is an ancestor Alembic infers was applied â€” you cannot be at 005
+  is an ancestor Alembic infers was applied — you cannot be at 005
   without having gone through it. `alembic upgrade head` returns
   "already at head, nothing to do".
 
@@ -76,7 +76,7 @@ Expected: Total: 47 / 47 passed.
   `upgrade head` will attempt to re-run migrations against a schema
   that already exists. 001 has no IF NOT EXISTS on its CREATE TABLE,
   so this fails with "relation ledger_entries already exists". A prior
-  version of this doc recommended stamping to an older revision â€”
+  version of this doc recommended stamping to an older revision —
   same problem, same failure mode.
 
 - **The correct way to inspect state is `alembic current`.** It reads
@@ -144,7 +144,7 @@ To configure deployment:
 
 ## Backend deployment
 
-Backend is stateless â€” all state in Neon. Any ASGI host works.
+Backend is stateless — all state in Neon. Any ASGI host works.
 
 - Railway: pip install -e . as build, uvicorn mtc.main:app --host 0.0.0.0 --port $PORT --app-dir src as start.
 - Render: same shape, uses $PORT env var.
@@ -156,15 +156,15 @@ Production start command (no --reload):
 
 ## Post-deploy smoke test
 
-1. Invoke-RestMethod "https://your-backend/health" â€” expect ok=True, db=connected.
-2. GET /stats/impact and /partners/public â€” expect JSON with data.
-3. Open https://<owner>.github.io/mutual-circle/ â€” impact numbers should appear (proves CORS works).
+1. Invoke-RestMethod "https://your-backend/health" — expect ok=True, db=connected.
+2. GET /stats/impact and /partners/public — expect JSON with data.
+3. Open https://<owner>.github.io/mutual-circle/ — impact numbers should appear (proves CORS works).
 4. Full swap round-trip: phone -> OTP -> swap -> PIN -> collect.
 
 ## Operational gotchas
 
 ### Windows: zombie socket on port 8000
-Stop uvicorn with Ctrl+C. Never Stop-Process â€” it leaves the port in LISTEN state for hours. If already stuck: reboot (only reliable fix). Integration test runs on port 8010 to avoid this.
+Stop uvicorn with Ctrl+C. Never Stop-Process — it leaves the port in LISTEN state for hours. If already stuck: reboot (only reliable fix). Integration test runs on port 8010 to avoid this.
 
 ### Pycache staleness
 If source changes don't take effect:

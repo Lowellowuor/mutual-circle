@@ -81,7 +81,7 @@ export const ConsoleView: React.FC = () => {
   useEffect(() => {
     if (tab !== 'partners') return;
 
-    // Demo partner keys have no real session â€” skip the fetch entirely
+    // Demo partner keys have no real session — skip the fetch entirely
     // so we do not spam the console with 401s and can render an
     // honest "not available in demo" empty state.
     if (selectedPartner.includes('demo-key')) {

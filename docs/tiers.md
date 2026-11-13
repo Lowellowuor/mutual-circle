@@ -23,7 +23,7 @@ Source of truth: `backend/src/mtc/requests_/tiers.py`
 
 ## Constants
 
-- `TIER_3_THRESHOLD_PENCE = 500_000` â€” KES 5,000 threshold
+- `TIER_3_THRESHOLD_PENCE = 500_000` — KES 5,000 threshold
 
 ## Flow
 
