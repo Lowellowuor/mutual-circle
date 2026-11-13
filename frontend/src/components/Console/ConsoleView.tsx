@@ -206,24 +206,6 @@ export const ConsoleView: React.FC = () => {
             </form>
           </Card>
 
-          <Card className="space-y-2">
-            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-              <KeyRound className="w-4 h-4 text-pine" /> Demo Credentials
-            </h3>
-            <p className="text-xs text-muted leading-relaxed">For demonstration. Production uses SSO / MFA.</p>
-            <div className="space-y-1.5 pt-2 border-t border-tile">
-              {(['enrolment', 'fulfilment', 'audit'] as Role[]).map(r => (
-                <div key={r} className="p-2 bg-canvas rounded-lg text-xs">
-                  <div className="text-[10px] uppercase text-muted tracking-wider">{STAFF_CREDS[r].label}</div>
-                  <div className="flex justify-between font-mono">
-                    <span className="text-ink">{STAFF_CREDS[r].id}</span>
-                    <span className="text-muted">PIN: {STAFF_CREDS[r].pin}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-
           <p className="text-center text-xs text-muted leading-relaxed px-4">
             R.U.T.H 4.8: separation enforced by architecture, not by policy.
           </p>

@@ -68,7 +68,7 @@ async def test_success_marks_request_paid(client, mock_conn):
     assert resp.status_code == 200
     assert resp.json()["ResultCode"] == 0
     assert resp.json()["detail"]["status"] == "paid"
-    assert resp.json()["reason"]["receipt"] == "RCPT123456"
+    assert resp.json()["detail"]["receipt"] == "RCPT123456"
 
     all_exec = " | ".join(str(c.args[0]) for c in mock_conn.execute.call_args_list if c.args)
     assert "UPDATE mpesa_transactions" in all_exec
@@ -83,7 +83,7 @@ async def test_failure_marks_payment_failed(client, mock_conn):
     resp = await client.post("/mpesa/stk/callback", json=_fail_payload())
     assert resp.status_code == 200
     assert resp.json()["detail"]["status"] == "payment_failed"
-    assert resp.json()["reason"]["result_code"] == 1032
+    assert resp.json()["detail"]["result_code"] == 1032
 
     all_exec = " | ".join(str(c.args[0]) for c in mock_conn.execute.call_args_list if c.args)
     assert "UPDATE mpesa_transactions" in all_exec
