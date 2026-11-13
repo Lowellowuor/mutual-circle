@@ -44,13 +44,6 @@ const useInView = <T extends HTMLElement>(ref: React.RefObject<T | null>) => {
 
 // ── Top bar ─────────────────────────────────────────────────────────────────
 
-const HEADER_NAV = [
-  { href: '#how-it-works', label: 'How it works' },
-  { href: '#three-doors', label: 'Give' },
-  { href: '#partners', label: 'Partners' },
-  { href: '#faq', label: 'FAQ' },
-];
-
 const TopBar: React.FC = () => {
   const { t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -62,6 +55,13 @@ const TopBar: React.FC = () => {
     </svg>
   );
 
+  const links = [
+    { href: '#how-it-works', label: t.nav.howItWorks },
+    { href: '#three-doors', label: t.nav.give },
+    { href: '#partners', label: t.nav.partners },
+    { href: '#faq', label: t.nav.faq },
+  ];
+
   return (
     <>
       <header className="sticky top-0 z-40 bg-[#FAF8F4]/95 backdrop-blur-sm border-b border-[#E8E6DE]">
@@ -70,9 +70,8 @@ const TopBar: React.FC = () => {
             <CircleMark />
             <span className="text-base font-semibold text-[#111111] tracking-tight">{t.nav.brand}</span>
           </a>
-
           <nav className="hidden md:flex items-center gap-8" aria-label="Primary">
-            {HEADER_NAV.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
@@ -82,40 +81,28 @@ const TopBar: React.FC = () => {
               </a>
             ))}
           </nav>
-
-          <div className="hidden md:flex items-center gap-5">
-            <a
-              href={DONOR_URL}
-              className="text-sm font-medium text-[#111111] hover:text-[#1F6B4A] transition-colors inline-flex items-center gap-1 focus:outline-none focus-visible:text-[#1F6B4A]"
-            >
-              Give <ArrowRight className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href={APP_URL}
-              className="btn btn-primary !h-11 !px-5 !text-sm"
-            >
-              Open the app
+          <div className="hidden md:flex items-center">
+            <a href={APP_URL} className="btn btn-primary !h-11 !px-5 !text-sm">
+              {t.common.openApp}
             </a>
           </div>
-
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
             className="md:hidden p-2 -mr-2 text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] rounded-lg"
-            aria-label="Open menu"
+            aria-label={t.common.menu}
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
       </header>
-
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)}>
         <div className="flex flex-col gap-0 py-2">
           <div className="flex items-center gap-2.5 pb-4 border-b border-[#E8E6DE]">
             <CircleMark />
             <span className="text-base font-semibold text-[#111111]">{t.nav.brand}</span>
           </div>
-          {HEADER_NAV.map((link) => (
+          {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
@@ -125,19 +112,8 @@ const TopBar: React.FC = () => {
               {link.label}
             </a>
           ))}
-          <a
-            href={DONOR_URL}
-            onClick={() => setMenuOpen(false)}
-            className="text-base font-medium text-[#111111] py-3.5 border-b border-[#E8E6DE] inline-flex items-center gap-1"
-          >
-            Give <ArrowRight className="w-4 h-4" />
-          </a>
-          <a
-            href={APP_URL}
-            onClick={() => setMenuOpen(false)}
-            className="btn btn-primary !h-12 w-full mt-4"
-          >
-            Open the app
+          <a href={APP_URL} onClick={() => setMenuOpen(false)} className="btn btn-primary !h-12 w-full mt-4">
+            {t.common.openApp}
           </a>
         </div>
       </Sheet>
@@ -187,8 +163,8 @@ const PhoneMockup: React.FC = () => {
         <div className="border-t border-lp-ink/10 bg-lp-surface grid grid-cols-3 py-2">
           {[
             { label: t.phoneMockup.tabHome, active: true },
-            { label: t.phoneMockup.tabActivity, active: false },
-            { label: t.phoneMockup.tabSettings, active: false },
+            { label: t.phoneMockup.tabRequests, active: false },
+            { label: t.phoneMockup.tabPrivacy, active: false },
           ].map((item) => (
             <div key={item.label} className="text-center">
               <div className={'w-4 h-4 mx-auto rounded-sm ' + (item.active ? 'bg-lp-green' : 'bg-lp-ink/20')} />
@@ -206,83 +182,62 @@ const PhoneMockup: React.FC = () => {
 // ── Hero ────────────────────────────────────────────────────────────────────
 
 const Hero: React.FC = () => {
+  const { t } = useLanguage();
   return (
     <section className="relative bg-[#FAF8F4]">
       <div className="max-w-[1120px] mx-auto px-6 pt-14 pb-20 md:pt-24 md:pb-32">
         <div className="grid md:grid-cols-12 gap-12 md:gap-16 items-center">
-          {/* Copy column */}
           <div className="md:col-span-6">
-            <h1 className="type-display-m md:type-display-d text-[#111111]">
-              Get what you need, privately.
-            </h1>
-            <p className="type-body-m md:type-body-d text-[#4A4F4B] mt-6 max-w-[60ch]">
-              Bills and fees go straight to the institution. Food and hygiene come from a locker. No name, no address.
-            </p>
+            <h1 className="type-display-m md:type-display-d text-[#111111]">{t.hero.h1}</h1>
+            <p className="type-body-m md:type-body-d text-[#4A4F4B] mt-6 max-w-[60ch]">{t.hero.sub}</p>
             <div className="mt-8 flex flex-wrap items-center gap-5">
-              <a href={APP_URL} className="btn btn-primary">
-                Open the app
-              </a>
+              <a href={APP_URL} className="btn btn-primary">{t.common.openApp}</a>
               <a href={DONOR_URL} className="btn-tertiary">
-                I want to give <ArrowRight className="w-4 h-4" />
+                {t.hero.ctaSecondary} <ArrowRight className="w-4 h-4" />
               </a>
             </div>
             <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[#4A4F4B]">
-              <span>No names</span>
+              <span>{t.hero.trust1}</span>
               <span className="w-1 h-1 rounded-full bg-[#4A4F4B]/40" aria-hidden="true" />
-              <span>Private token</span>
+              <span>{t.hero.trust2}</span>
               <span className="w-1 h-1 rounded-full bg-[#4A4F4B]/40" aria-hidden="true" />
-              <span>Hospital: invoice only</span>
+              <span>{t.hero.trust3}</span>
             </div>
           </div>
-
-          {/* Straight phone mockup — no tilt, no float, no artifact card */}
           <div className="md:col-span-6 flex justify-center md:justify-end">
             <div className="w-[280px] md:w-[300px] rounded-[2.5rem] bg-[#111111] p-2">
-              <div
-                className="rounded-[2.1rem] bg-[#FAF8F4] overflow-hidden flex flex-col"
-                style={{ height: '580px' }}
-              >
-                <div className="text-center text-[10px] pt-3 pb-1 text-[#4A4F4B]">9:41</div>
+              <div className="rounded-[2.1rem] bg-[#FAF8F4] overflow-hidden flex flex-col" style={{ height: '580px' }}>
+                <div className="text-center text-[10px] pt-3 pb-1 text-[#4A4F4B]">{t.phoneMockup.statusTime}</div>
                 <div className="px-4 py-3 flex items-center gap-2 border-b border-[#E8E6DE]">
                   <svg width="18" height="18" viewBox="0 0 28 28" fill="none" aria-hidden="true">
                     <circle cx="10" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
                     <circle cx="18" cy="14" r="8" stroke="#1F6B4A" strokeWidth="2" />
                   </svg>
-                  <span className="text-xs font-semibold text-[#111111]">Mutual Circle</span>
+                  <span className="text-xs font-semibold text-[#111111]">{t.phoneMockup.header}</span>
                 </div>
                 <div className="p-3 space-y-2 flex-1">
                   <div className="p-4 rounded-2xl bg-[#1F6B4A] text-white space-y-1">
                     <Package className="w-4 h-4" strokeWidth={2} />
-                    <div className="text-sm font-semibold">Reserve</div>
-                    <div className="text-[11px] text-white/75">Food or hygiene bundle</div>
+                    <div className="text-sm font-semibold">{t.phoneMockup.reserve}</div>
+                    <div className="text-[11px] text-white/75">{t.phoneMockup.reserveSub}</div>
                   </div>
                   <div className="p-4 rounded-2xl bg-white border border-[#E8E6DE] space-y-1">
                     <CreditCard className="w-4 h-4 text-[#1F6B4A]" strokeWidth={2} />
-                    <div className="text-sm font-semibold text-[#111111]">Pay a bill</div>
-                    <div className="text-[11px] text-[#4A4F4B]">Utility, school, hospital</div>
+                    <div className="text-sm font-semibold text-[#111111]">{t.phoneMockup.pay}</div>
+                    <div className="text-[11px] text-[#4A4F4B]">{t.phoneMockup.paySub}</div>
                   </div>
                   <div className="p-3 rounded-xl bg-[#DCE8E0]/60 flex justify-between items-center">
-                    <span className="text-[11px] text-[#111111]">Bundle reserved</span>
+                    <span className="text-[11px] text-[#111111]">{t.phoneMockup.recentRequest}</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1F6B4A] text-white font-medium">
-                      Ready
+                      {t.phoneMockup.recentRequestStatus}
                     </span>
                   </div>
                 </div>
                 <div className="border-t border-[#E8E6DE] bg-white grid grid-cols-3 py-3">
-                  {['Home', 'Activity', 'Settings'].map((label, i) => (
+                  {[t.phoneMockup.tabHome, t.phoneMockup.tabRequests, t.phoneMockup.tabPrivacy].map((label, i) => (
                     <div key={label} className="text-center">
-                      <div
-                        className={
-                          'w-4 h-4 mx-auto rounded-sm ' +
-                          (i === 0 ? 'bg-[#1F6B4A]' : 'bg-[#111111]/20')
-                        }
-                      />
-                      <div
-                        className={
-                          'text-[9px] mt-1 ' +
-                          (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')
-                        }
-                      >
+                      <div className={'w-4 h-4 mx-auto rounded-sm ' + (i === 0 ? 'bg-[#1F6B4A]' : 'bg-[#111111]/20')} />
+                      <div className={'text-[9px] mt-1 ' + (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')}>
                         {label}
                       </div>
                     </div>
@@ -303,6 +258,11 @@ const Hero: React.FC = () => {
 
 const ThePool: React.FC = () => {
   const { t } = useLanguage();
+  const points = [
+    { Icon: EyeOff, label: t.thePool.pointAnonymousLabel, body: t.thePool.pointAnonymousBody },
+    { Icon: Coins, label: t.thePool.pointPooledLabel, body: t.thePool.pointPooledBody },
+    { Icon: Users, label: t.thePool.pointCampaignsLabel, body: t.thePool.pointCampaignsBody },
+  ];
   return (
     <section id="the-pool" className="bg-[#0F1E17] py-16 md:py-24">
       <div className="max-w-[1120px] mx-auto px-6">
@@ -314,8 +274,21 @@ const ThePool: React.FC = () => {
           </p>
         </div>
 
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-10 md:mb-14">
+          {points.map(({ Icon, label, body }) => (
+            <div key={label} className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                <Icon className="w-4 h-4 text-[#DCE8E0]" strokeWidth={1.75} />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-white">{label}</div>
+                <div className="text-sm text-white/60 mt-0.5">{body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-          {/* Request card */}
           <div className="bg-white r-card p-6 md:p-8">
             <div className="section-label !text-[#1F6B4A] mb-5">{t.thePool.requestLabel}</div>
             <div className="space-y-3">
@@ -323,19 +296,14 @@ const ThePool: React.FC = () => {
                 <span className="type-body-m type-secondary">{t.thePool.requestType}</span>
                 <span className="type-h2-m !text-[#111111] tabular-nums">{t.thePool.requestAmount}</span>
               </div>
-              <div className="flex justify-between items-baseline gap-4">
-                <span className="type-body-m type-secondary">{t.thePool.requestRefLabel}</span>
-                <span className="text-sm font-mono text-[#111111]">{t.thePool.requestRef}</span>
-              </div>
             </div>
             <div className="mt-5 pt-4 border-t border-[#E8E6DE]">
-              <div className="section-label mb-1">Status</div>
+              <div className="section-label mb-1">{t.thePool.statusLabel}</div>
               <div className="text-sm font-medium text-[#1F6B4A]">{t.thePool.requestStatus}</div>
             </div>
             <div className="mt-5 text-sm italic text-[#4A4F4B]">{t.thePool.exampleLabel}</div>
           </div>
 
-          {/* Gift card */}
           <div className="bg-white r-card p-6 md:p-8">
             <div className="section-label !text-[#1F6B4A] mb-5">{t.thePool.giftLabel}</div>
             <div className="space-y-3">
@@ -343,16 +311,21 @@ const ThePool: React.FC = () => {
                 <span className="type-body-m type-secondary">{t.thePool.giftType}</span>
                 <span className="type-h2-m !text-[#111111] tabular-nums">{t.thePool.giftAmount}</span>
               </div>
-              <div className="flex justify-between items-baseline gap-4">
-                <span className="type-body-m type-secondary">{t.thePool.giftRefLabel}</span>
-                <span className="text-sm font-mono text-[#111111]">{t.thePool.giftRef}</span>
-              </div>
             </div>
             <div className="mt-5 pt-4 border-t border-[#E8E6DE]">
-              <div className="section-label mb-1">Status</div>
+              <div className="section-label mb-1">{t.thePool.statusLabel}</div>
               <div className="text-sm font-medium text-[#1F6B4A]">{t.thePool.giftStatus}</div>
             </div>
             <div className="mt-5 text-sm italic text-[#4A4F4B]">{t.thePool.exampleLabel}</div>
+          </div>
+        </div>
+
+        <div className="mt-14 md:mt-20 max-w-2xl">
+          <p className="type-h2-m !text-[#DCE8E0]">{t.thePool.bookend}</p>
+          <div className="mt-6">
+            <a href={DONOR_URL} className="btn btn-primary">
+              {t.thePool.giveCta}
+            </a>
           </div>
         </div>
       </div>
@@ -514,7 +487,7 @@ const HowItWorks: React.FC = () => {
                   </div>
                 </div>
                 <div className="border-t border-[#E8E6DE] bg-white grid grid-cols-3 py-3">
-                  {['Home', 'Activity', 'Settings'].map((lbl, i) => (
+                  {[t.phoneMockup.tabHome, t.phoneMockup.tabRequests, t.phoneMockup.tabPrivacy].map((lbl, i) => (
                     <div key={lbl} className="text-center">
                       <div className={'w-4 h-4 mx-auto rounded-sm ' + (i === 0 ? 'bg-[#1F6B4A]' : 'bg-[#111111]/20')} />
                       <div className={'text-[9px] mt-1 ' + (i === 0 ? 'text-[#1F6B4A] font-medium' : 'text-[#4A4F4B]')}>
@@ -633,12 +606,8 @@ const Partners: React.FC = () => {
       <div className="max-w-[1120px] mx-auto px-6 section-pad">
         <div className="max-w-2xl mb-10 md:mb-14">
           <span className="section-label">{t.partners.eyebrow}</span>
-          <h2 className="type-h2-m md:type-h2-d mt-3 text-[#111111]">
-            {t.partners.headline}
-          </h2>
-          <p className="type-body-m md:type-body-d type-secondary mt-4 max-w-[60ch]">
-            {t.partners.body}
-          </p>
+          <h2 className="type-h2-m md:type-h2-d mt-3 text-[#111111]">{t.partners.headline}</h2>
+          <p className="type-body-m md:type-body-d type-secondary mt-4 max-w-[60ch]">{t.partners.body}</p>
         </div>
 
         <div className="border-t border-[#E8E6DE]">
@@ -659,11 +628,7 @@ const Partners: React.FC = () => {
         <div className="mt-10 md:mt-14 max-w-2xl">
           <p className="type-h2-m !text-[#1F6B4A] leading-tight">{t.partners.line}</p>
           <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => setSheetOpen(true)}
-              className="btn btn-primary"
-            >
+            <button type="button" onClick={() => setSheetOpen(true)} className="btn btn-primary">
               {t.partners.cta}
             </button>
           </div>
@@ -676,31 +641,29 @@ const Partners: React.FC = () => {
             <div className="w-16 h-16 mx-auto rounded-full bg-[#DCE8E0] flex items-center justify-center mb-5">
               <ShieldCheck className="w-8 h-8 text-[#1F6B4A]" strokeWidth={1.75} />
             </div>
-            <p className="type-h2-m text-[#111111]">Thank you.</p>
-            <p className="type-body-m type-secondary mt-2 max-w-xs mx-auto">
-              We will be in touch within 48 hours.
-            </p>
+            <p className="type-h2-m text-[#111111]">{t.partners.success}</p>
+            <p className="type-body-m type-secondary mt-2 max-w-xs mx-auto">{t.partners.successBody}</p>
           </div>
         ) : (
           <div className="space-y-6">
             <div>
-              <span className="section-label">Partners</span>
+              <span className="section-label">{t.partners.eyebrow}</span>
               <h2 className="type-h2-m mt-2 text-[#111111]">{t.partners.formTitle}</h2>
-              <p className="type-body-m type-secondary mt-1">Tell us about your organisation.</p>
+              <p className="type-body-m type-secondary mt-1">{t.partners.formSubtitle}</p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="partner-org" className="block section-label mb-2">Organisation</label>
+                <label htmlFor="partner-org" className="block section-label mb-2">{t.partners.fieldOrg}</label>
                 <input
                   id="partner-org"
                   type="text"
                   required
-                  placeholder="Organisation name"
+                  placeholder={t.partners.fieldOrgPlaceholder}
                   className="w-full h-12 px-4 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all"
                 />
               </div>
               <div>
-                <div className="section-label mb-2">Organisation type</div>
+                <div className="section-label mb-2">{t.partners.fieldType}</div>
                 <div className="grid grid-cols-2 gap-2">
                   {t.partners.typeOptions.map((opt) => (
                     <label
@@ -727,27 +690,25 @@ const Partners: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label htmlFor="partner-email" className="block section-label mb-2">Work email</label>
+                <label htmlFor="partner-email" className="block section-label mb-2">{t.partners.fieldEmail}</label>
                 <input
                   id="partner-email"
                   type="email"
                   required
-                  placeholder="name@organisation.org"
+                  placeholder={t.partners.fieldEmailPlaceholder}
                   className="w-full h-12 px-4 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all"
                 />
               </div>
               <div>
-                <label htmlFor="partner-msg" className="block section-label mb-2">Message</label>
+                <label htmlFor="partner-msg" className="block section-label mb-2">{t.partners.fieldMessage}</label>
                 <textarea
                   id="partner-msg"
                   rows={3}
-                  placeholder="What would you like to discuss?"
+                  placeholder={t.partners.fieldMessagePlaceholder}
                   className="w-full px-4 py-3 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all resize-none"
                 />
               </div>
-              <button type="submit" className="btn btn-primary w-full">
-                {t.partners.submit}
-              </button>
+              <button type="submit" className="btn btn-primary w-full">{t.partners.submit}</button>
             </form>
           </div>
         )}
@@ -823,6 +784,14 @@ const Faq: React.FC = () => {
 };
 
 const Footer: React.FC = () => {
+  const { t } = useLanguage();
+  const productLinks = [
+    { href: '#how-it-works', label: t.footer.linkHowItWorks },
+    { href: '#three-doors', label: t.footer.linkOpenApp },
+    { href: DONOR_URL, label: t.footer.linkGive },
+    { href: '#partners', label: t.footer.linkPartners },
+    { href: '#faq', label: t.footer.linkFaq },
+  ];
   return (
     <footer className="bg-[#0F1E17] text-white pb-24 md:pb-0">
       <div className="max-w-[1120px] mx-auto px-6 py-12 md:py-16">
@@ -833,58 +802,44 @@ const Footer: React.FC = () => {
                 <circle cx="10" cy="14" r="8" stroke="#DCE8E0" strokeWidth="1.75" />
                 <circle cx="18" cy="14" r="8" stroke="#DCE8E0" strokeWidth="1.75" />
               </svg>
-              <span className="text-base font-semibold tracking-tight">Mutual Circle</span>
+              <span className="text-base font-semibold tracking-tight">{t.nav.brand}</span>
             </div>
-            <p className="text-sm text-white/70 leading-relaxed max-w-[40ch]">
-              Equip. Transform. Made for more.
-            </p>
-            <p className="text-sm text-white/40 mt-2">
-              Tagline by LumiereCore CLG
-            </p>
+            <p className="text-sm text-white/70 leading-relaxed max-w-[40ch]">{t.footer.tagline}</p>
+            <p className="text-sm text-white/40 mt-2">{t.footer.taglineCredit}</p>
           </div>
-
           <div className="md:col-span-2">
-            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
-              Product
-            </div>
+            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">{t.footer.productLabel}</div>
             <ul className="space-y-2 text-sm">
-              <li><a href="#how-it-works" className="text-white/70 hover:text-white transition-colors">How it works</a></li>
-              <li><a href="#three-doors" className="text-white/70 hover:text-white transition-colors">Get started</a></li>
-              <li><a href={DONOR_URL} className="text-white/70 hover:text-white transition-colors">Give</a></li>
-              <li><a href="#partners" className="text-white/70 hover:text-white transition-colors">Partners</a></li>
-              <li><a href="#faq" className="text-white/70 hover:text-white transition-colors">FAQ</a></li>
+              {productLinks.map((link) => (
+                <li key={link.href}>
+                  <a href={link.href} className="text-white/70 hover:text-white transition-colors">{link.label}</a>
+                </li>
+              ))}
             </ul>
           </div>
-
           <div className="md:col-span-2">
-            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
-              Company
-            </div>
+            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">{t.footer.companyLabel}</div>
             <ul className="space-y-2 text-sm">
-              <li><a href="https://lumierecore.org" className="text-white/70 hover:text-white transition-colors">LumiereCore CLG</a></li>
+              <li><a href="https://lumierecore.org" className="text-white/70 hover:text-white transition-colors">{t.footer.linkParent}</a></li>
             </ul>
           </div>
-
           <div className="md:col-span-3">
-            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
-              Contact
-            </div>
+            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">{t.footer.contactLabel}</div>
             <ul className="space-y-2 text-sm text-white/70">
-              <li><a href="https://www.lumierecore.org" className="hover:text-white transition-colors">www.lumierecore.org</a></li>
-              <li><a href="mailto:swanjohi@lumierecore.org" className="hover:text-white transition-colors">swanjohi@lumierecore.org</a></li>
-              <li><a href="mailto:info@lumierecore.org" className="hover:text-white transition-colors">info@lumierecore.org</a></li>
-              <li>+254 107 777 007</li>
-              <li className="text-white/50">Nairobi, Kenya</li>
+              <li><a href={'https://' + t.footer.website} className="hover:text-white transition-colors">{t.footer.website}</a></li>
+              <li><a href={'mailto:' + t.footer.email1} className="hover:text-white transition-colors">{t.footer.email1}</a></li>
+              <li><a href={'mailto:' + t.footer.email2} className="hover:text-white transition-colors">{t.footer.email2}</a></li>
+              <li>{t.footer.phone}</li>
+              <li className="text-white/50">{t.footer.city}</li>
             </ul>
           </div>
         </div>
-
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-white/40">
-          <div>© 2026 LumiereCore CLG</div>
+          <div>{t.footer.copyright}</div>
           <div className="flex flex-wrap items-center gap-4">
-            <a href="mailto:info@lumierecore.org?subject=Privacy%20policy" className="hover:text-white transition-colors">Privacy</a>
-            <a href="mailto:info@lumierecore.org?subject=Terms" className="hover:text-white transition-colors">Terms</a>
-            <a href="mailto:info@lumierecore.org?subject=Data%20protection" className="hover:text-white transition-colors">Data protection</a>
+            <a href={'mailto:' + t.footer.email2 + '?subject=Privacy%20policy'} className="hover:text-white transition-colors">{t.footer.privacy}</a>
+            <a href={'mailto:' + t.footer.email2 + '?subject=Terms'} className="hover:text-white transition-colors">{t.footer.terms}</a>
+            <a href={'mailto:' + t.footer.email2 + '?subject=Data%20protection'} className="hover:text-white transition-colors">{t.footer.dataProtection}</a>
           </div>
         </div>
       </div>
@@ -894,18 +849,21 @@ const Footer: React.FC = () => {
 
 // ── Mobile dock ─────────────────────────────────────────────────────────────
 
-const MobileDock: React.FC = () => (
-  <div
-    className="fixed inset-x-0 bottom-0 z-30 md:hidden bg-white border-t border-[#E8E6DE]"
-    style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-  >
-    <div className="p-3">
-      <a href={APP_URL} className="btn btn-primary w-full">
-        Open the app
-      </a>
+const MobileDock: React.FC = () => {
+  const { t } = useLanguage();
+  return (
+    <div
+      className="fixed inset-x-0 bottom-0 z-30 md:hidden bg-white border-t border-[#E8E6DE]"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div className="p-3">
+        <a href={APP_URL} className="btn btn-primary w-full">
+          {t.common.openApp}
+        </a>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ── Page root ───────────────────────────────────────────────────────────────
 
