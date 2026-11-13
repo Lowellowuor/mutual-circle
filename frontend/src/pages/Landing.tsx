@@ -20,16 +20,6 @@ const DONOR_URL = import.meta.env.BASE_URL + 'donor';
 // Curated photography — served locally from frontend/public/images/landing/
 // (see ROLE.txt amendment 2026-11-13). No people, no partner logos.
 const BASE = import.meta.env.BASE_URL;
-const IMG = {
-  food: BASE + 'images/landing/food.jpg',
-  hygiene: BASE + 'images/landing/hygiene.jpg',
-  utility: BASE + 'images/landing/utility.jpg',
-  school: BASE + 'images/landing/school.jpg',
-  heroAccent: BASE + 'images/landing/hero-accent.jpg',
-  architecture: BASE + 'images/landing/architecture.jpg',
-  giving: BASE + 'images/landing/giving.jpg',
-  institutions: BASE + 'images/landing/institutions.jpg',
-};
 
 // ── Reveal / scroll animation ───────────────────────────────────────────────
 
@@ -48,71 +38,9 @@ const useInView = <T extends HTMLElement>(ref: React.RefObject<T | null>) => {
   return visible;
 };
 
-const Reveal: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({
-  children, delay = 0, className = '',
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const visible = useInView(ref);
-  return (
-    <div
-      ref={ref}
-      data-reveal
-      data-visible={visible}
-      style={{ transitionDelay: delay + 'ms' }}
-      className={className}
-    >
-      {children}
-    </div>
-  );
-};
-
 // ── Ambient backdrop (subtle drifting orbs) ─────────────────────────────────
 
-const AmbientBackdrop: React.FC = () => (
-  <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
-    <div
-      className="absolute -top-32 -left-20 w-[500px] h-[500px] rounded-full blur-3xl orb-drift"
-      style={{ background: 'radial-gradient(circle, rgba(220,232,224,0.55) 0%, rgba(220,232,224,0) 70%)' }}
-    />
-    <div
-      className="absolute -bottom-40 -right-24 w-[600px] h-[600px] rounded-full blur-3xl orb-drift-slow"
-      style={{ background: 'radial-gradient(circle, rgba(31,107,74,0.08) 0%, rgba(31,107,74,0) 70%)' }}
-    />
-  </div>
-);
-
 // ── Shared decorative primitives ────────────────────────────────────────────
-
-const Eyebrow: React.FC<{ children: React.ReactNode; number?: string }> = ({ children, number }) => (
-  <span className="eyebrow">
-    {number && <span className="mr-1.5 tabular-nums text-lp-green/60">{number}</span>}
-    {children}
-  </span>
-);
-
-const DotGrid: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div
-    className={'absolute inset-0 pointer-events-none ' + className}
-    style={{
-      backgroundImage: 'radial-gradient(circle, rgba(31,107,74,0.14) 1px, transparent 1px)',
-      backgroundSize: '24px 24px',
-      maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
-      WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
-    }}
-    aria-hidden="true"
-  />
-);
-
-const WaveDivider: React.FC = () => (
-  <div className="w-full overflow-hidden -mt-px" aria-hidden="true">
-    <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-10 md:h-14 block">
-      <path
-        d="M0,30 C360,60 720,0 1080,30 C1260,45 1380,40 1440,30 L1440,60 L0,60 Z"
-        fill="rgba(220,232,224,0.4)"
-      />
-    </svg>
-  </div>
-);
 
 // ── Top bar ─────────────────────────────────────────────────────────────────
 
@@ -370,8 +298,6 @@ const Hero: React.FC = () => {
 };
 
 // ── Promise ─────────────────────────────────────────────────────────────────
-
-
 
 // ── How it works ────────────────────────────────────────────────────────────
 
@@ -633,13 +559,7 @@ const HowItWorks: React.FC = () => {
 
 // ── Interactive demo ─────────────────────────────────────────────────────────
 
-
-
-
-
 // ── Private by design ───────────────────────────────────────────────────────
-
-
 
 const Private: React.FC = () => {
   const { t } = useLanguage();
@@ -689,36 +609,6 @@ const Private: React.FC = () => {
 // Thin sage dashed line + chevron pointing from the photo toward the benefits
 // it introduces. Only on md+. Lives inside the sticky photo column so it
 // moves with the image as the user scrolls the numbered rows.
-
-const SectionArrow: React.FC<{ direction: 'left' | 'right'; className?: string }> = ({ direction, className = '' }) => (
-  <div
-    className={'hidden md:block absolute pointer-events-none text-lp-green/40 ' + className}
-    aria-hidden="true"
-  >
-    <svg width="48" height="32" viewBox="0 0 48 32" fill="none">
-      <line
-        x1={direction === 'left' ? 44 : 4}
-        y1="16"
-        x2={direction === 'left' ? 8 : 40}
-        y2="16"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeDasharray="2 4"
-        strokeLinecap="round"
-      />
-      <polyline
-        points={direction === 'left' ? '12,8 4,16 12,24' : '36,8 44,16 36,24'}
-        stroke="currentColor"
-        strokeWidth="1.5"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  </div>
-);
-
-
 
 const Partners: React.FC = () => {
   const { t } = useLanguage();
@@ -948,13 +838,13 @@ const Footer: React.FC = () => {
             <p className="text-sm text-white/70 leading-relaxed max-w-[40ch]">
               Equip. Transform. Made for more.
             </p>
-            <p className="text-xs text-white/40 mt-2">
+            <p className="text-sm text-white/40 mt-2">
               Tagline by LumiereCore CLG
             </p>
           </div>
 
           <div className="md:col-span-2">
-            <div className="text-xs uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
+            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
               Product
             </div>
             <ul className="space-y-2 text-sm">
@@ -967,7 +857,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="md:col-span-2">
-            <div className="text-xs uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
+            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
               Company
             </div>
             <ul className="space-y-2 text-sm">
@@ -976,7 +866,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="md:col-span-3">
-            <div className="text-xs uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
+            <div className="text-sm uppercase tracking-[0.1em] font-semibold text-white/40 mb-3">
               Contact
             </div>
             <ul className="space-y-2 text-sm text-white/70">
@@ -989,7 +879,7 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs text-white/40">
+        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-white/40">
           <div>© 2026 LumiereCore CLG</div>
           <div className="flex flex-wrap items-center gap-4">
             <a href="mailto:info@lumierecore.org?subject=Privacy%20policy" className="hover:text-white transition-colors">Privacy</a>
