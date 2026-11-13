@@ -83,6 +83,8 @@ export const en = {
     title: 'How it works',
     needLabel: 'If you need',
     giveLabel: 'If you give',
+    needCta: 'Get started',
+    giveCta: 'Give',
     needSteps: [
       { title: 'Request', body: 'Choose what you need.' },
       { title: 'Verify', body: 'We check the bill, not you.' },
