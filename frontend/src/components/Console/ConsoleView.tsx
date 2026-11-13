@@ -304,7 +304,7 @@ export const ConsoleView: React.FC = () => {
           {riskFlags.length === 0 ? (
             <EmptyState Icon={CheckCircle} title="No active flags" body="All risk flags have been resolved." iconClassName="text-emerald-600" />
           ) : riskFlags.map(flag => (
-            <div key={flag.id} className="p-3 bg-white border border-[#111111]/15 rounded-xl space-y-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedDetail({ type: 'flag', item: flag })}>
+            <div key={flag.id} className="p-3 bg-white border border-[#E8E6DE] rounded-xl space-y-2 cursor-pointer hover:border-[#1F6B4A]" onClick={() => setSelectedDetail({ type: 'flag', item: flag })}>
               <div className="flex items-start justify-between gap-1">
                 <div className="flex items-center gap-1 flex-wrap min-w-0"><span className={'px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ' + (flag.severity === 'high' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800')}>{flag.severity}</span><span className="font-mono text-[10px] text-[#111111]/50">{flag.id}</span></div>
                 <span className="text-[10px] font-mono text-[#111111]/40 shrink-0">{flag.timestamp}</span>
@@ -403,10 +403,10 @@ export const ConsoleView: React.FC = () => {
       <div className="p-3 bg-[#FAF8F4] border border-[#111111]/10 rounded-xl"><div className="font-semibold text-[#1F6B4A] flex items-center gap-1 text-[12px]"><Store className="w-4 h-4" /> Partner Till</div><p className="text-[11px] text-[#111111]/60 mt-1">R.U.T.H 4.5 - voucher redemption.</p></div>
 
       <form onSubmit={handleRedeem} className="p-3 bg-white border border-[#111111]/5 shadow-sm rounded-xl space-y-2">
-        <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
+        <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Partner</label><select value={tillPartner} onChange={e => setTillPartner(e.target.value)} className="w-full bg-[#FAF8F4] border border-[#E8E6DE] rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0"><option>Naivas Kibera</option><option>Kenyatta Hospital</option></select></div>
         <div className="grid grid-cols-2 gap-2">
-          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">PIN</label><input maxLength={6} pattern="[0-9]{6}" title="Must be exactly 6 digits" value={tillPin} onChange={e => setTillPin(e.target.value)} placeholder="6 digits" className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0" /></div>
-          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={tillAmount} onChange={e => setTillAmount(e.target.value)} placeholder="0" className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0" /></div>
+          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">PIN</label><input maxLength={6} pattern="[0-9]{6}" title="Must be exactly 6 digits" value={tillPin} onChange={e => setTillPin(e.target.value)} placeholder="6 digits" className="w-full bg-[#FAF8F4] border border-[#E8E6DE] rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0" /></div>
+          <div><label className="text-[11px] font-mono uppercase text-[#111111]/50">Amount (KES)</label><input type="number" value={tillAmount} onChange={e => setTillAmount(e.target.value)} placeholder="0" className="w-full bg-[#FAF8F4] border border-[#E8E6DE] rounded-lg px-2 py-2 text-[11px] font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0" /></div>
         </div>
         <button type="submit" disabled={!tillPin || !tillAmount} className="w-full py-2 bg-[#1F6B4A] hover:bg-[#18553a] text-white rounded-lg text-[11px] font-semibold disabled:opacity-40">Redeem Voucher</button>
       </form>
@@ -524,7 +524,7 @@ export const ConsoleView: React.FC = () => {
             <button
               key={p.key}
               onClick={() => setSelectedPartner(p.key)}
-              className={'p-2 rounded-lg border-2 text-center transition-all ' + (active ? 'bg-[#1F6B4A] text-white border-[#1F6B4A]' : 'bg-white border-[#111111]/15 text-[#111111] hover:border-[#111111]/30')}
+              className={'p-2 rounded-lg border-2 text-center transition-all ' + (active ? 'bg-[#1F6B4A] text-white border-[#1F6B4A]' : 'bg-white border-[#E8E6DE] text-[#111111] hover:border-[#111111]/30')}
             >
               <Icon className="w-3 h-3 mx-auto mb-0.5" />
               <div className="text-[11px] font-bold">{p.label}</div>
@@ -676,7 +676,7 @@ export const ConsoleView: React.FC = () => {
             <ChevronRight className="w-3 h-3 rotate-180" /> Back
           </button>
           <div className="p-4">
-            <div className="p-4 bg-[#FAF8F4] border border-[#111111]/15 rounded-xl space-y-1.5">
+            <div className="p-4 bg-[#FAF8F4] border border-[#E8E6DE] rounded-xl space-y-1.5">
               <h4 className="text-[11px] font-bold text-[#111111] uppercase tracking-wider">Spec Coverage</h4>
               {['Separate credentials (4.8)', 'Login gate', 'Verification tiers 1-4 (4.8)', 'OCR completion (4.8)', 'Deduplication (4.7)', 'Audit log + export (4.7)', 'POCAMLA export (6)', 'Partner vouchers (4.5)', 'Pledge matching (4.4)', 'Match interests panel', 'Depot + locker stock (4.2)'].map(f => (
                 <div key={f} className="flex items-center gap-1.5 text-[11px] text-[#111111]/70"><div className="w-1 h-1 rounded-full bg-[#1F6B4A]" />{f}</div>
@@ -726,7 +726,7 @@ export const ConsoleView: React.FC = () => {
           {developerItems.map(it => renderMoreButton(it, true))}
           <button
             onClick={() => { setTab('queue'); setAuditSub('flags'); setFilter('all'); setReceipt(null); setShowRaw(false); setTillResult(null); setIssueModal(null); setIssueSuccess(null); setMoreTab('menu'); }}
-            className="w-full p-3 bg-white border border-[#111111]/15 rounded-xl flex items-center justify-center gap-1.5 text-[#111111]/60 hover:text-[#111111] hover:bg-[#FAF8F4] text-[12px] font-medium mt-4"
+            className="w-full p-3 bg-white border border-[#E8E6DE] rounded-xl flex items-center justify-center gap-1.5 text-[#111111]/60 hover:text-[#111111] hover:bg-[#FAF8F4] text-[12px] font-medium mt-4"
           >
             <RotateCcw className="w-3 h-3" /> Reset view
           </button>
@@ -795,7 +795,7 @@ export const ConsoleView: React.FC = () => {
             </div>
             <div>
               <label className="text-[11px] font-mono uppercase text-[#111111]/50">Partner</label>
-              <select value={issuePartner} onChange={e => setIssuePartner(e.target.value as any)} className="w-full bg-[#FAF8F4] border border-[#111111]/15 rounded-lg px-3 py-2 text-xs font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0">
+              <select value={issuePartner} onChange={e => setIssuePartner(e.target.value as any)} className="w-full bg-[#FAF8F4] border border-[#E8E6DE] rounded-lg px-3 py-2 text-xs font-mono mt-1 outline-none focus:ring-2 focus:ring-[#1F6B4A] focus:ring-offset-0">
                 <option>Naivas Kibera</option><option>Kenyatta Hospital</option>
               </select>
             </div>
