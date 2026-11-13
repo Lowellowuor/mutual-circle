@@ -169,7 +169,7 @@ export const en = {
   },
   faq: {
     eyebrow: 'FAQ',
-    title: 'FAQ',
+    title: 'Questions answered.',
     q1: 'Who can see my information?',
     a1: 'People in the circle cannot. M-Pesa wallets are registered to verified identity, so the telecom and the state can.',
     q2: 'Do I receive cash?',

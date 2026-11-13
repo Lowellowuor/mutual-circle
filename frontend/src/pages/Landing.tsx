@@ -3,6 +3,9 @@ import {
   HeartHandshake, Package, CreditCard, FileText,
   Coins, Users, Hash, ShieldCheck, Droplet,
   Zap, GraduationCap, Menu, ArrowRight, Check,
+  EyeOff,
+  Lock,
+  Info,
 } from 'lucide-react';
 import { LanguageProvider, useLanguage } from '../i18n';
 import { Button } from '../ui/Button';
@@ -641,59 +644,42 @@ const HowItWorks: React.FC = () => {
 const Private: React.FC = () => {
   const { t } = useLanguage();
   const principles = [
-    { title: t.private.p1Title, body: t.private.p1Body },
-    { title: t.private.p2Title, body: t.private.p2Body },
-    { title: t.private.p3Title, body: t.private.p3Body },
+    { Icon: EyeOff, title: t.private.p1Title, body: t.private.p1Body },
+    { Icon: Lock, title: t.private.p2Title, body: t.private.p2Body },
+    { Icon: FileText, title: t.private.p3Title, body: t.private.p3Body },
   ];
   return (
-    <section id="private" className="relative py-16 md:py-28 overflow-hidden mesh-sage">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 right-10 w-[420px] h-[420px] rounded-full bg-lp-green/10 blur-3xl orb-drift" />
-        <div className="absolute bottom-10 left-10 w-[380px] h-[380px] rounded-full bg-lp-sage/60 blur-3xl orb-drift-slow" />
-      </div>
-      <div className="relative max-w-[1120px] mx-auto px-6">
-        <Reveal>
-          <div className="max-w-3xl">
-            <Eyebrow>{t.private.eyebrow}</Eyebrow>
-            <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
-              {t.private.headline}
-            </h2>
-            <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
-              {t.private.body}
-            </p>
-          </div>
-        </Reveal>
+    <section id="private" className="bg-white border-y border-[#E8E6DE]">
+      <div className="max-w-[1120px] mx-auto px-6 section-pad">
+        <div className="max-w-2xl mb-10 md:mb-14">
+          <span className="section-label">{t.private.eyebrow}</span>
+          <h2 className="type-h2-m md:type-h2-d mt-3 text-[#111111]">
+            {t.private.headline}
+          </h2>
+          <p className="type-body-m md:type-body-d type-secondary mt-4 max-w-[60ch]">
+            {t.private.body}
+          </p>
+        </div>
 
-        <Reveal delay={100}>
-          <div className="mt-16 md:mt-20 max-w-3xl">
-            {principles.map((p, i) => (
-              <div
-                key={i}
-                className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-10 items-baseline"
-              >
-                <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div className="md:flex md:gap-8 md:items-baseline">
-                  <h3 className="text-base md:text-lg font-semibold text-lp-ink md:w-40 shrink-0">
-                    {p.title}
-                  </h3>
-                  <p className="mt-1 md:mt-0 text-sm md:text-base text-lp-ink/60 leading-relaxed">
-                    {p.body}
-                  </p>
-                </div>
+        <div className="border-t border-[#E8E6DE]">
+          {principles.map(({ Icon, title, body }) => (
+            <div
+              key={title}
+              className="grid grid-cols-[48px_1fr] md:grid-cols-[48px_180px_1fr] gap-4 md:gap-6 py-6 border-b border-[#E8E6DE] items-start"
+            >
+              <div className="w-11 h-11 rounded-full bg-[#DCE8E0] flex items-center justify-center shrink-0">
+                <Icon className="w-5 h-5 text-[#1F6B4A]" strokeWidth={1.75} />
               </div>
-            ))}
-          </div>
-        </Reveal>
+              <div className="text-base font-semibold text-[#111111] md:pt-2.5">{title}</div>
+              <p className="type-body-m type-secondary col-span-2 md:col-span-1 md:pt-2.5">{body}</p>
+            </div>
+          ))}
+        </div>
 
-        <Reveal delay={200}>
-          <div className="mt-20 md:mt-28 max-w-3xl">
-            <p className="display-serif text-[32px] md:text-[48px] leading-[1.1] text-lp-green">
-              {t.private.line}
-            </p>
-          </div>
-        </Reveal>
+        <div className="mt-10 flex items-start gap-3 max-w-2xl">
+          <Info className="w-4 h-4 text-[#4A4F4B] shrink-0 mt-1" strokeWidth={1.75} />
+          <p className="text-[15px] leading-relaxed text-[#4A4F4B]">{t.private.line}</p>
+        </div>
       </div>
     </section>
   );
@@ -747,151 +733,93 @@ const Partners: React.FC = () => {
   };
 
   const principles = [
-    { title: t.partners.p1Title, body: t.partners.p1Body },
-    { title: t.partners.p2Title, body: t.partners.p2Body },
-    { title: t.partners.p3Title, body: t.partners.p3Body },
+    { Icon: Hash, title: t.partners.p1Title, body: t.partners.p1Body },
+    { Icon: Coins, title: t.partners.p2Title, body: t.partners.p2Body },
+    { Icon: ShieldCheck, title: t.partners.p3Title, body: t.partners.p3Body },
   ];
 
   return (
-    <section id="partners" className="relative overflow-hidden py-20 md:py-32 border-t border-lp-ink/5">
-      <AmbientBackdrop />
-      <div className="relative max-w-[1120px] mx-auto px-6">
-        <div className="grid md:grid-cols-5 gap-12 md:gap-16 items-start">
-          {/* Photo column (left on desktop) */}
-          <Reveal delay={150} className="md:col-span-2 md:order-1">
-            <div className="md:sticky md:top-28 relative">
-              <SectionArrow direction="right" className="-right-14 top-32" />
-              <figure className="relative">
-                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-lp-sage/40 shadow-2xl ring-1 ring-lp-ink/10">
-                  <img
-                    src={IMG.institutions}
-                    alt={t.partners.photoAlt}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-[1.03]"
-                    loading="lazy"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15'; }}
-                  />
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{ background: 'linear-gradient(180deg, rgba(31,107,74,0.06) 0%, rgba(31,107,74,0.02) 50%, rgba(17,17,17,0.22) 100%)' }}
-                    aria-hidden="true"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-emerald-300 mb-1">
-                      The settle
-                    </div>
-                    <div className="display-serif text-xl leading-tight">Where bills get paid.</div>
-                  </div>
-                </div>
-              </figure>
+    <section id="partners" className="bg-[#FAF8F4]">
+      <div className="max-w-[1120px] mx-auto px-6 section-pad">
+        <div className="max-w-2xl mb-10 md:mb-14">
+          <span className="section-label">{t.partners.eyebrow}</span>
+          <h2 className="type-h2-m md:type-h2-d mt-3 text-[#111111]">
+            {t.partners.headline}
+          </h2>
+          <p className="type-body-m md:type-body-d type-secondary mt-4 max-w-[60ch]">
+            {t.partners.body}
+          </p>
+        </div>
+
+        <div className="border-t border-[#E8E6DE]">
+          {principles.map(({ Icon, title, body }) => (
+            <div
+              key={title}
+              className="grid grid-cols-[48px_1fr] md:grid-cols-[48px_180px_1fr] gap-4 md:gap-6 py-6 border-b border-[#E8E6DE] items-start"
+            >
+              <div className="w-11 h-11 rounded-full bg-[#DCE8E0] flex items-center justify-center shrink-0">
+                <Icon className="w-5 h-5 text-[#1F6B4A]" strokeWidth={1.75} />
+              </div>
+              <div className="text-base font-semibold text-[#111111] md:pt-2.5">{title}</div>
+              <p className="type-body-m type-secondary col-span-2 md:col-span-1 md:pt-2.5">{body}</p>
             </div>
-          </Reveal>
+          ))}
+        </div>
 
-          {/* Text column (right on desktop) */}
-          <div className="md:col-span-3 md:order-2">
-            <Reveal>
-              <div>
-                <Eyebrow>{t.partners.eyebrow}</Eyebrow>
-                <h2 className="display-serif mt-4 text-[40px] md:text-[64px] leading-[1.0] text-lp-ink">
-                  {t.partners.headline}
-                </h2>
-                <p className="mt-6 text-lg md:text-xl text-lp-ink/65 leading-relaxed">
-                  {t.partners.body}
-                </p>
-              </div>
-            </Reveal>
-
-            <Reveal delay={100}>
-              <div className="mt-12 md:mt-16">
-                {principles.map((p, i) => (
-                  <div
-                    key={i}
-                    className="py-6 md:py-8 border-b border-lp-ink/8 last:border-0 grid grid-cols-[auto_1fr] gap-6 md:gap-8 items-baseline"
-                  >
-                    <span className="display-serif text-xl md:text-2xl text-lp-green/40 tabular-nums">
-                      0{i + 1}
-                    </span>
-                    <div>
-                      <h3 className="text-base md:text-lg font-semibold text-lp-ink">
-                        {p.title}
-                      </h3>
-                      <p className="mt-1 text-sm md:text-base text-lp-ink/60 leading-relaxed">
-                        {p.body}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-
-            <Reveal delay={200}>
-              <div className="mt-14 md:mt-20 card-editorial rounded-3xl p-6 md:p-8">
-                <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-lp-green mb-3">
-                  {t.partners.eyebrow}
-                </div>
-                <p className="display-serif text-[26px] md:text-[34px] leading-[1.15] text-lp-ink">
-                  {t.partners.line}
-                </p>
-                <div className="mt-6">
-                  <Button onClick={() => setSheetOpen(true)}>
-                    {t.partners.cta}
-                    <ArrowRight className="w-4 h-4 ml-1.5" />
-                  </Button>
-                </div>
-              </div>
-            </Reveal>
+        <div className="mt-10 md:mt-14 max-w-2xl">
+          <p className="type-h2-m !text-[#1F6B4A] leading-tight">{t.partners.line}</p>
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={() => setSheetOpen(true)}
+              className="btn btn-primary"
+            >
+              {t.partners.cta}
+            </button>
           </div>
         </div>
       </div>
 
       <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
         {submitted ? (
-          <div className="py-12 text-center content-in">
-            <div className="w-16 h-16 mx-auto rounded-full bg-lp-sage flex items-center justify-center mb-5">
-              <ShieldCheck className="w-8 h-8 text-lp-green" strokeWidth={1.75} />
+          <div className="py-12 text-center">
+            <div className="w-16 h-16 mx-auto rounded-full bg-[#DCE8E0] flex items-center justify-center mb-5">
+              <ShieldCheck className="w-8 h-8 text-[#1F6B4A]" strokeWidth={1.75} />
             </div>
-            <p className="display-serif text-3xl text-lp-ink">Thank you.</p>
-            <p className="text-sm text-lp-ink/55 mt-2 max-w-xs mx-auto leading-relaxed">
-              We'll be in touch within 48 hours.
+            <p className="type-h2-m text-[#111111]">Thank you.</p>
+            <p className="type-body-m type-secondary mt-2 max-w-xs mx-auto">
+              We will be in touch within 48 hours.
             </p>
           </div>
         ) : (
           <div className="space-y-6">
             <div>
-              <span className="eyebrow">Partnership</span>
-              <h2 className="display-serif mt-2 text-2xl text-lp-ink">
-                {t.partners.formTitle}
-              </h2>
-              <p className="mt-1 text-sm text-lp-ink/55">
-                Tell us about your organisation.
-              </p>
+              <span className="section-label">Partners</span>
+              <h2 className="type-h2-m mt-2 text-[#111111]">{t.partners.formTitle}</h2>
+              <p className="type-body-m type-secondary mt-1">Tell us about your organisation.</p>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
-                  Organisation
-                </label>
+                <label htmlFor="partner-org" className="block section-label mb-2">Organisation</label>
                 <input
+                  id="partner-org"
                   type="text"
                   required
                   placeholder="Organisation name"
-                  className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/10 text-base text-lp-ink placeholder:text-lp-ink/30 focus:outline-none focus:border-lp-green focus:ring-2 focus:ring-lp-green/20 transition-all"
+                  className="w-full h-12 px-4 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all"
                 />
               </div>
-
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
-                  Organisation type
-                </label>
+                <div className="section-label mb-2">Organisation type</div>
                 <div className="grid grid-cols-2 gap-2">
                   {t.partners.typeOptions.map((opt) => (
                     <label
                       key={opt}
                       className={
-                        'relative flex items-center justify-center px-3 py-2.5 rounded-xl text-sm font-medium press-scale cursor-pointer transition-all ' +
+                        'relative flex items-center justify-center h-12 rounded-xl text-sm font-medium cursor-pointer transition-all focus-within:ring-2 focus-within:ring-[#1F6B4A]/30 ' +
                         (selectedType === opt
-                          ? 'bg-lp-green text-white shadow-sm'
-                          : 'bg-lp-canvas border border-lp-ink/10 text-lp-ink/70 hover:text-lp-ink hover:border-lp-green/30')
+                          ? 'bg-[#1F6B4A] text-white'
+                          : 'bg-[#FAF8F4] border border-[#E8E6DE] text-[#111111] hover:border-[#1F6B4A]/40')
                       }
                     >
                       <input
@@ -908,39 +836,77 @@ const Partners: React.FC = () => {
                   ))}
                 </div>
               </div>
-
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
-                  Work email
-                </label>
+                <label htmlFor="partner-email" className="block section-label mb-2">Work email</label>
                 <input
+                  id="partner-email"
                   type="email"
                   required
                   placeholder="name@organisation.org"
-                  className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/10 text-base text-lp-ink placeholder:text-lp-ink/30 focus:outline-none focus:border-lp-green focus:ring-2 focus:ring-lp-green/20 transition-all"
+                  className="w-full h-12 px-4 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all"
                 />
               </div>
-
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.18em] font-semibold text-lp-ink/50 mb-2">
-                  Message <span className="text-lp-ink/30 normal-case tracking-normal">(optional)</span>
-                </label>
+                <label htmlFor="partner-msg" className="block section-label mb-2">Message</label>
                 <textarea
+                  id="partner-msg"
                   rows={3}
                   placeholder="What would you like to discuss?"
-                  className="w-full px-4 py-3 rounded-xl bg-lp-canvas border border-lp-ink/10 text-base text-lp-ink placeholder:text-lp-ink/30 focus:outline-none focus:border-lp-green focus:ring-2 focus:ring-lp-green/20 transition-all resize-none"
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8F4] border border-[#E8E6DE] type-body-m text-[#111111] placeholder:text-[#4A4F4B]/50 focus:outline-none focus:border-[#1F6B4A] focus:ring-2 focus:ring-[#1F6B4A]/20 transition-all resize-none"
                 />
               </div>
-
-              <Button type="submit" fullWidth>
+              <button type="submit" className="btn btn-primary w-full">
                 {t.partners.submit}
-                <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
+              </button>
             </form>
           </div>
         )}
       </Sheet>
     </section>
+  );
+};
+
+const AccordionMulti: React.FC<{ items: { id: string; question: string; answer: string }[] }> = ({ items }) => {
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => {
+    const next = new Set(open);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setOpen(next);
+  };
+  return (
+    <div className="divide-y divide-[#E8E6DE] border-y border-[#E8E6DE]">
+      {items.map((item) => {
+        const isOpen = open.has(item.id);
+        return (
+          <div key={item.id}>
+            <button
+              type="button"
+              onClick={() => toggle(item.id)}
+              aria-expanded={isOpen}
+              aria-controls={'faq-' + item.id}
+              className="w-full py-5 flex items-center justify-between text-left gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6B4A] focus-visible:ring-offset-2"
+            >
+              <span className="text-base font-medium text-[#111111]">{item.question}</span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                className={'shrink-0 transition-transform duration-200 ' + (isOpen ? 'rotate-180' : '')}
+                aria-hidden="true"
+              >
+                <path d="M3 6L8 11L13 6" stroke="#111111" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div
+              id={'faq-' + item.id}
+              className={'overflow-hidden transition-all duration-200 ' + (isOpen ? 'max-h-96 pb-5' : 'max-h-0')}
+            >
+              <p className="type-body-m type-secondary leading-relaxed pr-8">{item.answer}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 
@@ -953,78 +919,14 @@ const Faq: React.FC = () => {
     { id: 'q4', question: t.faq.q4, answer: t.faq.a4 },
     { id: 'q5', question: t.faq.q5, answer: t.faq.a5 },
   ];
-  const [active, setActive] = useState(0);
-  const current = items[active] ?? items[0];
-
   return (
-    <section id="faq" className="relative overflow-hidden py-16 md:py-28">
-      <WaveDivider />
-      <AmbientBackdrop />
-      <div className="max-w-[1120px] mx-auto px-6 mt-6 md:mt-10">
-        <Reveal>
-          <div className="text-center">
-            <Eyebrow>{t.faq.eyebrow}</Eyebrow>
-            <h2 className="display-serif mt-3 text-4xl md:text-5xl text-lp-ink">
-              {t.faq.title}
-            </h2>
-          </div>
-        </Reveal>
-
-        {/* Desktop: two-column swap. Questions left, answer right. */}
-        <Reveal delay={100}>
-          <div className="hidden md:grid grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 mt-14 items-start">
-            <div>
-              {items.map((item, i) => {
-                const isActive = i === active;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setActive(i)}
-                    aria-pressed={isActive}
-                    className={
-                      'w-full text-left flex items-start gap-4 py-4 border-b border-lp-ink/8 last:border-0 press-scale transition-colors ' +
-                      (isActive ? 'text-lp-ink' : 'text-lp-ink/55 hover:text-lp-ink row-lift')
-                    }
-                  >
-                    <span
-                      className={
-                        'display-serif text-xl tabular-nums shrink-0 w-8 transition-colors ' +
-                        (isActive ? 'text-lp-green' : 'text-lp-ink/20')
-                      }
-                    >
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <span className="text-base font-medium leading-snug flex-1">
-                      {item.question}
-                    </span>
-                    {isActive && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-lp-green shrink-0 mt-2" aria-hidden="true" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="card-editorial rounded-3xl p-8 md:p-10 min-h-[220px]" key={active}>
-              <div className="content-in">
-                <div className="text-[10px] uppercase tracking-[0.22em] font-semibold text-lp-green mb-4">
-                  Answer
-                </div>
-                <p className="text-base md:text-lg text-lp-ink leading-relaxed">
-                  {current.answer}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Mobile: accordion (unchanged from before) */}
-        <Reveal delay={100}>
-          <div className="md:hidden mt-10">
-            <Accordion items={items} />
-          </div>
-        </Reveal>
+    <section id="faq" className="bg-white border-y border-[#E8E6DE]">
+      <div className="max-w-[800px] mx-auto px-6 section-pad">
+        <div className="mb-10 md:mb-14">
+          <span className="section-label">{t.faq.eyebrow}</span>
+          <h2 className="type-h2-m md:type-h2-d mt-3 text-[#111111]">{t.faq.title}</h2>
+        </div>
+        <AccordionMulti items={items} />
       </div>
     </section>
   );
