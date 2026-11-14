@@ -10,8 +10,8 @@
 
 **Integrations wired end-to-end (not simulated any more):**
 
-- **M-PESA Daraja** — OAuth, STK Push, callback handler with 4-layer verification (transaction ID match, amount match, phone match, receipt format). Verify-by-query fallback. Callback URL must be internet-reachable (cloudflared tunnel for dev).
-- **Africa's Talking** — SMS delivery for requester notifications (PIN, reference, status updates) via `notify()` calls, gated by `MOCK_SMS`.
+- **M-PESA Daraja** OAuth, STK Push, callback handler with 4-layer verification (transaction ID match, amount match, phone match, receipt format). Verify-by-query fallback. Callback URL must be internet-reachable (cloudflared tunnel for dev).
+- **Africa's Talking**  SMS delivery for requester notifications (PIN, reference, status updates) via `notify()` calls, gated by `MOCK_SMS`.
 
 **Audience apps split (one bundle per route):**
 
@@ -137,14 +137,14 @@ Open http://localhost:3000/mutual-circle/ (or whichever URL Vite prints).
 
 **Partner auth is pilot-grade.** `X-Partner-Key` is a static per-partner key. Real deployment needs per-partner JWTs with rotation. See `SECURITY.md`.
 
-**Audit trail is partial.** Compliance-critical actions (dispatch, voucher issuance, OCR verification, flag resolution, partner confirm) write to `audit_log`. Some operator actions are local-only — see `SECURITY.md` for the full list.
+**Audit trail is partial.** Compliance-critical actions (dispatch, voucher issuance, OCR verification, flag resolution, partner confirm) write to `audit_log`. Some operator actions are local-only  see `SECURITY.md` for the full list.
 
 **Bench tab is a stub.** The Requester Bench shows the top-level entry (helplines + "reach out directly") but is not the full peer-support experience.
 
 
 ## Blind-pool invariant
 
-No donor is linked to a specific recipient anywhere in the schema. This is enforced at the data model, not just the UI. If you find a query that appears to link donor to recipient, that is a bug — report it.
+No donor is linked to a specific recipient anywhere in the schema. This is enforced at the data model, not just the UI. If you find a query that appears to link donor to recipient, that is a bug report it.
 
 ## Integration test
 
@@ -154,8 +154,8 @@ Expect `Total: 47 / 47 passed`. The test runs on port 8010 to isolate from a zom
 
 ## Deployment note (Windows)
 
-The integration test kills all venv python during setup. Stop the demo backend with `Ctrl+C`, not `Stop-Process` — killing uvicorn with `Stop-Process` leaves the Windows socket in LISTEN state for hours.
+The integration test kills all venv python during setup. Stop the demo backend with `Ctrl+C`, not `Stop-Process`  killing uvicorn with `Stop-Process` leaves the Windows socket in LISTEN state for hours.
 
 ## License
 
-See `LICENSE`. Prototype — not for public deployment without addressing `SECURITY.md`.
+See `LICENSE`. Prototype  not for public deployment without addressing `SECURITY.md`.
