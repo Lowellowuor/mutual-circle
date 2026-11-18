@@ -130,7 +130,7 @@ export const en = {
     p2Body: 'Staff never see it.',
     p3Title: 'Hospital payments',
     p3Body: 'Invoice and amount only.',
-    line: 'M-Pesa wallets are registered to verified identity.',
+    line: 'Mobile money and card accounts are registered to verified identity.',
   },
   partners: {
     eyebrow: 'Partners',
@@ -162,7 +162,7 @@ export const en = {
     eyebrow: 'FAQ',
     title: 'Questions answered.',
     q1: 'Who can see my information?',
-    a1: 'People in the circle cannot. M-Pesa wallets are registered to verified identity, so the telecom and the state can.',
+        a1: 'People in the circle cannot. Payment providers like Paystack require verified identity, so the provider and the state can see the transaction, but other users, donors, and staff cannot.',
     q2: 'Do I receive cash?',
     a2: 'Bills and fees are paid directly to the institution.',
     q3: 'How do I collect a bundle?',
