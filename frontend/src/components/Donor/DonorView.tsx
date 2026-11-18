@@ -16,7 +16,6 @@ import {
 import { SkeletonList } from '../Shared/Skeleton';
 import { EmptyState } from '../Shared/EmptyState';
 import { AppBottomNav } from '../layout/AppBottomNav';
-import { MpesaModal } from '../Requester/MpesaModal';
 
 type Tab = 'home' | 'give' | 'pledge' | 'impact' | 'leaders';
 type Screen = 'tab' | 'give_success' | 'pledge_success' | 'ledger' | 'settings' | 'activity';
@@ -88,7 +87,7 @@ export const DonorView: React.FC = () => {
     if (newDonation && newDonation.id) {
       setPayingDonation({ id: newDonation.id, amount: finalAmount * 100 });
     } else {
-      console.warn('Donation created but no ID returned for M-PESA flow');
+      console.warn('Donation created but no ID returned; cannot start Paystack checkout');
     }
     
     setScreen('give_success');
@@ -303,7 +302,6 @@ export const DonorView: React.FC = () => {
           processing={processing}
           handleGive={handleGive}
           payingDonation={payingDonation}
-          setPayingDonation={setPayingDonation}
           donorContributions={donorContributions}
         />
       );
@@ -327,7 +325,6 @@ export const DonorView: React.FC = () => {
           handlePledge={handlePledge}
           pledges={pledges}
           payingPledge={payingPledge}
-          setPayingPledge={setPayingPledge}
         />
       );
     }
@@ -426,7 +423,6 @@ export const DonorView: React.FC = () => {
           processing={processing}
           handleGive={handleGive}
           payingDonation={payingDonation}
-          setPayingDonation={setPayingDonation}
           donorContributions={donorContributions}
         />
       );
@@ -450,7 +446,6 @@ export const DonorView: React.FC = () => {
           handlePledge={handlePledge}
           pledges={pledges}
           payingPledge={payingPledge}
-          setPayingPledge={setPayingPledge}
         />
       );
     }
@@ -589,12 +584,6 @@ export const DonorView: React.FC = () => {
         </div>
       </div>
       <AppBottomNav tabs={TABS} active={tab} onChange={goTab} />
-      {payingDonation && (
-        <MpesaModal mode="donation" targetId={payingDonation.id} amount={payingDonation.amount} onClose={() => setPayingDonation(null)} />
-      )}
-      {payingPledge && (
-        <MpesaModal mode="pledge" targetId={payingPledge.id} amount={payingPledge.amount} onClose={() => setPayingPledge(null)} />
-      )}
     </>
   );
 };

@@ -4,13 +4,13 @@
 
 **Resource-sharing network for Kenya.** Requesters submit a need  a food bundle or a bill to pay  and receive an outcome without ever being linked to a specific donor. Donors give to a blind pool, never to a person. Fulfilment staff settle requests with partner institutions. Every state change is on a public HMAC-chained ledger.
 
-**Status:** Pilot-ready. 133 automated tests passing. Full end-to-end integrations (M-PESA Daraja, Africa's Talking, KPLC, Chui). All PII encrypted at rest. Ready for Nairobi pilot.
+**Status:** Pilot-ready. 188 automated tests passing. Full end-to-end integrations (Paystack, Africa's Talking, KPLC, Chui). All PII encrypted at rest. Ready for Nairobi pilot.
 
 ## Recent updates (2026-11)
 
 **Integrations wired end-to-end (not simulated any more):**
 
-- **M-PESA Daraja** OAuth, STK Push, callback handler with 4-layer verification (transaction ID match, amount match, phone match, receipt format). Verify-by-query fallback. Callback URL must be internet-reachable (cloudflared tunnel for dev).
+- **Paystack** hosted checkout for donations and pledges (replaces M-PESA Daraja STK Push). The pending payment is saved before Paystack is called; the donor is redirected to Paystack and back to `/donor/payment-return`. A payment is marked paid only after Paystack's verify API confirms reference, amount and currency, via the signed webhook (`POST /paystack/webhook`, HMAC-SHA512) or the return page (`GET /payments/verify/{reference}`). Idempotent. Webhook needs a cloudflared tunnel in local dev; the return page does not.
 - **Africa's Talking**  SMS delivery for requester notifications (PIN, reference, status updates) via `notify()` calls, gated by `MOCK_SMS`.
 
 **Audience apps split (one bundle per route):**
@@ -46,7 +46,7 @@ Tier 2 pool requests (< KES 5,000) now start in `pending_evidence` status. The r
 | 4.5 | Partner vouchers | Single-use PIN, monthly reconciliation CSV |
 | 4.6 | Blind pool and campaigns | Schema has no donation-to-disbursement link (verified) |
 | 4.7 | Ledger, keyed hash of object IDs | HMAC-SHA256 of meter/invoice number; raw value in `metadata.raw_object_id` (requester and audit only) |
-| 4.8 | Fraud tiers T1-T4 and separation of duties | Separate staff credentials, role gates, 4-layer M-PESA callback verification |
+| 4.8 | Fraud tiers T1-T4 and separation of duties | Separate staff credentials, role gates, signed Paystack webhook confirmed against Paystack's verify API |
 | 4.9 | Bench, isolated system | Separate `DATABASE_URL_BENCH` plumbed |
 
 Spec section 8 open items are tracked in SECURITY.md and ROADMAP.md.
@@ -129,7 +129,7 @@ Open http://localhost:3000/mutual-circle/ (or whichever URL Vite prints).
 
 ## Current limitations
 
-**Payments are wired (sandbox).** M-PESA Daraja STK Push, OAuth, and callback handling are implemented end-to-end. B2C payouts (disbursing to institutions) require Safaricom's public certificate for the SecurityCredential; that is pending. Sandbox STK prompts only fire for whitelisted test numbers. See `docs/deploy.md` for tunnel setup.
+**Donor payments are wired (Paystack test mode, local only).** Donations and pledges go through Paystack hosted checkout; set `PAYSTACK_SECRET_KEY` (a `sk_test_` key) in `backend/.env`. Payouts to institutions are not automated: fulfilment staff pay billers outside the app and record it (KPLC flow in `routes/institutional.py`). Requesters never pay in the app. See `docs/deploy.md` for receiving the Paystack webhook locally with cloudflared.
 
 **Messaging is wired (sandbox).** Africa's Talking SMS delivery is implemented and called by `notify()` on every state change where a phone number is available. Sandbox only delivers to whitelisted test numbers; production requires a registered Sender ID.
 

@@ -66,7 +66,7 @@ def decrypt_phone(ciphertext: str) -> str:
 
 
 def _normalize_for_hash(phone: str) -> str:
-    """Same normalization as _norm_phone in mpesa/routes.py."""
+    """Normalize to 2547XXXXXXXX (no +) so every phone format hashes the same."""
     if not phone:
         return ""
     p = phone.strip().replace(" ", "").replace("-", "")

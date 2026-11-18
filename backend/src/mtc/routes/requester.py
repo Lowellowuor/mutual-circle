@@ -12,11 +12,8 @@ import asyncpg
 
 from mtc import idempotency
 from mtc.config import settings
-from mtc.mpesa.client import initiate_stk_push
-from mtc.crypto import encrypt_phone, hash_phone
 from mtc.db.main import get_conn
-from mtc.rate_limit.counter import RateLimitExceeded, consume_quota, check_ip_rate_limit
-from fastapi import Request
+from mtc.rate_limit.counter import RateLimitExceeded, consume_quota
 from mtc.requests_.lifecycle import WithdrawNotAllowed, list_requests, withdraw_request
 from mtc.requests_.pool import create_pool
 from mtc.requests_.swap import create_swap
@@ -62,11 +59,6 @@ class PoolBody(BaseModel):
                 f"Expected pattern: {pattern}"
             )
         return self
-
-
-class PayBody(BaseModel):
-    phone: str = Field(..., min_length=9, max_length=15,
-                       description="Kenyan phone (07XX or +2547XX). Amount is taken from the request, not the body.")
 
 
 @router.post("/swap")
@@ -136,142 +128,6 @@ async def create_pool_route(
         raise
     except Exception:
         await idempotency.release(conn, idempotency_key, "pool", token)
-        raise
-
-
-@router.post("/{request_id}/pay")
-async def pay_route(
-    request_id: str,
-    body: PayBody,
-    request: Request,
-    token: str = Depends(require_token),
-    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
-    conn: asyncpg.Connection = Depends(get_conn),
-):
-    """Trigger STK Push for a pool request.
-
-    The amount is taken from requests.amount_pence, NOT the request body
-    — a caller cannot specify a smaller amount than the request's locked
-    amount. Account reference is REF-<request_id[:8]>, matching the
-    format already used in notifications.
-
-    Status flow:
-      n/a             -> pending_payment   STK sent, awaiting callback
-      payment_failed  -> pending_payment   retry allowed (new STK)
-      pending_payment -> 409               STK already in flight
-      paid            -> 409               already paid
-      other states    -> 409               request not payable
-
-    Idempotency scope is "pool_pay" (distinct from "pool" for create),
-    so a retry with the same Idempotency-Key returns the cached
-    checkout_request_id rather than triggering a second STK.
-
-    Failure modes:
-      - Bad phone format         -> 400 (ValueError from client._normalize_phone)
-      - Daraja config missing /
-        Daraja-side rejection    -> 503 (RuntimeError from initiate_stk_push)
-      - DB write fails after STK -> logged with checkout_id; the payment
-        went through on Daraja's side, reconciliation required
-    """
-    try:
-        await check_ip_rate_limit(conn, ip_address=request.client.host, endpoint="pay")
-    except RateLimitExceeded as e:
-        raise HTTPException(429, detail=e.reason)
-
-    cached = await idempotency.check_or_claim(conn, idempotency_key, "pool_pay", token)
-    if cached is not None:
-        return cached
-
-    try:
-        row = await conn.fetchrow(
-            """SELECT id, amount_pence, payment_status, token_hash
-               FROM requests WHERE id = $1""",
-            request_id,
-        )
-        if row is None or row["token_hash"] != token:
-            raise HTTPException(404, "Request not found")
-
-        if row["amount_pence"] is None:
-            raise HTTPException(409, "Request has no fixed amount; payment not applicable")
-
-        current = row["payment_status"]
-        if current == "paid":
-            raise HTTPException(409, "Request already paid")
-        if current == "pending_payment":
-            raise HTTPException(409, "Payment already in progress")
-
-        account_ref = "REF-" + str(row["id"])[:8].upper()
-
-        try:
-            stk = await initiate_stk_push(
-                phone=body.phone,
-                amount_pence=row["amount_pence"],
-                account_ref=account_ref,
-                description="Mutual Circle pool",
-            )
-        except ValueError as exc:
-            raise HTTPException(400, f"Invalid phone number: {exc}") from exc
-        except RuntimeError as exc:
-            logger.error(
-                "STK push failed for request %s (amount_pence=%s): %s",
-                request_id, row["amount_pence"], exc,
-            )
-            raise HTTPException(503, f"Payment initiation failed: {exc}") from exc
-
-        checkout_id = stk["checkout_request_id"]
-        logger.info(
-            "STK sent for request %s, checkout_id=%s amount_pence=%s",
-            request_id, checkout_id, row["amount_pence"],
-        )
-
-        # R.U.T.H 4.8 / payments review issue #3:
-        # STK has already fired. The INSERT into mpesa_transactions is the
-        # critical write. If it fails, log at CRITICAL and tell caller NOT
-        # to retry (a retry would fire a second STK prompt and double-charge).
-        try:
-            await conn.execute(
-                """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone_encrypted, expected_phone_hash)
-               VALUES ($1, $2, 'requests', $3, $4, $5)""",
-                checkout_id, row["amount_pence"], row["id"], encrypt_phone(stk["phone"]), hash_phone(stk["phone"]),
-            )
-        except Exception as exc:
-            logger.critical(
-                "PAYMENT_LOST: STK fired but save failed. "
-                "checkout_id=%s request_id=%s amount_pence=%s phone=%s error=%r",
-                checkout_id, request_id, row["amount_pence"], stk.get("phone"), exc,
-            )
-            raise HTTPException(
-                503,
-                "M-PESA was initiated but the transaction could not be recorded. "
-                f"Reference: {checkout_id}. Do not retry — contact support with this reference.",
-            ) from exc
-
-        # Non-critical second write. If it fails, the mpesa_transactions row
-        # still exists in 'pending' state and the callback will still fire.
-        try:
-            await conn.execute(
-                "UPDATE requests SET payment_status = 'pending_payment', updated_at = now() WHERE id = $1",
-                row["id"],
-            )
-        except Exception as exc:
-            logger.error(
-                "Non-critical UPDATE failed for request %s (checkout_id=%s): %r",
-                request_id, checkout_id, exc,
-            )
-
-        response = {
-            "ok": True,
-            "checkout_request_id": checkout_id,
-            "message": stk.get("customer_message") or "STK push sent",
-        }
-        await idempotency.complete(conn, idempotency_key, "pool_pay", token, response)
-        return response
-    except HTTPException:
-        await idempotency.release(conn, idempotency_key, "pool_pay", token)
-        raise
-    except Exception:
-        logger.exception("Unexpected error in pay_route for request %s", request_id)
-        await idempotency.release(conn, idempotency_key, "pool_pay", token)
         raise
 
 

@@ -38,7 +38,7 @@ async def test_every_live_table_is_created_by_a_migration(conn):
         "idempotency_keys", "intake_surveys", "ledger_entries",
         "locker_stock", "match_interests", "mpesa_transactions",
         "notifications", "opportunities", "partner_confirmations",
-        "partners", "pledges", "rate_counters", "requests", "requesters", "risk_flags",
+        "partners", "paystack_payments", "pledges", "rate_counters", "requests", "requesters", "risk_flags",
         "sms_sessions", "staff_sessions", "voucher_redemptions", "vouchers",
     }
 
@@ -66,7 +66,7 @@ async def test_every_expected_table_exists(conn):
         "idempotency_keys", "intake_surveys", "ledger_entries",
         "locker_stock", "match_interests", "mpesa_transactions",
         "notifications", "opportunities", "partner_confirmations",
-        "partners", "pledges", "rate_counters", "requests", "requesters", "risk_flags",
+        "partners", "paystack_payments", "pledges", "rate_counters", "requests", "requesters", "risk_flags",
         "sms_sessions", "staff_sessions", "voucher_redemptions", "vouchers",
     }
     rows = await conn.fetch(

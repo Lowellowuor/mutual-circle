@@ -74,8 +74,7 @@ def test_production_all_valid_no_raise():
         ledger_hmac_key="b" * 64,
         token_hmac_key_current="c" * 64,
         partner_hmac_key="d" * 64,
-        mpesa_consumer_secret="e" * 64,
-        mpesa_passkey="f" * 64,
+        paystack_secret_key="e" * 64,
         at_api_key="g" * 64,
     )
     with patch("mtc.main.settings", s):
@@ -102,8 +101,7 @@ def test_development_valid_no_warning(caplog):
         ledger_hmac_key="b" * 64,
         token_hmac_key_current="c" * 64,
         partner_hmac_key="d" * 64,
-        mpesa_consumer_secret="e" * 64,
-        mpesa_passkey="f" * 64,
+        paystack_secret_key="e" * 64,
         at_api_key="g" * 64,
     )
     with patch("mtc.main.settings", s):

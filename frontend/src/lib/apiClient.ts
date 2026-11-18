@@ -410,24 +410,66 @@ export const getPublicPartners = () =>
   );
 
 
-export const payPoolRequest = (token: string, requestId: string, phone: string) =>
-  call<{ ok: boolean; checkout_request_id: string; message: string }>(
-    `/requests/${requestId}/pay`,
-    { method: 'POST', headers: { 'X-Token': token, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ phone }) },
+// ═══════════════════════════════════════════════════════════════════════════
+// Paystack (donations + pledges)
+// ═══════════════════════════════════════════════════════════════════════════
+// These throw instead of returning null, so callers can show the backend's
+// reason (e.g. 409 "payment already in progress") to the donor.
+
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function callStrict<T>(path: string, init?: RequestInit): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    });
+  } catch {
+    throw new ApiError('Could not reach the server. Please check your connection and try again.', 0);
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new ApiError((data && data.reason) || `Request failed (HTTP ${res.status})`, res.status);
+  }
+  return data as T;
+}
+
+export type PaymentKind = 'donation' | 'pledge';
+
+export interface PaystackCheckout {
+  ok: boolean;
+  reference: string;
+  authorization_url: string;
+}
+
+export interface PaymentVerification {
+  reference: string;
+  status: 'pending' | 'paid' | 'failed' | 'abandoned';
+  kind: PaymentKind;
+  target_id: string;
+  amount_pence: number;
+  currency: string;
+}
+
+/** Opens a Paystack checkout. Redirect the browser to `authorization_url`. */
+export const startPaystackCheckout = (kind: PaymentKind, donorHash: string, id: string) =>
+  callStrict<PaystackCheckout>(
+    `/${kind === 'donation' ? 'donations' : 'pledges'}/${encodeURIComponent(id)}/pay`,
+    { method: 'POST', headers: { 'X-Donor-Hash': donorHash, 'Idempotency-Key': genIdempotencyKey() }, body: '{}' },
   );
 
-
-export const payDonation = (donorHash: string, donationId: string, phone: string) =>
-  call<{ ok: boolean; checkout_request_id: string; message: string }>(
-    `/donations/${donationId}/pay`,
-    { method: 'POST', headers: { 'X-Donor-Hash': donorHash, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ phone }) },
-  );
-
-
-export const payPledge = (donorHash: string, pledgeId: string, phone: string) =>
-  call<{ ok: boolean; checkout_request_id: string; message: string }>(
-    `/pledges/${pledgeId}/pay`,
-    { method: 'POST', headers: { 'X-Donor-Hash': donorHash, 'Idempotency-Key': genIdempotencyKey() }, body: JSON.stringify({ phone }) },
+/** Asks the backend to confirm a payment with Paystack. */
+export const verifyPaystackPayment = (donorHash: string, reference: string) =>
+  callStrict<PaymentVerification>(
+    `/payments/verify/${encodeURIComponent(reference)}`,
+    { headers: { 'X-Donor-Hash': donorHash } },
   );
 
 
@@ -451,17 +493,6 @@ export const sendSimulatorUssd = async (sessionId: string, serviceCode: string, 
   return await res.text();
 };
 
-
-export const payPoolRequestStrict = async (token: string, requestId: string, phone: string) => {
-  const res = await fetch(`${BASE}/requests/${requestId}/pay`, {
-    method: 'POST',
-    headers: { 'X-Token': token, 'Idempotency-Key': genIdempotencyKey(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.reason || 'Payment failed');
-  return data;
-};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Tier 2 photo evidence (R.U.T.H 4.3 fallback path)

@@ -41,6 +41,16 @@
 - **Migrations 011 - 022:** Standardized the schema (pledge status, donation defaults, phone encryption, standalone surveys, requesters table, institutional payments).
 - **CI Pipeline:** 133 tests running against a fresh PostgreSQL container, enforcing schema contracts.
 
+### Paystack donor payments (2026-11-18)
+
+- Replaced M-PESA Daraja STK Push with Paystack hosted checkout for donations and pledges (`POST /donations/{id}/pay`, `POST /pledges/{id}/pay` return an `authorization_url`)
+- Pending payment saved with a unique reference before Paystack is called; one live checkout per donation/pledge (partial unique index), stale ones re-verified after 30 minutes
+- `POST /paystack/webhook`: HMAC-SHA512 signature check (401 on failure), `charge.success` confirmed with Paystack's verify API (reference, amount, currency), idempotent, 500 on errors so Paystack retries, no PII in logs
+- `GET /payments/verify/{reference}` + frontend return page `/donor/payment-return`
+- Migration 023 `paystack_payments`; `mpesa_transactions` kept for history, no longer written
+- Removed: `mtc/mpesa/`, `/mpesa/stk/callback`, requester self-pay `/requests/{id}/pay`, `MPESA_*` config, MpesaModal
+- KPLC institutional payment flow unchanged
+
 ### Collection confirmation
 
 
@@ -100,6 +110,14 @@
 - Kenya DPA 2019 compliance story
 - catch {} -> catch (e) { console.error(...) } (~10 occurrences)
 - Integration test should not kill demo backend (pre-kill to port 8010 only)
+
+## Paystack go-live (not started — local/test mode only today)
+
+- Live secret key in the production secret store; `PAYSTACK_CALLBACK_URL` pointing at the GitHub Pages return page
+- Live webhook URL set to the deployed backend's `/paystack/webhook` (never a tunnel)
+- Refund runbook for `PAYSTACK_DOUBLE_PAYMENT` log lines
+- Optional donor email field in Give/Pledge (the API already accepts `email`) so Paystack receipts reach a real inbox
+- Reconciliation job for `paystack_payments` rows left `pending` (today they are re-checked only when the donor pays again or opens the return page)
 
 ## Known operational gotcha
 

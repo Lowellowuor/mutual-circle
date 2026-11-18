@@ -82,46 +82,65 @@ function.
 Report security issues to the maintainer directly. Do not open a public issue.
 
 
-## Webhook attack surface — M-PESA Daraja callback
+## Webhook attack surface — Paystack
 
-`POST /mpesa/stk/callback` receives Safaricom STK Push callbacks. The
-endpoint is unauthenticated by design: Safaricom does not sign payloads,
-and their egress IP ranges change. The only verification is that the
-`CheckoutRequestID` in the callback matches a request we initiated
-(write-then-call contract in `/pool/{id}/pay`).
+Donations and pledges are paid through Paystack hosted checkout. The
+M-PESA Daraja integration (unsigned STK callback at
+`/mpesa/stk/callback`, requester self-pay at `/requests/{id}/pay`) was
+removed.
 
-Mitigations:
+`POST /paystack/webhook` receives Paystack events. Controls:
 
-1. **Idempotency on CheckoutRequestID.** A duplicate callback returns
-   the cached response from the first. A malformed or spoofed
-   CheckoutRequestID returns 200 with `{"status": "unknown_checkout_id"}`
-   and does NOT update any request row.
+1. **Signed requests only.** `x-paystack-signature` must equal the
+   HMAC-SHA512 of the raw request body keyed with `PAYSTACK_SECRET_KEY`
+   (constant-time compare). Missing or wrong signature -> 401, checked
+   before a database connection is taken. If the key is not configured
+   the endpoint returns 500 instead of accepting anything.
+2. **The event body is not trusted.** Only `charge.success` is acted on,
+   and only the `reference` is read from it. The backend then calls
+   Paystack's verify API and marks a payment paid only if the verified
+   `status` is `success` and `reference`, `amount` (exact, lowest
+   currency unit) and `currency` all match the pending row we saved. A
+   mismatch is logged at ERROR and nothing changes.
+3. **Write-then-call.** The pending `paystack_payments` row, with our own
+   unguessable reference, is committed before Paystack is called, so
+   every reference Paystack knows about is in our table. Unknown
+   references are acknowledged (200) and ignored.
+4. **Idempotent, and nothing can block the real payment.** `paid` is set
+   with `UPDATE ... WHERE status <> 'paid'`, so duplicate deliveries and
+   races do nothing. Failed, cancelled, rejected or forged events never
+   write a state that stops a later genuine success from being recorded.
+5. **Retries on our errors.** Unexpected errors (DB down, Paystack verify
+   unreachable) return 500 so Paystack retries.
+6. **One live checkout per target.** A partial unique index allows one
+   `pending` payment per donation or pledge. A pending checkout older than
+   30 minutes is re-verified with Paystack before a new one may start.
+7. **No PII in logs or tables.** Request bodies and verify responses
+   (customer email, phone, card details) are never logged; logs carry the
+   reference and outcome only. `paystack_payments` stores no email, phone
+   or card data. A donor email, if a client sends one, is passed to
+   Paystack and not stored. Without one, a placeholder
+   `donor-<sha256(donor_hash)[:16]>@example.com` is used, so
+   the `X-Donor-Hash` credential is never sent to Paystack.
 
-2. **Always return 200.** Permanent failures and in-flight states would
-   trigger Safaricom retries that cannot succeed. We return 200 to stop
-   retries, and log the full payload. Manual reconciliation via
-   `mpesa_receipt` is deferred to a future operations runbook.
+`GET /payments/verify/{reference}` (frontend return page) requires the
+`X-Donor-Hash` that created the payment (404 otherwise) and uses the
+same verify-then-record logic. It never trusts the `reference` or
+`trxref` query string Paystack appends to the redirect beyond using it
+as a lookup key.
 
-3. **No trusted data from the callback alone.** `requests.mpesa_receipt`
-   is stored but never used as an authorization signal. The
-   `payment_status` column reflects Safaricom's claim, not a verified
-   fact. Downstream business logic (voucher issuance, tier checks) does
-   not read `payment_status` yet.
+Residual risks / open items:
 
-Residual risks accepted for pilot:
-
-- A spoofed callback with a valid CheckoutRequestID (obtained from a
-  real STK push) could mark a request as `paid`. Mitigation requires a
-  secondary confirmation via the Daraja transaction status API, which
-  is deferred to Phase 3 proper.
-- A DB error during callback processing logs and returns 200 (no
-  retry), potentially leaving the request in `pending_payment`. Manual
-  reconciliation is required.
-
-When `/pool/{id}/pay` lands:
-
-- Add `MPESA_CONSUMER_SECRET`, `MPESA_PASSKEY`, and `AT_API_KEY` to
-  `_REQUIRED_SECRETS` in `main.py` — the fail-fast logic must be
-  promoted at the same time as the callers.
-- Implement the transaction status API as a secondary verification for
-  callbacks with a receipt above a threshold (e.g. > KES 5,000).
+- `PAYSTACK_SECRET_KEY` is both the API key and the webhook signing key.
+  Leaking it allows forged webhooks, though step 2 still requires
+  Paystack's own verify API to report a matching successful charge.
+  Rotate it in the Paystack dashboard if exposed.
+- If a donor completes an old checkout after starting a new one for the
+  same target, both charges are recorded and a
+  `PAYSTACK_DOUBLE_PAYMENT` CRITICAL log is written. Refunds are manual.
+- `X-Donor-Hash` is a bearer credential held in localStorage (see
+  Authentication gaps above); anyone holding it can check that donor's
+  payment status.
+- Local development exposes the webhook through a cloudflared quick
+  tunnel (docs/deploy.md). Use test keys only, and never point the live
+  webhook URL at a laptop.

@@ -50,6 +50,10 @@ EXPECTED_TABLES = {
     "opportunities": None,
     "partner_confirmations": None,
     "partners": None,
+    "paystack_payments": {
+        "reference", "target_table", "target_id", "donor_hash",
+        "amount_pence", "currency", "status",
+    },
     "pledges": {"id", "status", "payment_status", "type", "max_value_pence"},
     "requesters": {"token_hash", "phone_encrypted", "phone_hash"},
     "rate_counters": None,
@@ -160,3 +164,14 @@ async def test_donor_auth_fk_integrity(conn):
     assert "donor_profiles" in combined, (
         f"donor_sessions FK does not reference donor_profiles: {combined}"
     )
+
+
+@pytest.mark.asyncio
+async def test_paystack_one_pending_payment_per_target(conn):
+    """Migration 023: a second pending checkout for one target is impossible."""
+    row = await conn.fetchrow(
+        "SELECT indexdef FROM pg_indexes WHERE indexname = 'uq_paystack_payments_one_pending'"
+    )
+    assert row is not None, "uq_paystack_payments_one_pending index missing — migration 023 didn't run"
+    idx = row["indexdef"].lower()
+    assert "unique" in idx and "status = 'pending'" in idx, idx

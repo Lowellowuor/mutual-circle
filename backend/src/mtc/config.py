@@ -31,13 +31,15 @@ class Settings(BaseSettings):
     partner_hmac_key: str = ""
 
 
-    mpesa_environment: str = "sandbox"
-    mpesa_consumer_key: str = ""
-    mpesa_consumer_secret: str = ""
-    mpesa_shortcode: str = ""
-    mpesa_passkey: str = ""
-    mpesa_callback_url: str = ""
-    mpesa_transaction_type: str = "CustomerPayBillOnline"
+    # Paystack (donations + pledges). The secret key lives only in
+    # backend/.env, which is gitignored. Test keys start with sk_test_.
+    paystack_secret_key: str = ""
+    # ISO currency sent to Paystack. Amounts are always sent in the
+    # currency's lowest unit, which is what *_pence columns already hold.
+    paystack_currency: str = "KES"
+    # Frontend page Paystack redirects the donor to after checkout.
+    # Paystack appends ?trxref=...&reference=... to this URL.
+    paystack_callback_url: str = "http://localhost:3000/mutual-circle/donor/payment-return"
 
     at_environment: str = "sandbox"
     at_username: str = "sandbox"

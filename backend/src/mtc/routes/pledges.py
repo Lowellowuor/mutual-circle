@@ -1,13 +1,19 @@
 """Pledges — donor side of The Match."""
+import logging
+import uuid
+
 import asyncpg
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from mtc.crypto import encrypt_phone, hash_phone
+from mtc import idempotency
 from mtc.db.main import get_conn
-from mtc.mpesa.client import initiate_stk_push
+from mtc.paystack.client import PaystackError
+from mtc.paystack.payments import PaymentConflict, start_payment
 from mtc.rate_limit.counter import check_ip_rate_limit, RateLimitExceeded
-from fastapi import HTTPException, Request
+from mtc.routes.payments import PaystackPayBody
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pledges", tags=["pledges"])
 
@@ -79,56 +85,68 @@ def _row_to_dict(r):
     return d
 
 
-from pydantic import BaseModel
-
-class PledgePayBody(BaseModel):
-    phone: str
-
 @router.post("/{pledge_id}/pay")
 async def pay_pledge(
     pledge_id: str,
-    body: PledgePayBody,
     request: Request,
+    body: PaystackPayBody | None = None,
     donor_hash: str = Depends(_require_donor),
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
+    """Open a Paystack checkout for a pledge's cash value (max_value_pence).
+
+    Payment only touches ``payment_status``; the match ``status``
+    (awaiting_match -> matched -> settled) is never written here.
+    """
+    try:
+        pledge_uuid = uuid.UUID(pledge_id)
+    except ValueError:
+        raise HTTPException(404, "Pledge not found")
+
     try:
         await check_ip_rate_limit(conn, ip_address=request.client.host, endpoint="pay")
     except RateLimitExceeded as e:
         raise HTTPException(429, detail=e.reason)
 
-    row = await conn.fetchrow(
-        "SELECT id, max_value_pence, status, payment_status FROM pledges WHERE id = $1 AND donor_hash = $2",
-        pledge_id, donor_hash
-    )
-    if not row:
-        raise HTTPException(404, "Pledge not found")
-    if row["payment_status"] in ("paid", "pending_payment"):
-        raise HTTPException(409, "Pledge already paid or payment in progress")
-    if not row["max_value_pence"] or row["max_value_pence"] <= 0:
-        raise HTTPException(400, "Pledge does not have a cash value to pay")
+    cached = await idempotency.check_or_claim(conn, idempotency_key, "pledge_pay", donor_hash)
+    if cached is not None:
+        return cached
 
-    account_ref = "PLG-" + str(row["id"])[:8].upper()
     try:
-        stk = await initiate_stk_push(
-            phone=body.phone,
-            amount_pence=row["max_value_pence"],
-            account_ref=account_ref,
-            description="Mutual Circle Pledge",
+        row = await conn.fetchrow(
+            "SELECT id, max_value_pence, status, payment_status FROM pledges WHERE id = $1 AND donor_hash = $2",
+            pledge_uuid, donor_hash,
         )
-    except Exception as e:
-        raise HTTPException(503, f"Payment initiation failed: {e}")
+        if not row:
+            raise HTTPException(404, "Pledge not found")
+        if row["payment_status"] == "paid":
+            raise HTTPException(409, "Pledge already paid")
+        if not row["max_value_pence"] or row["max_value_pence"] <= 0:
+            raise HTTPException(400, "Pledge does not have a cash value to pay")
 
-    checkout_id = stk["checkout_request_id"]
-
-    await conn.execute(
-        """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone_encrypted, expected_phone_hash)
-           VALUES ($1, $2, 'pledges', $3, $4, $5)""",
-        checkout_id, row["max_value_pence"], row["id"], encrypt_phone(stk["phone"]), hash_phone(stk["phone"])
-    )
-    await conn.execute(
-        "UPDATE pledges SET payment_status = 'pending_payment' WHERE id = $1",
-        row["id"],
-    )
-
-    return {"ok": True, "checkout_request_id": checkout_id, "message": stk.get("customer_message")}
+        checkout = await start_payment(
+            conn,
+            target_table="pledges",
+            target_id=row["id"],
+            donor_hash=donor_hash,
+            amount_pence=row["max_value_pence"],
+            email=body.email if body else None,
+        )
+        response = {"ok": True, **checkout}
+        await idempotency.complete(conn, idempotency_key, "pledge_pay", donor_hash, response)
+        return response
+    except PaymentConflict as e:
+        await idempotency.release(conn, idempotency_key, "pledge_pay", donor_hash)
+        raise HTTPException(409, str(e))
+    except PaystackError as e:
+        logger.warning("Pledge %s: Paystack initialize failed: %s", pledge_id, e)
+        await idempotency.release(conn, idempotency_key, "pledge_pay", donor_hash)
+        raise HTTPException(503, "Payment provider unavailable. Please try again.")
+    except HTTPException:
+        await idempotency.release(conn, idempotency_key, "pledge_pay", donor_hash)
+        raise
+    except Exception:
+        logger.exception("Pledge %s: payment initiation failed", pledge_id)
+        await idempotency.release(conn, idempotency_key, "pledge_pay", donor_hash)
+        raise HTTPException(500, "Payment initiation failed")

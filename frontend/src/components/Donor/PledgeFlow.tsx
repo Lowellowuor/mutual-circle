@@ -2,6 +2,7 @@
 import React from 'react';
 import { Check, Package, MapPin, Handshake } from 'lucide-react';
 import { EmptyState } from '../Shared/EmptyState';
+import { usePaystackCheckout } from './usePaystackCheckout';
 
 interface PledgeFlowProps {
   showSuccess: boolean;
@@ -19,12 +20,13 @@ interface PledgeFlowProps {
   handlePledge: () => void;
   pledges: any[];
   payingPledge: { id: string; amount: number } | null;
-  setPayingPledge: (p: { id: string; amount: number } | null) => void;
 }
 
 const LOCALITIES = ['Nairobi County', 'Mombasa County', 'Kisumu County', 'Nakuru County'];
 
 export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
+  const checkout = usePaystackCheckout('pledge');
+
   if (props.showSuccess) {
     const stillUnpaid = props.payingPledge
       && props.pledges.find(p => p.id === props.payingPledge!.id)?.status !== 'settled';
@@ -65,9 +67,18 @@ export const PledgeFlow: React.FC<PledgeFlowProps> = (props) => {
 
         <div className="space-y-3 pt-2">
           {stillUnpaid && (
-            <button className="btn btn-primary bg-green-600 hover:bg-green-700" w-full onClick={() => props.setPayingPledge(props.payingPledge)}>
-              Pay with M-PESA
-            </button>
+            <div className="space-y-2 mb-3">
+              <button
+                className="btn btn-primary w-full bg-green-600 hover:bg-green-700"
+                onClick={() => checkout.start(props.payingPledge!.id)}
+                disabled={checkout.redirecting}
+              >
+                {checkout.redirecting ? 'Opening Paystack…' : `Pay KES ${(props.payingPledge!.amount / 100).toLocaleString()} with Paystack`}
+              </button>
+              {checkout.error && (
+                <p role="alert" className="text-sm text-rose-600 text-center">{checkout.error}</p>
+              )}
+            </div>
           )}
           <button className="btn btn-primary w-full mb-3" onClick={() => { props.onCloseSuccess(); props.setPDesc(''); props.setPValue(''); }}>
             Pledge again

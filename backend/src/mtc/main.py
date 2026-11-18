@@ -23,7 +23,7 @@ from mtc.routes.webhooks import router as webhooks_router
 from mtc.routes.surveys import router as surveys_router
 from mtc.routes.helplines import router as helplines_router
 from mtc.routes.ledger_public import router as ledger_public_router
-from mtc.mpesa.routes import router as mpesa_router
+from mtc.routes.payments import router as payments_router
 from mtc.routes.notifications import router as notifications_router
 from mtc.routes.opportunities import router as opportunities_router
 from mtc.routes.partners import router as partners_router
@@ -44,8 +44,7 @@ _REQUIRED_SECRETS = (
     "LEDGER_HMAC_KEY",
     "TOKEN_HMAC_KEY_CURRENT",
     "PARTNER_HMAC_KEY",
-    "MPESA_CONSUMER_SECRET",
-    "MPESA_PASSKEY",
+    "PAYSTACK_SECRET_KEY",
     "AT_API_KEY",
 )
 
@@ -66,8 +65,7 @@ def _validate_secrets() -> None:
         "LEDGER_HMAC_KEY": settings.ledger_hmac_key,
         "TOKEN_HMAC_KEY_CURRENT": settings.token_hmac_key_current,
         "PARTNER_HMAC_KEY": settings.partner_hmac_key,
-        "MPESA_CONSUMER_SECRET": settings.mpesa_consumer_secret,
-        "MPESA_PASSKEY": settings.mpesa_passkey,
+        "PAYSTACK_SECRET_KEY": settings.paystack_secret_key,
         "AT_API_KEY": settings.at_api_key,
     }
     missing = [
@@ -95,20 +93,12 @@ def _validate_secrets() -> None:
 def _log_integration_status() -> None:
     """Log which external integrations are configured (no fail-fast).
 
-    These are not in _REQUIRED_SECRETS yet because no route currently
-    calls initiate_stk_push or send_sms. When /pool/{id}/pay lands,
-    promote MPESA_CONSUMER_SECRET, MPESA_PASSKEY, and AT_API_KEY to
-    _REQUIRED_SECRETS. Until then, empty values are logged as warnings
-    so production deploys know what is missing without refusing to start.
+    Production fail-fast for these keys lives in _validate_secrets. In
+    development, empty values are logged here so it is obvious why a
+    payment or SMS call fails.
     """
     integrations = {
-        "M-PESA (STK Push)": all([
-            settings.mpesa_consumer_key,
-            settings.mpesa_consumer_secret,
-            settings.mpesa_shortcode,
-            settings.mpesa_passkey,
-            settings.mpesa_callback_url,
-        ]),
+        "Paystack (donations + pledges)": bool(settings.paystack_secret_key),
         "Africa's Talking (SMS)": all([
             settings.at_api_key, settings.at_username,
         ]),
@@ -273,7 +263,7 @@ app.include_router(stats_router)
 app.include_router(notifications_router)
 app.include_router(ledger_public_router)
 app.include_router(partners_router)
-app.include_router(mpesa_router)
+app.include_router(payments_router)
 app.include_router(sms_router)
 app.include_router(ussd_router)
 app.include_router(locker_router)

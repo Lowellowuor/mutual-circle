@@ -1,16 +1,17 @@
 """Donor contributions — blind pooled giving, leaderboard, profile."""
 import logging
+import uuid
+
 import asyncpg
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from mtc import idempotency
-from mtc.crypto import encrypt_phone, hash_phone
 from mtc.db.main import get_conn
-from mtc.mpesa.client import initiate_stk_push
-from pydantic import BaseModel
+from mtc.paystack.client import PaystackError
+from mtc.paystack.payments import PaymentConflict, start_payment
 from mtc.rate_limit.counter import check_ip_rate_limit, RateLimitExceeded
-from fastapi import Request
+from mtc.routes.payments import PaystackPayBody
 
 logger = logging.getLogger(__name__)
 
@@ -179,18 +180,26 @@ async def update_profile(
         "opt_in_ledger": row["opt_in_ledger"],
     }
 
-class DonationPayBody(BaseModel):
-    phone: str = Field(..., min_length=9, max_length=15)
-
 @router.post("/{donation_id}/pay")
 async def pay_donation(
     donation_id: str,
-    body: DonationPayBody,
     request: Request,
+    body: PaystackPayBody | None = None,
     donor_hash: str = Depends(_require_token),
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
+    """Open a Paystack checkout for a donation.
+
+    Returns ``authorization_url`` (redirect the donor there) and
+    ``reference``. The pending payment row is saved before Paystack is
+    called. 409 if already paid or a checkout is in progress.
+    """
+    try:
+        donation_uuid = uuid.UUID(donation_id)
+    except ValueError:
+        raise HTTPException(404, "Donation not found")
+
     try:
         await check_ip_rate_limit(conn, ip_address=request.client.host, endpoint="pay")
     except RateLimitExceeded as e:
@@ -203,41 +212,35 @@ async def pay_donation(
     try:
         row = await conn.fetchrow(
             "SELECT id, amount_pence, status FROM donor_contributions WHERE id = $1 AND donor_hash = $2",
-            donation_id, donor_hash
+            donation_uuid, donor_hash,
         )
         if not row:
             raise HTTPException(404, "Donation not found")
         if row["status"] == "paid":
             raise HTTPException(409, "Donation already paid")
-        if row["status"] == "pending_payment":
-            raise HTTPException(409, "Payment is already in progress. Please check your phone.")
 
-        account_ref = "DON-" + str(row["id"])[:8].upper()
-        stk = await initiate_stk_push(
-            phone=body.phone,
+        checkout = await start_payment(
+            conn,
+            target_table="donor_contributions",
+            target_id=row["id"],
+            donor_hash=donor_hash,
             amount_pence=row["amount_pence"],
-            account_ref=account_ref,
-            description="Mutual Circle Donation",
+            email=body.email if body else None,
         )
-        checkout_id = stk["checkout_request_id"]
-
-        await conn.execute(
-            """INSERT INTO mpesa_transactions (checkout_request_id, amount_pence, target_table, target_id, expected_phone_encrypted, expected_phone_hash)
-               VALUES ($1, $2, 'donor_contributions', $3, $4, $5)""",
-            checkout_id, row["amount_pence"], row["id"], encrypt_phone(stk["phone"]), hash_phone(stk["phone"])
-        )
-        await conn.execute(
-            "UPDATE donor_contributions SET status = 'pending_payment' WHERE id = $1",
-            row["id"]
-        )
-
-        response = {"ok": True, "checkout_request_id": checkout_id, "message": stk.get("customer_message")}
+        response = {"ok": True, **checkout}
         await idempotency.complete(conn, idempotency_key, "donation_pay", donor_hash, response)
         return response
+    except PaymentConflict as e:
+        await idempotency.release(conn, idempotency_key, "donation_pay", donor_hash)
+        raise HTTPException(409, str(e))
+    except PaystackError as e:
+        logger.warning("Donation %s: Paystack initialize failed: %s", donation_id, e)
+        await idempotency.release(conn, idempotency_key, "donation_pay", donor_hash)
+        raise HTTPException(503, "Payment provider unavailable. Please try again.")
     except HTTPException:
         await idempotency.release(conn, idempotency_key, "donation_pay", donor_hash)
         raise
-    except Exception as e:
-        logger.error(f"Donation pay failed: {e}")
+    except Exception:
+        logger.exception("Donation %s: payment initiation failed", donation_id)
         await idempotency.release(conn, idempotency_key, "donation_pay", donor_hash)
         raise HTTPException(500, "Payment initiation failed")

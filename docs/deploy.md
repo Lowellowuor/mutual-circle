@@ -46,6 +46,9 @@ Expected: Total: 47 / 47 passed.
 | JWT_SECRET | 64 hex chars | same |
 | PARTNER_HMAC_KEY | 64 hex chars | same |
 | STAFF_*_PIN_HASH (3 vars) | bcrypt $2b$12$... | python -c "import bcrypt; print(bcrypt.hashpw(b'PIN', bcrypt.gensalt()).decode())" |
+| PAYSTACK_SECRET_KEY | sk_test_... (local) / sk_live_... (production) | Paystack dashboard -> Settings -> API Keys & Webhooks. Only in backend/.env. Required (32+ chars) in production. |
+| PAYSTACK_CURRENCY | ISO code, default KES | Must be a currency your Paystack account can charge |
+| PAYSTACK_CALLBACK_URL | URL, default http://localhost:3000/mutual-circle/donor/payment-return | The frontend return page; production: https://<owner>.github.io/mutual-circle/donor/payment-return |
 
 ## Database (Neon)
 
@@ -179,19 +182,52 @@ Different origins to a browser. Backend CORS allow_origins must contain both if 
 
 ## What is not in this repo
 No Dockerfile. No Terraform. No backend CI. No secrets manager. No APM / error tracking. No log aggregation.
-## M-PESA callback tunnel (local dev)
 
-Daraja POSTs to MPESA_CALLBACK_URL when STK resolves. That URL must be internet-reachable.
+## Paystack webhook locally (cloudflared)
 
-```
-# Terminal 2: cloudflared
+Donations and pledges are paid through Paystack's hosted checkout. Two
+things confirm a payment, and both ask Paystack's verify API before
+marking anything paid:
+
+1. **Return page** — after checkout Paystack redirects the browser to
+   `PAYSTACK_CALLBACK_URL` (`/mutual-circle/donor/payment-return`), which
+   calls `GET /payments/verify/{reference}`. This works on localhost with
+   no tunnel, because it is the donor's own browser making the call.
+2. **Webhook** — Paystack POSTs `charge.success` to
+   `POST /paystack/webhook`. This catches payments where the donor closed
+   the tab before being redirected. Paystack's servers must reach it, so
+   locally you need a tunnel.
+
+```bash
+# Terminal 1: backend on :8000 (see "Backend" above)
+
+# Terminal 2: cloudflared quick tunnel to the backend
 cloudflared tunnel --url http://localhost:8000
-# copy https://xxx.trycloudflare.com
-# set MPESA_CALLBACK_URL=https://xxx.trycloudflare.com/mpesa/stk/callback in .env
-# restart uvicorn
+# copy the https://<random>.trycloudflare.com URL it prints
 ```
 
-Quick-tunnels rotate the URL each restart. Update .env and restart uvicorn each time.
+Then in the Paystack dashboard, **Test mode** -> Settings -> API Keys &
+Webhooks -> **Test Webhook URL**:
+
+```text
+https://<random>.trycloudflare.com/paystack/webhook
+```
+
+Notes:
+
+- No `.env` change or uvicorn restart is needed: the webhook URL lives in
+  the Paystack dashboard, and signatures are checked with
+  `PAYSTACK_SECRET_KEY` (HMAC-SHA512 of the raw body, header
+  `x-paystack-signature`). Requests with a bad or missing signature get 401.
+- Quick tunnels get a new URL every time cloudflared restarts. Paste the
+  new one into the dashboard each time.
+- To check it works: make a test donation, pay with a Paystack test card,
+  and look for `Paystack webhook: reference=... outcome=paid` in the
+  uvicorn log. A second delivery of the same event logs `duplicate` and
+  changes nothing.
+- The tunnel exposes your local backend to the internet while it runs.
+  Stop it when you are done.
+- Never point the **Live** webhook URL at a laptop tunnel.
 
 ## SPA fallback for /donor and /admin
 

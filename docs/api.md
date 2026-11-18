@@ -75,9 +75,14 @@ All amounts in pence (amount_pence, max_value_pence, total_pooled_pence). KES 5,
 - /openapi.json - machine-readable schema
 ## Payment and evidence endpoints (added 2026-11)
 
-M-PESA:
-- POST /requests/{id}/pay, POST /donations/{id}/pay, POST /pledges/{id}/pay — trigger STK Push. Body `{\"phone\": \"+2547XXXXXXXX\"}`.
-- POST /mpesa/stk/callback — Safaricom posts here. Four-layer verification (txn ID, amount, phone, receipt format). Failures mark `status='callback_rejected'`.
+Paystack (donations and pledges):
+- POST /donations/{id}/pay, POST /pledges/{id}/pay — `X-Donor-Hash` auth, optional `Idempotency-Key`. Body optional: `{"email": "..."}` (passed to Paystack, never stored; without it a placeholder `donor-<id>@example.com` is used). Saves a pending payment with a unique `reference`, then opens a Paystack checkout. Returns `{"ok": true, "reference": "mc-don-...", "authorization_url": "https://checkout.paystack.com/..."}`; redirect the browser to `authorization_url`. Amount comes from the donation (`amount_pence`) or pledge (`max_value_pence`), never the body. 409 if already paid or a checkout is in progress (a pending checkout older than 30 minutes is re-checked with Paystack first), 400 if a pledge has no cash value, 503 if Paystack is unreachable.
+- POST /paystack/webhook — Paystack posts here. Requires `x-paystack-signature` = HMAC-SHA512 of the raw body keyed with `PAYSTACK_SECRET_KEY`, else 401. Acts only on `charge.success`, and only after `verify_transaction` confirms reference, amount and currency. Idempotent (a duplicate returns `{"status": "duplicate"}` and changes nothing). Responses: `paid`, `duplicate`, `rejected` (mismatch, not marked paid), `ignored`, `unknown_reference`. 500 on unexpected errors so Paystack retries.
+- GET /payments/verify/{reference} — `X-Donor-Hash` auth (404 for anyone else's reference). Used by the frontend return page `/mutual-circle/donor/payment-return`. Confirms with Paystack unless already paid. Returns `{"reference", "status": "pending|paid|failed|abandoned", "kind": "donation|pledge", "target_id", "amount_pence", "currency"}`.
+
+Payment state: `paystack_payments.status` pending -> paid | failed | abandoned (a late success still moves failed/abandoned to paid). Targets: `donor_contributions.status` and `pledges.payment_status` go unpaid -> pending_payment -> paid | payment_failed. A pledge's match `status` is never touched by payment.
+
+Requester self-pay (`POST /requests/{id}/pay`) and the M-PESA callback (`POST /mpesa/stk/callback`) were removed. Bills are paid to institutions by fulfilment staff; see docs/payout.md.
 
 Tier 2 photo evidence:
 - POST /requests/pool/{id}/evidence — multipart `file`. jpeg/png/pdf, max 5 MB.

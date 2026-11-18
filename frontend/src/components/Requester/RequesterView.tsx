@@ -25,7 +25,6 @@ import { MatchTab } from './MatchTab';
 import { BenchTab } from './BenchTab';
 
 import { SettingsTab } from './SettingsTab';
-import { MpesaModal } from './MpesaModal';
 
 type Tab = 'home' | 'swap' | 'pool' | 'match' | 'bench' | 'messages' | 'settings';
 type SwapStep = 'bundle' | 'location' | 'success';
@@ -57,7 +56,6 @@ const POOL_CATS: { id: PoolCat; name: string; desc: string; Icon: any; accent: s
 
 export const RequesterView: React.FC = () => {
   const { tokenHash, initializeSession, logout, swapRequests, poolRequests, executeSwap, executePool, withdrawRequest, expressInterest, vouchers, voucherRedemptions, collectRequest } = useApp();
-  const [payingRequest, setPayingRequest] = useState<{ id: string; amount: number } | null>(null);
   const [showIntakePrompt, setShowIntakePrompt] = useState(false);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [surveyRequestId, setSurveyRequestId] = useState<string | null>(null);
@@ -468,7 +466,6 @@ export const RequesterView: React.FC = () => {
       collectError={collectError}
       setCollectError={setCollectError}
       collectRequest={collectRequest}
-      setPayingRequest={setPayingRequest}
       sessionStats={sessionStats}
     />
   );
@@ -656,9 +653,6 @@ export const RequesterView: React.FC = () => {
         </div>
       </div>
       <AppBottomNav tabs={TABS} active={tab} onChange={goTab} />
-      {payingRequest && (
-        <MpesaModal mode="request" targetId={payingRequest.id} amount={payingRequest.amount} onClose={() => setPayingRequest(null)} />
-      )}
     </>
   );
 };

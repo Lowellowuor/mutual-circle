@@ -11,8 +11,9 @@ const UssdSimulatorApp = React.lazy(() => import('./apps/UssdSimulatorApp'));
 const WhatsAppSimulatorApp = React.lazy(() => import('./apps/WhatsAppSimulatorApp'));
 const BenchApp = React.lazy(() => import('./apps/BenchApp'));
 const ArchitectureApp = React.lazy(() => import('./apps/ArchitectureApp'));
+const PaymentReturn = React.lazy(() => import('./pages/PaymentReturn'));
 
-type Route = 'landing' | 'pitch' | 'donor' | 'admin' | 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'bench' | 'architecture';
+type Route = 'landing' | 'pitch' | 'donor' | 'payment-return' | 'admin' | 'requester' | 'sms' | 'ussd' | 'whatsapp' | 'bench' | 'architecture';
 
 function getRoute(): Route {
   // Vite base path is /mutual-circle/, so pathname comes in as
@@ -23,6 +24,8 @@ function getRoute(): Route {
   const last = segments[segments.length - 1];
   if (last === 'pitch') return 'pitch';
   if (last === 'donor') return 'donor';
+  // Paystack returns donors to /donor/payment-return?reference=...
+  if (last === 'payment-return') return 'payment-return';
   if (last === 'admin') return 'admin';
   if (last === 'sms') return 'sms';
   if (last === 'ussd') return 'ussd';
@@ -41,6 +44,7 @@ function App() {
             {route === 'pitch' && <PitchHarness />}
             {route === 'landing' && <Landing />}
             {route === 'donor' && <DonorApp />}
+            {route === 'payment-return' && <PaymentReturn />}
             {route === 'admin' && <ConsoleApp />}
             {route === 'requester' && <RequesterApp />}
             {route === 'sms' && <SmsSimulatorApp />}

@@ -9,6 +9,7 @@ After the fix:
   status:         awaiting_match -> matched -> settled
   payment_status: unpaid -> pending_payment -> paid | payment_failed
 These are independent. Payment events only touch payment_status.
+Payments go through Paystack (initialize_transaction is patched here).
 """
 from unittest.mock import AsyncMock, patch
 
@@ -32,13 +33,23 @@ async def clean_db():
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute(
-            "TRUNCATE pledges, requests, mpesa_transactions, idempotency_keys, "
+            "TRUNCATE pledges, requests, paystack_payments, idempotency_keys, "
             "rate_counters, staff_sessions, audit_log RESTART IDENTITY CASCADE"
         )
     yield
 
 
 DONOR_HASH = "test-donor-pledge-hash"
+CHECKOUT_URL = "https://checkout.paystack.com/test-access-code"
+
+
+@pytest.fixture
+def paystack_init():
+    async def fake(**kw):
+        return {"authorization_url": CHECKOUT_URL, "access_code": "ac", "reference": kw["reference"]}
+    with patch("mtc.paystack.payments.initialize_transaction", new_callable=AsyncMock) as m:
+        m.side_effect = fake
+        yield m
 
 
 def _donor():
@@ -74,7 +85,7 @@ async def test_create_pledge_defaults(client, clean_db):
     assert body["payment_status"] == "unpaid"
 
 
-async def test_pay_pledge_preserves_match_status(client, clean_db):
+async def test_pay_pledge_preserves_match_status(client, clean_db, paystack_init):
     """THE regression test for payments review #8.
 
     Before: POST /pledges/{id}/pay wrote status='pending_payment',
@@ -84,18 +95,10 @@ async def test_pay_pledge_preserves_match_status(client, clean_db):
     body = await _create(client)
     pledge_id = body["id"]
 
-    with patch("mtc.routes.pledges.initiate_stk_push", new_callable=AsyncMock) as stk:
-        stk.return_value = {
-            "checkout_request_id": "ws_CO_test_PLEDGE_001",
-            "customer_message": "Enter PIN",
-            "phone": "254712345678",
-        }
-        r = await client.post(
-            f"/pledges/{pledge_id}/pay",
-            headers=_donor(),
-            json={"phone": "+254712345678"},
-        )
+    r = await client.post(f"/pledges/{pledge_id}/pay", headers=_donor(), json={})
     assert r.status_code == 200, r.text
+    assert r.json()["authorization_url"] == CHECKOUT_URL
+    assert paystack_init.await_args.kwargs["amount_minor"] == 50000
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -106,17 +109,14 @@ async def test_pay_pledge_preserves_match_status(client, clean_db):
     assert row["payment_status"] == "pending_payment"
 
 
-async def test_pay_pledge_no_value_returns_400(client, clean_db):
+async def test_pay_pledge_no_value_returns_400(client, clean_db, paystack_init):
     body = await _create(client, type_="goods", value=None)
-    r = await client.post(
-        f"/pledges/{body['id']}/pay",
-        headers=_donor(),
-        json={"phone": "+254712345678"},
-    )
+    r = await client.post(f"/pledges/{body['id']}/pay", headers=_donor(), json={})
     assert r.status_code == 400
+    paystack_init.assert_not_awaited()
 
 
-async def test_pay_pledge_already_paid_returns_409(client, clean_db):
+async def test_pay_pledge_already_paid_returns_409(client, clean_db, paystack_init):
     body = await _create(client)
     pledge_id = body["id"]
     pool = await get_pool()
@@ -124,29 +124,20 @@ async def test_pay_pledge_already_paid_returns_409(client, clean_db):
         await conn.execute(
             "UPDATE pledges SET payment_status = 'paid' WHERE id = $1", pledge_id,
         )
-    r = await client.post(
-        f"/pledges/{pledge_id}/pay",
-        headers=_donor(),
-        json={"phone": "+254712345678"},
-    )
+    r = await client.post(f"/pledges/{pledge_id}/pay", headers=_donor(), json={})
     assert r.status_code == 409
+    paystack_init.assert_not_awaited()
 
 
-async def test_pay_pledge_already_pending_returns_409(client, clean_db):
+async def test_pay_pledge_in_progress_returns_409(client, clean_db, paystack_init):
     body = await _create(client)
     pledge_id = body["id"]
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        await conn.execute(
-            "UPDATE pledges SET payment_status = 'pending_payment' WHERE id = $1",
-            pledge_id,
-        )
-    r = await client.post(
-        f"/pledges/{pledge_id}/pay",
-        headers=_donor(),
-        json={"phone": "+254712345678"},
-    )
-    assert r.status_code == 409
+    first = await client.post(f"/pledges/{pledge_id}/pay", headers=_donor(), json={})
+    assert first.status_code == 200, first.text
+
+    second = await client.post(f"/pledges/{pledge_id}/pay", headers=_donor(), json={})
+    assert second.status_code == 409
+    assert paystack_init.await_count == 1
 
 
 async def test_match_rejects_unpaid_service_credit(client, clean_db):

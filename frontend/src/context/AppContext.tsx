@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import * as api from '../lib/apiClient';
 import { setSessionExpiredHandler } from '../lib/apiClient';
+import { getOrCreateDonorHash } from '../lib/donorHash';
 import {
   PoolRequest, SwapRequest, RiskFlag, Campaign, Pledge, AuditLogEntry,
   DedupItem, LockerStock, DepotCounts, DonorContribution, StaffRole,
@@ -49,30 +50,13 @@ interface AppContextType {
   closeMatchInterest: (id: string, status: 'contacted' | 'closed') => Promise<{ ok: boolean; reason?: string }>;
   expressInterest: (opportunityId: string, title: string) => void;
   addDonorContribution: (amount: number, isAnonymous: boolean, optInLedger: boolean) => Promise<any>;
-  payDonation: (donationId: string, phone: string) => Promise<boolean>;
   addPledge: (type: 'goods' | 'service_credit', description: string, locality: string, maxValue?: number) => Promise<any>;
-  payPledge: (pledgeId: string, phone: string) => Promise<boolean>;
   downloadAuditCsv: () => Promise<boolean>;
-  payPoolRequest: (requestId: string, phone: string) => Promise<boolean>;
 
   refetchAll: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
-function getOrCreateDonorHash(): string {
-  try {
-    let h = localStorage.getItem('mtc-donor-hash');
-    if (!h) {
-      h = 'donor-' + Math.random().toString(36).slice(2, 10);
-      localStorage.setItem('mtc-donor-hash', h);
-    }
-    return h;
-  } catch (e) {
-    console.warn('[donor-hash] crypto.randomUUID unavailable, falling back to shared anonymous hash', e);
-    return 'donor-anonymous';
-  }
-}
 
 function parseMeta(v: unknown): Record<string, unknown> {
   if (typeof v === 'string') { try { return JSON.parse(v) as Record<string, unknown>; } catch { return {}; } }
@@ -285,36 +269,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   
 
-
-  const payPledge = useCallback(async (pledgeId: string, phone: string) => {
-    if (!donorHash) return false;
-    const res = await api.payPledge(donorHash, pledgeId, phone);
-    if (res && res.ok) {
-      await refetchAll();
-      return true;
-    }
-    return false;
-  }, [donorHash]);
-
-  const payDonation = useCallback(async (donationId: string, phone: string) => {
-    if (!donorHash) return false;
-    const res = await api.payDonation(donorHash, donationId, phone);
-    if (res && res.ok) {
-      await refetchAll();
-      return true;
-    }
-    return false;
-  }, [donorHash]);
-
-  const payPoolRequest = useCallback(async (requestId: string, phone: string) => {
-    if (!tokenHash) return false;
-    const res = await api.payPoolRequest(tokenHash, requestId, phone);
-    if (res && res.ok) {
-      await refetchAll();
-      return true;
-    }
-    return false;
-  }, [tokenHash]);
 
   const refetchAll = useCallback(async () => {
     const c = await api.listCampaigns();
@@ -639,9 +593,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       issueVoucher, redeemVoucher, completeOcrCheck,
       routeFlagToTier4, clearFlagAsFalsePositive, matchPledge, closeMatchInterest, expressInterest,
       addDonorContribution, addPledge, downloadAuditCsv,
-      payPoolRequest,
-      payDonation,
-      payPledge,
       refetchAll,
     }}>
       {children}

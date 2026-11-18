@@ -2,6 +2,7 @@
 import React from 'react';
 import { Check, Wallet } from 'lucide-react';
 import { EmptyState } from '../Shared/EmptyState';
+import { usePaystackCheckout } from './usePaystackCheckout';
 
 interface GiveFlowProps {
   showSuccess: boolean;
@@ -19,13 +20,14 @@ interface GiveFlowProps {
   processing: boolean;
   handleGive: () => void;
   payingDonation: { id: string; amount: number } | null;
-  setPayingDonation: (d: { id: string; amount: number } | null) => void;
   donorContributions: any[];
 }
 
 const AMOUNTS_KES = [1000, 2500, 5000, 10000];
 
 export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
+  const checkout = usePaystackCheckout('donation');
+
   if (props.showSuccess) {
     const stillUnpaid = props.payingDonation
       && props.donorContributions.find(d => d.id === props.payingDonation!.id)?.status !== 'paid';
@@ -44,13 +46,23 @@ export const GiveFlow: React.FC<GiveFlowProps> = (props) => {
         </div>
 
         {stillUnpaid && (
-          <button className="btn btn-primary bg-green-600 hover:bg-green-700 font-bold shadow-soft mt-4" w-full onClick={() => props.setPayingDonation(props.payingDonation)}>
-            Pay with M-PESA
-          </button>
+          <div className="mt-4 space-y-2">
+            <button
+              className="btn btn-primary w-full bg-green-600 hover:bg-green-700 font-bold shadow-soft"
+              onClick={() => checkout.start(props.payingDonation!.id)}
+              disabled={checkout.redirecting}
+            >
+              {checkout.redirecting ? 'Opening Paystack…' : `Pay KES ${(props.payingDonation!.amount / 100).toLocaleString()} with Paystack`}
+            </button>
+            {checkout.error && (
+              <p role="alert" className="text-sm text-rose-600 text-center">{checkout.error}</p>
+            )}
+            <p className="text-xs text-muted text-center">You'll be taken to Paystack's secure page to pay, then brought back here.</p>
+          </div>
         )}
         {!props.payingDonation && (
           <div className="text-sm text-muted text-center mt-4">
-             Donation recorded. (Awaiting M-PESA setup)
+             We couldn't record this donation, so payment can't start yet. Please try again.
           </div>
         )}
 

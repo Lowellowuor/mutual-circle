@@ -83,9 +83,11 @@ jobs:
       # live database. Migrations run once before the test split below.
       #
       # Tests are split into two steps by dependency:
-      #   no-DB:   test_secret_validation.py, test_mpesa_callback.py
-      #   real-DB: test_auth.py, test_dispatch.py, test_flags_vouchers.py,
-      #            test_ledger.py, test_requests.py
+      #   no-DB:   test_secret_validation.py and the Paystack suites
+      #            (test_paystack_client.py, test_paystack_pay_routes.py,
+      #            test_paystack_webhook.py). Paystack HTTP is mocked; no
+      #            PAYSTACK_SECRET_KEY is needed, tests set a dummy one.
+      #   real-DB: everything under tests/ (includes the no-DB files again)
       #
       # Staff credentials are read from env vars by
       # mtc.auth.staff.authenticate (not from a DB table). The bcrypt
@@ -106,7 +108,7 @@ jobs:
           PYTHONPATH: src
           CI_NO_DB: "1"
           MESSAGING_ENCRYPTION_KEY: "ci-dummy-messaging-key-not-for-prod-0000"
-        run: pytest tests/test_secret_validation.py tests/test_mpesa_callback.py tests/test_pay_route.py -v
+        run: pytest tests/test_secret_validation.py tests/test_paystack_client.py tests/test_paystack_pay_routes.py tests/test_paystack_webhook.py -v
 
       - name: Test (real DB)
         working-directory: backend

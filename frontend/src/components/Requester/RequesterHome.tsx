@@ -20,7 +20,6 @@ interface RequesterHomeProps {
   collectError: string | null;
   setCollectError: (err: string | null) => void;
   collectRequest: (id: string, pin: string) => Promise<boolean>;
-  setPayingRequest: (req: { id: string, amount: number } | null) => void;
   sessionStats: { total: number, dispatched: number, pending: number };
   intakePrompt?: React.ReactNode;
 }
@@ -211,9 +210,8 @@ export const RequesterHome: React.FC<RequesterHomeProps> = (props) => {
                   ? String(liveSwap.pin)
                   : (r.pin && String(r.pin) !== '----' && String(r.pin).length >= 3 ? String(r.pin) : null);
               const canCollect = r.type === 'swap' && !isWithdrawn && !!resolvedPin && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status);
-              const canSettle = r.type === 'pool' && r.status === 'fulfilled' && r.paymentStatus !== 'paid';
               const pinPending = r.type === 'swap' && !resolvedPin && ['reserved', 'verified', 'submitted_to_partner', 'voucher_issued'].includes(r.status);
-              const hasActions = canWithdraw || canCollect || canSettle || pinPending;
+              const hasActions = canWithdraw || canCollect || pinPending;
 
               return (
                 <div key={r.id} className="py-5 border-b border-lp-ink/8 last:border-0">
@@ -259,15 +257,6 @@ export const RequesterHome: React.FC<RequesterHomeProps> = (props) => {
                               className="text-xs font-semibold text-lp-green hover:underline press-scale"
                             >
                               Confirm pickup
-                            </button>
-                          )}
-                          {canSettle && (
-                            <button
-                              type="button"
-                              onClick={() => props.setPayingRequest({ id: r.id, amount: r.amount * 100 })}
-                              className="inline-flex items-center px-3 py-1.5 rounded-full bg-lp-green text-white text-xs font-semibold press-scale"
-                            >
-                              Settle
                             </button>
                           )}
                           {pinPending && (
