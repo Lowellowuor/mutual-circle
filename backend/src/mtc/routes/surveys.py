@@ -50,6 +50,9 @@ class IntakeBody(BaseModel):
         "formal", "informal", "agriculture", "services", "manufacturing", "none"
     ]
     primary_need: Literal["food", "utilities", "school_fees", "hospital", "rent"]
+    urgency: Literal["today", "this_week", "this_month"] = "this_week"
+    duration_in_need: Literal["less_than_month", "1_to_6_months", "over_6_months"] = "less_than_month"
+    willing_to_give_back: bool | None = None
     consent_to_aggregate: bool = False
     consent_to_followup: bool = False
     submitted_via: Literal["whatsapp", "sms", "ussd", "web", "in_person"] = "web"
@@ -101,16 +104,20 @@ async def submit_intake(
                    work_status = $3,
                    industry = $4,
                    primary_need = $5,
-                   consent_to_aggregate = $6,
-                   consent_to_followup = $7,
-                   submitted_via = $8,
-                   ip_hash = COALESCE(ip_hash, $9),
-                   time_to_complete_ms = $10,
+                   urgency = $6,
+                   duration_in_need = $7,
+                   willing_to_give_back = $8,
+                   consent_to_aggregate = $9,
+                   consent_to_followup = $10,
+                   submitted_via = $11,
+                   ip_hash = COALESCE(ip_hash, $12),
+                   time_to_complete_ms = $13,
                    revision_count = revision_count + 1,
                    updated_at = now()
                WHERE id = $1""",
             existing["id"],
             body.family_size, body.work_status, body.industry, body.primary_need,
+            body.urgency, body.duration_in_need, body.willing_to_give_back,
             body.consent_to_aggregate, body.consent_to_followup,
             body.submitted_via, ip_hash, body.time_to_complete_ms,
         )
@@ -120,12 +127,14 @@ async def submit_intake(
         row = await conn.fetchrow(
             """INSERT INTO intake_surveys
                    (request_id, token_hash, family_size, work_status, industry, primary_need,
+                    urgency, duration_in_need, willing_to_give_back,
                     consent_to_aggregate, consent_to_followup,
                     submitted_via, ip_hash, time_to_complete_ms)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
                RETURNING id""",
             body.request_id, token, body.family_size, body.work_status, body.industry,
-            body.primary_need, body.consent_to_aggregate, body.consent_to_followup,
+            body.primary_need, body.urgency, body.duration_in_need, body.willing_to_give_back,
+            body.consent_to_aggregate, body.consent_to_followup,
             body.submitted_via, ip_hash, body.time_to_complete_ms,
         )
         survey_id = row["id"]

@@ -15,6 +15,9 @@ export const IntakeSurveyModal: React.FC<Props> = ({ token, requestId, onClose, 
   const [workStatus, setWorkStatus] = useState<string>('casual');
   const [industry, setIndustry] = useState<string>('informal');
   const [primaryNeed, setPrimaryNeed] = useState<string>('food');
+  const [urgency, setUrgency] = useState<string>('this_week');
+  const [duration, setDuration] = useState<string>('less_than_month');
+  const [willingToGiveBack, setWillingToGiveBack] = useState<boolean>(true);
   const [consentAggregate, setConsentAggregate] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +33,9 @@ export const IntakeSurveyModal: React.FC<Props> = ({ token, requestId, onClose, 
         work_status: workStatus,
         industry,
         primary_need: primaryNeed,
+        urgency,
+        duration_in_need: duration,
+        willing_to_give_back: willingToGiveBack,
         consent_to_aggregate: consentAggregate,
         consent_to_followup: true,
       });
@@ -96,6 +102,31 @@ export const IntakeSurveyModal: React.FC<Props> = ({ token, requestId, onClose, 
               <option value="rent">Rent</option>
             </select>
           </div>
+
+          <div>
+            <label className="text-sm font-semibold text-[#111111] block mb-2">How urgent is this?</label>
+            <select value={urgency} onChange={e => setUrgency(e.target.value)} className="w-full h-12 px-3 rounded-xl border border-[#E8E6DE] bg-white text-sm">
+              <option value="today">I need it today</option>
+              <option value="this_week">This week</option>
+              <option value="this_month">This month</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-[#111111] block mb-2">How long have you been facing this gap?</label>
+            <select value={duration} onChange={e => setDuration(e.target.value)} className="w-full h-12 px-3 rounded-xl border border-[#E8E6DE] bg-white text-sm">
+              <option value="less_than_month">Less than a month</option>
+              <option value="1_to_6_months">1 to 6 months</option>
+              <option value="over_6_months">Over 6 months</option>
+            </select>
+          </div>
+
+          <label className="flex items-start gap-3 p-3 bg-white border border-[#E8E6DE] rounded-xl cursor-pointer">
+            <input type="checkbox" checked={willingToGiveBack} onChange={e => setWillingToGiveBack(e.target.checked)} className="mt-1" />
+            <div className="text-xs text-[#111111]/70 leading-relaxed">
+              <strong>Give back:</strong> If the circle helps you today, I am willing to help someone else once I am back on my feet.
+            </div>
+          </label>
 
           <label className="flex items-start gap-3 p-3 bg-white border border-[#E8E6DE] rounded-xl cursor-pointer">
             <input type="checkbox" checked={consentAggregate} onChange={e => setConsentAggregate(e.target.checked)} className="mt-1" />

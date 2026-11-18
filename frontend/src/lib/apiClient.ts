@@ -581,7 +581,7 @@ export const getSurveyStatus = (token: string, requestId: string | null) =>
     headers: { 'X-Token': token },
   });
 
-export const submitIntake = (token: string, data: { request_id: string | null; family_size: number; work_status: string; industry: string; primary_need: string; consent_to_aggregate: boolean; consent_to_followup: boolean; submitted_via?: string }) =>
+export const submitIntake = (token: string, data: { request_id: string | null; family_size: number; work_status: string; industry: string; primary_need: string; urgency: string; duration_in_need: string; willing_to_give_back: boolean; consent_to_aggregate: boolean; consent_to_followup: boolean; submitted_via?: string }) =>
   call<{ ok: boolean; survey_id: string; basket_recommendation: any }>('/surveys/intake', {
     method: 'POST',
     headers: { 'X-Token': token, 'Content-Type': 'application/json' },
