@@ -7,6 +7,6 @@ httpx
 cryptography
 python-multipart
 alembic
-sqlalchemy
+sqlalchemy[asyncio]
 pytest
 pytest-asyncio
