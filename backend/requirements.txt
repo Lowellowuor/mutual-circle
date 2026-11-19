@@ -8,7 +8,10 @@ cryptography
 python-multipart
 alembic
 sqlalchemy[asyncio]
+greenlet
 pytest
-pytest-asynciopython-jose[cryptography]
+pytest-asyncio
+python-jose[cryptography]
 bcrypt
 passlib[bcrypt]
+psycopg2-binary
