@@ -9,4 +9,6 @@ python-multipart
 alembic
 sqlalchemy[asyncio]
 pytest
-pytest-asyncio
+pytest-asynciopython-jose[cryptography]
+bcrypt
+passlib[bcrypt]
