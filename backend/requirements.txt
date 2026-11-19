@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+asyncpg
+pydantic
+pydantic-settings
+httpx
+cryptography
+python-multipart
