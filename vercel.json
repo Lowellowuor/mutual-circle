@@ -5,8 +5,7 @@
       "framework": "vite"
     },
     "backend": {
-      "root": "backend/",
-      "entrypoint": "main:app"
+      "root": "backend/"
     }
   },
   "rewrites": [
