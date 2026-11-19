@@ -5,7 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/mutual-circle/',
+    base: process.env.VERCEL ? '/' : '/mutual-circle/',
     plugins: [react(), tailwindcss()],
     build: {
       rollupOptions: {
