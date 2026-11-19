@@ -6,3 +6,7 @@ pydantic-settings
 httpx
 cryptography
 python-multipart
+alembic
+sqlalchemy
+pytest
+pytest-asyncio
