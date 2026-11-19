@@ -1,0 +1,7 @@
+{
+  "name": "mutual-circle-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build"
+  }
+}
