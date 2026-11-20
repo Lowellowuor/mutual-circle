@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Smartphone, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '../../ui/Button';
+import { DEMO_MODE } from '../../lib/demo';
 
 interface RequesterIntakeProps {
   intakeStep: 'phone' | 'otp';
@@ -91,11 +92,12 @@ export const RequesterIntake: React.FC<RequesterIntakeProps> = (props) => {
               <p className="text-sm text-rose-600 text-center">{props.otpError}</p>
             )}
 
-            {import.meta.env.DEV && (
-              <p className="text-center text-xs text-lp-ink/50">
-                Dev — OTP:{' '}
-                <span className="font-mono font-semibold text-lp-green text-base tracking-widest">{props.generatedOtp}</span>
-              </p>
+            {DEMO_MODE && (
+              <div className="rounded-xl bg-lp-sage/60 px-4 py-3 text-center">
+                <p className="text-xs text-lp-ink/60">Demo mode: no SMS is sent. Your code is</p>
+                <p className="font-mono font-semibold text-lp-green text-2xl tracking-[0.4em] mt-1">{props.generatedOtp}</p>
+                <p className="text-[11px] text-lp-ink/45 mt-1">It has been filled in for you. Press Verify.</p>
+              </div>
             )}
 
             <Button type="submit" variant="primary" fullWidth className="!h-12" disabled={props.otpInput.length < 4 || props.otpProcessing}>

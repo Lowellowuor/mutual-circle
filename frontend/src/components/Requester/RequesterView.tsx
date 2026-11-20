@@ -25,6 +25,7 @@ import { MatchTab } from './MatchTab';
 import { BenchTab } from './BenchTab';
 
 import { SettingsTab } from './SettingsTab';
+import { DEMO_MODE } from '../../lib/demo';
 
 type Tab = 'home' | 'swap' | 'pool' | 'match' | 'bench' | 'messages' | 'settings';
 type SwapStep = 'bundle' | 'location' | 'success';
@@ -268,8 +269,9 @@ export const RequesterView: React.FC = () => {
       return;
     }
     setPhoneError(null);
-    setGeneratedOtp(generateOtp());
-    setOtpInput('');
+    const code = generateOtp();
+    setGeneratedOtp(code);
+    setOtpInput(DEMO_MODE ? code : '');
     setOtpError(null);
     setOtpAttempts(0);
     setResendCooldown(OTP_RESEND_SECONDS);
@@ -308,8 +310,9 @@ export const RequesterView: React.FC = () => {
   };
 
   const handleResend = () => {
-    setGeneratedOtp(generateOtp());
-    setOtpInput('');
+    const code = generateOtp();
+    setGeneratedOtp(code);
+    setOtpInput(DEMO_MODE ? code : '');
     setOtpError(null);
     setOtpAttempts(0);
     setResendCooldown(OTP_RESEND_SECONDS);
